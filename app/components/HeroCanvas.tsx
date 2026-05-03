@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Stars, Environment } from "@react-three/drei";
+import { Stars } from "@react-three/drei";
 import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import { useReducedMotion } from "framer-motion";
@@ -194,7 +194,6 @@ export default function HeroCanvas() {
       <MouseHighlight reduced={reduced} />
 
       <Suspense fallback={null}>
-        <Environment preset="sunset" />
         <MinaretRing />
         <OrbitRing radius={2.0} speed={0.25} count={8} size={0.045} color={"#fbbf24"} reduced={reduced} />
         <OrbitRing radius={2.7} speed={-0.15} count={12} size={0.025} color={"#fde68a"} reduced={reduced} />
