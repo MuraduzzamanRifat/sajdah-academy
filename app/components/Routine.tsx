@@ -14,6 +14,7 @@ import {
   Sunrise,
   Sunset,
 } from "lucide-react";
+import { asset } from "../lib/asset";
 
 const thursdayRoutine = [
   { time: "Before Magrib", event: "Arrival", duration: "10 Mins", icon: <Clock className="w-5 h-5" /> },
@@ -140,8 +141,8 @@ export default function Routine() {
       <div aria-hidden className="ambient-orbs orbs-light" />
       <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32">
         <div aria-hidden className="ambient-orbs orbs-dark" />
-        {/* Faint amber radial + Islamic 8-point star silhouette for visual
-            continuity with the home hero. Static SVG, GPU-cheap, no JS. */}
+        {/* Faint amber radial + medallion silhouette for visual continuity
+            with the home hero. Static, GPU-cheap, no JS. */}
         <div
           className="absolute inset-0 opacity-60"
           style={{
@@ -149,28 +150,13 @@ export default function Routine() {
               "radial-gradient(circle at 50% 60%, rgba(245,158,11,0.18) 0%, rgba(16,185,129,0.06) 30%, transparent 60%)",
           }}
         />
-        <svg
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           aria-hidden
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[70vw] opacity-[0.07]"
-          viewBox="-100 -100 200 200"
-        >
-          <defs>
-            <radialGradient id="rs" cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="100%" stopColor="#f59e0b" />
-            </radialGradient>
-          </defs>
-          <polygon
-            points={Array.from({ length: 16 })
-              .map((_, i) => {
-                const r = i % 2 === 0 ? 90 : 50;
-                const a = (i / 16) * Math.PI * 2 - Math.PI / 2;
-                return `${(Math.cos(a) * r).toFixed(1)},${(Math.sin(a) * r).toFixed(1)}`;
-              })
-              .join(" ")}
-            fill="url(#rs)"
-          />
-        </svg>
+          src={asset("/medallion-128.webp")}
+          alt=""
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[70vw] opacity-[0.10] object-contain"
+        />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}

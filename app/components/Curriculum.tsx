@@ -1,15 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, Heart, Star, Target, CheckCircle2 } from "lucide-react";
+import { BookOpen, Heart, Target, CheckCircle2 } from "lucide-react";
 import { Reveal } from "./Reveal";
+import { asset } from "../lib/asset";
+
+/* eslint-disable-next-line @next/next/no-img-element */
+const MedallionMark = () => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src={asset("/medallion-128.webp")}
+    alt=""
+    width={28}
+    height={28}
+    className="w-7 h-7 object-contain"
+  />
+);
 
 const phases = [
   {
     id: 1,
     title: "Phase 1: Foundation (Month 1–2)",
     goal: "ঈমান, আকীদা ও বেসিক আমল",
-    icon: <Star className="w-6 h-6 text-amber-500" />,
+    icon: <MedallionMark />,
     focusAreas: [
       "Basic Aqeedah (ঈমানের ভিত্তি)",
       "Salah Correctness (নামাজ ঠিক করা)",

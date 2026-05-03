@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { Calendar, MapPin, ShieldCheck, Star } from "lucide-react";
+import { Calendar, MapPin, ShieldCheck } from "lucide-react";
 import HeroBackdrop from "./HeroBackdrop";
 import { asset } from "../lib/asset";
 
@@ -77,7 +77,14 @@ export default function Hero() {
           className="text-center max-w-4xl mx-auto"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-300 mb-8 backdrop-blur-sm">
-            <Star className="w-4 h-4 fill-amber-400" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset("/medallion-128.webp")}
+              alt=""
+              width={20}
+              height={20}
+              className="w-5 h-5 object-contain shrink-0"
+            />
             <span className="font-medium text-sm tracking-wide">
               100% PHYSICAL SESSIONS AT PREMIUM RESORTS
             </span>

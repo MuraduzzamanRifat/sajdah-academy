@@ -1,11 +1,22 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 export const dynamic = "force-static";
 export const alt = "Sajdah Academy — দেশের সেরা প্রিমিয়াম রিসোর্টে ফিজিক্যাল ইসলামিক ট্রেনিং";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+/* Read the medallion PNG once at build time and embed as data URL.
+   ImageResponse cannot fetch external URLs during static export. */
+function loadMedallionDataUrl(): string {
+  const file = path.join(process.cwd(), "public", "medallion-512.png");
+  const buf = readFileSync(file);
+  return `data:image/png;base64,${buf.toString("base64")}`;
+}
+
 export default function OG() {
+  const medallionSrc = loadMedallionDataUrl();
   return new ImageResponse(
     (
       <div
@@ -23,28 +34,25 @@ export default function OG() {
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* Star mark in top-right */}
+        {/* Calligraphy medallion in top-right (replaces the old gold star) */}
         <div
           style={{
             position: "absolute",
-            top: 80,
-            right: 80,
+            top: 50,
+            right: 50,
             display: "flex",
+            width: 220,
+            height: 220,
           }}
         >
-          <svg width="160" height="160" viewBox="-100 -100 200 200">
-            <defs>
-              <radialGradient id="g" cx="0" cy="0" r="80" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#fde68a" />
-                <stop offset="60%" stopColor="#fbbf24" />
-                <stop offset="100%" stopColor="#f59e0b" />
-              </radialGradient>
-            </defs>
-            <polygon
-              points="0.0,-72.0 14.5,-35.1 50.9,-50.9 35.1,-14.5 72.0,0.0 35.1,14.5 50.9,50.9 14.5,35.1 0.0,72.0 -14.5,35.1 -50.9,50.9 -35.1,14.5 -72.0,0.0 -35.1,-14.5 -50.9,-50.9 -14.5,-35.1"
-              fill="url(#g)"
-            />
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={medallionSrc}
+            alt=""
+            width={220}
+            height={220}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
         </div>
 
         <div
@@ -81,7 +89,7 @@ export default function OG() {
             fontSize: 32,
             color: "#a7f3d0",
             lineHeight: 1.4,
-            maxWidth: 880,
+            maxWidth: 760,
           }}
         >
           ৬ মাসের ফিজিক্যাল ইসলামিক ট্রেনিং · গাজীপুর · মে ২০২৬

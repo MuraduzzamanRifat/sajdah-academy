@@ -5,7 +5,6 @@ import {
   BookOpen,
   Heart,
   Shield,
-  Star,
   Users,
   Droplets,
   Scale,
@@ -16,6 +15,19 @@ import {
   Compass,
 } from "lucide-react";
 import { Reveal } from "./Reveal";
+import { asset } from "../lib/asset";
+
+/* eslint-disable-next-line @next/next/no-img-element */
+const MedallionMark = () => (
+  // eslint-disable-next-line @next/next/no-img-element
+  <img
+    src={asset("/medallion-128.webp")}
+    alt=""
+    width={24}
+    height={24}
+    className="w-6 h-6 object-contain"
+  />
+);
 
 const courseOutline = [
   {
@@ -54,7 +66,7 @@ const courseOutline = [
   {
     id: 4,
     title: "Hadith e Mubarakah",
-    icon: <Star className="w-6 h-6 text-emerald-600" />,
+    icon: <MedallionMark />,
     topics: [
       "হাদীস বুঝার মূলনীতি",
       "কুরআন ও হাদীসের সামঞ্জস্যতা",
