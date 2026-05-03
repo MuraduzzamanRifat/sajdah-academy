@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 /* CSS-only fallback used on mobile / low-power devices.
-   No WebGL, no JS animation cost — just gradient + radial pattern.
-   Preserves the same emerald/amber color story as the WebGL version. */
+   No WebGL, no JS animation cost — just gradient backdrop.
+   The medallion (rendered in Hero.tsx) now fills the focal role. */
 function CssBackdrop() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-emerald-950">
@@ -19,29 +19,6 @@ function CssBackdrop() {
       />
       {/* Faint emerald sheen from the top */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/40 via-transparent to-emerald-950" />
-      {/* Static 8-point Islamic star silhouette via SVG (tiny, GPU-cheap) */}
-      <svg
-        aria-hidden
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] max-w-[520px] opacity-15"
-        viewBox="-100 -100 200 200"
-      >
-        <defs>
-          <radialGradient id="g" cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="100%" stopColor="#f59e0b" />
-          </radialGradient>
-        </defs>
-        <polygon
-          points={Array.from({ length: 16 })
-            .map((_, i) => {
-              const r = i % 2 === 0 ? 90 : 50;
-              const a = (i / 16) * Math.PI * 2 - Math.PI / 2;
-              return `${(Math.cos(a) * r).toFixed(1)},${(Math.sin(a) * r).toFixed(1)}`;
-            })
-            .join(" ")}
-          fill="url(#g)"
-        />
-      </svg>
     </div>
   );
 }
