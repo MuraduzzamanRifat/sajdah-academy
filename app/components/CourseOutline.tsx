@@ -153,8 +153,8 @@ const courseOutline = [
 
 export default function CourseOutline() {
   return (
-    <section className="py-20 bg-emerald-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 bg-emerald-50/50 ambient-emerald relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -179,10 +179,10 @@ export default function CourseOutline() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.05 }}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 hover:shadow-md transition-all group hover:-translate-y-1"
+              className="glass-light glass-light-hover rounded-2xl p-6 group"
             >
-              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors shrink-0">
+              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-200/60">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100/80 flex items-center justify-center group-hover:bg-amber-100/90 transition-colors shrink-0">
                   {course.icon}
                 </div>
                 <div>

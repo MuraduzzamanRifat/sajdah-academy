@@ -18,8 +18,8 @@ export default function Registration() {
   };
 
   return (
-    <section id="register" className="py-20 bg-emerald-900 text-slate-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="register" className="py-20 bg-emerald-900 text-slate-50 ambient-dark relative overflow-hidden">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             অনলাইন রেজিস্ট্রেশন
@@ -29,8 +29,8 @@ export default function Registration() {
           </p>
         </div>
 
-        <div className="bg-white text-slate-800 rounded-2xl shadow-xl overflow-hidden">
-          <div className="flex border-b border-slate-100">
+        <div className="glass-light text-slate-800 rounded-2xl overflow-hidden">
+          <div className="flex border-b border-slate-200/50">
             <div
               className={`flex-1 py-4 text-center font-medium ${
                 step >= 1

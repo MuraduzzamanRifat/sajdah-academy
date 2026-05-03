@@ -93,8 +93,10 @@ const Timeline = ({ data }: { data: TimelineItem[] }) => (
           </div>
 
           <div
-            className={`flex-1 p-5 rounded-2xl shadow-sm border transition-all duration-300 group-hover:shadow-md ${
-              item.highlight ? "bg-amber-50 border-amber-200" : "bg-white border-slate-100"
+            className={`flex-1 p-5 rounded-2xl transition-all duration-300 ${
+              item.highlight
+                ? "glass-gold"
+                : "glass-light glass-light-hover"
             }`}
           >
             <div className="sm:hidden mb-2 inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
@@ -134,8 +136,8 @@ export default function Routine() {
   };
 
   return (
-    <section className="pb-24 bg-slate-50">
-      <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32">
+    <section className="pb-24 bg-slate-50 ambient-emerald">
+      <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32 ambient-dark">
         {/* Faint amber radial + Islamic 8-point star silhouette for visual
             continuity with the home hero. Static SVG, GPU-cheap, no JS. */}
         <div
@@ -188,7 +190,7 @@ export default function Routine() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-6"
+            className="glass-light p-6 rounded-2xl flex items-center gap-6"
           >
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
               <Clock className="w-8 h-8 text-emerald-600" />
@@ -208,7 +210,7 @@ export default function Routine() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-6"
+            className="glass-light p-6 rounded-2xl flex items-center gap-6"
           >
             <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
               <BookOpen className="w-8 h-8 text-amber-600" />
@@ -228,7 +230,7 @@ export default function Routine() {
         <div
           role="tablist"
           aria-label="Routine day"
-          className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-8 bg-white p-2 rounded-2xl shadow-sm border border-slate-100"
+          className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4 mb-8 glass-light p-2 rounded-2xl"
         >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -252,7 +254,7 @@ export default function Routine() {
           })}
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-4 sm:p-8 overflow-hidden min-h-[600px]">
+        <div className="glass-light rounded-3xl p-4 sm:p-8 overflow-hidden min-h-[600px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

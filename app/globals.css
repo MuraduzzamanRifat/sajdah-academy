@@ -51,6 +51,94 @@ html, body {
 /* Hardware-accelerate animated layers and avoid sub-pixel rounding leaks */
 .will-change-transform { will-change: transform; }
 
+/* ========================================================================
+   Premium glass system — tinted frost for both light and dark surfaces.
+   Each variant pairs a low-opacity bg, a frosted backdrop, an inner
+   highlight border, and an outer ambient shadow tinted with brand color.
+   ======================================================================== */
+
+/* Glass on LIGHT surfaces (slate-50, emerald-50) */
+.glass-light {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.65) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px rgba(16, 185, 129, 0.06),
+    0 12px 32px -12px rgba(2, 44, 34, 0.18);
+}
+.glass-light-hover {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.glass-light-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1px rgba(245, 158, 11, 0.4),
+    0 24px 48px -16px rgba(2, 44, 34, 0.28),
+    0 0 32px -4px rgba(245, 158, 11, 0.18);
+}
+
+/* Glass on DARK surfaces (emerald-900, emerald-950) */
+.glass-dark {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 12px 32px -12px rgba(0, 0, 0, 0.5);
+}
+.glass-dark-hover {
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 320ms ease;
+}
+.glass-dark-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(251, 191, 36, 0.4);   /* amber-400 */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 24px 48px -16px rgba(0, 0, 0, 0.6),
+    0 0 40px -8px rgba(245, 158, 11, 0.35);
+}
+
+/* Glass with strong amber/gold tint — for premium accent panels */
+.glass-gold {
+  background:
+    linear-gradient(135deg, rgba(252, 211, 77, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(252, 211, 77, 0.35);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 12px 32px -12px rgba(245, 158, 11, 0.25);
+}
+
+/* Ambient blob backgrounds — give glass something to refract over */
+.ambient-emerald {
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.10) 0%, transparent 35%),
+    radial-gradient(circle at 85% 70%, rgba(245, 158, 11, 0.08) 0%, transparent 40%);
+}
+.ambient-dark {
+  background-image:
+    radial-gradient(circle at 10% 30%, rgba(245, 158, 11, 0.10) 0%, transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 50% 0%, rgba(252, 211, 77, 0.06) 0%, transparent 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-light-hover, .glass-dark-hover {
+    transition: none;
+  }
+  .glass-light-hover:hover, .glass-dark-hover:hover { transform: none; }
+}
+
 /* Premium gold line-drawing hover — 4 border lines scale in from corners.
    Inner span elements lay 1px amber lines along the 4 edges, each anchored
    to a different corner so they appear to "draw" themselves on hover. */

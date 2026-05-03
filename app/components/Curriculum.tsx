@@ -70,8 +70,8 @@ const coreSubjects = [
 
 export default function Curriculum() {
   return (
-    <section id="curriculum" className="py-20 bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="curriculum" className="py-20 bg-slate-50 ambient-emerald relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
             একাডেমিক মডেল ও কারিকুলাম
@@ -94,7 +94,7 @@ export default function Curriculum() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100 text-center hover:shadow-md transition-shadow"
+                className="glass-light glass-light-hover p-6 rounded-xl text-center"
               >
                 <h4 className="font-bold text-emerald-800 mb-2">{subject.title}</h4>
                 <p className="text-sm text-slate-500">{subject.desc}</p>
@@ -110,9 +110,9 @@ export default function Curriculum() {
               initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-100"
+              className="glass-light rounded-2xl overflow-hidden"
             >
-              <div className="bg-emerald-900 px-6 py-4 flex items-center gap-4 text-white">
+              <div className="bg-gradient-to-r from-emerald-900 to-emerald-800 px-6 py-4 flex items-center gap-4 text-white">
                 <div className="p-2 bg-white rounded-full">{phase.icon}</div>
                 <div>
                   <h3 className="text-xl font-bold">{phase.title}</h3>
