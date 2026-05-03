@@ -110,7 +110,9 @@ export default function PremiumExperience() {
                 transition={{ delay: idx * 0.1 }}
                 className="gold-frame group relative overflow-hidden rounded-3xl shadow-2xl border border-emerald-800/50"
               >
-                <div className="aspect-[16/9] overflow-hidden relative">
+                {/* Image fills the background; content (below) drives card height
+                    so long Bangla titles can wrap without being clipped. */}
+                <div className="absolute inset-0 overflow-hidden">
                   <Image
                     src={feature.image}
                     alt={feature.title}
@@ -120,16 +122,19 @@ export default function PremiumExperience() {
                     loading="lazy"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/85 to-emerald-950/30" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/10">
+
+                <div className="relative z-10 p-6 sm:p-8 min-h-[340px] sm:min-h-[380px] flex flex-col justify-end">
+                  <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className="p-2.5 sm:p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 shrink-0">
                       {feature.icon}
                     </div>
-                    <h3 className="text-2xl font-bold text-white">{feature.title}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white min-w-0 leading-tight">
+                      {feature.title}
+                    </h3>
                   </div>
-                  <p className="text-emerald-100/90 leading-relaxed text-lg">
+                  <p className="text-emerald-100/90 leading-relaxed text-base sm:text-lg">
                     {feature.description}
                   </p>
                 </div>
