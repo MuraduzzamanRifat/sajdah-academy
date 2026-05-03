@@ -90,7 +90,42 @@ export const metadata: Metadata = {
     email: true,
     address: true,
   },
+  referrer: "strict-origin-when-cross-origin",
 };
+
+/* CSP — hardened for our static export. GitHub Pages can't set HTTP headers,
+   so this lives in <meta http-equiv>. Notes:
+   - 'unsafe-inline' for scripts is required by Next.js hydration data
+     (cannot use nonces with static export — no per-request server).
+   - 'unsafe-inline' for styles is required by framer-motion (inline style attrs).
+   - Unsplash whitelisted for Premium Experience hero photos.
+   - frame-ancestors / X-Frame-Options is header-only, can't be set on
+     GH Pages — clickjacking risk not addressable on this hosting tier. */
+const CSP = [
+  "default-src 'self'",
+  "img-src 'self' data: blob: https://images.unsplash.com",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline'",
+  "connect-src 'self'",
+  "worker-src 'self' blob:",
+  "form-action 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
+const PERMISSIONS = [
+  "camera=()",
+  "microphone=()",
+  "geolocation=()",
+  "gyroscope=()",
+  "accelerometer=()",
+  "magnetometer=()",
+  "payment=()",
+  "usb=()",
+  "interest-cohort=()", // opt out of FLoC
+].join(", ");
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -162,6 +197,11 @@ const jsonLd = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
+      <head>
+        <meta httpEquiv="Content-Security-Policy" content={CSP} />
+        <meta httpEquiv="Permissions-Policy" content={PERMISSIONS} />
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+      </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
         <script
           type="application/ld+json"
