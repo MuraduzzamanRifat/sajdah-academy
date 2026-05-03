@@ -14,7 +14,7 @@ const features = [
       "শীতাতপ নিয়ন্ত্রিত, আধুনিক সুযোগ-সুবিধা সম্পন্ন প্রিমিয়াম শেয়ার্ড বা প্রাইভেট রুম।",
     icon: <BedDouble className="w-6 h-6 text-amber-400" />,
     image:
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "প্রাকৃতিক ও শান্ত পরিবেশ",
@@ -22,7 +22,7 @@ const features = [
       "শহরের কোলাহল মুক্ত, সবুজে ঘেরা মনোরম পরিবেশ যা তাযকিয়াহ ও ইবাদতের জন্য অনুকূল।",
     icon: <Trees className="w-6 h-6 text-emerald-400" />,
     image:
-      "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "হাই-এন্ড ক্লাসরুম",
@@ -30,7 +30,7 @@ const features = [
       "আধুনিক মাল্টিমিডিয়া, প্রজেক্টর ও আরামদায়ক সিটিং ব্যবস্থা সম্পন্ন শীতাতপ নিয়ন্ত্রিত কনফারেন্স হল।",
     icon: <MonitorPlay className="w-6 h-6 text-amber-300" />,
     image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "প্রিমিয়াম ডাইনিং",
@@ -38,7 +38,7 @@ const features = [
       "স্বাস্থ্যসম্মত, সুস্বাদু ও পুষ্টিকর হালাল বুফে খাবার এবং সার্বক্ষণিক রিফ্রেশমেন্টের ব্যবস্থা।",
     icon: <Utensils className="w-6 h-6 text-orange-400" />,
     image:
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop",
   },
 ];
 

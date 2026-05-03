@@ -115,7 +115,7 @@ export default function Hero() {
             </a>
             <a
               href="/#curriculum"
-              className="px-8 py-4 bg-transparent border-2 border-emerald-400 hover:bg-emerald-800/50 text-white font-semibold rounded-lg transition-all duration-200 text-lg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300/50"
+              className="px-8 py-4 bg-transparent border-2 border-emerald-400 hover:bg-emerald-800/50 text-white font-bold rounded-lg transition-all duration-200 text-lg active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300/50"
             >
               কোর্স মডিউল দেখুন
             </a>

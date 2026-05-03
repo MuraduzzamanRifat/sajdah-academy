@@ -7,10 +7,12 @@ import ScrollProgress from "./components/ScrollProgress";
 import StickyMobileCTA from "./components/StickyMobileCTA";
 
 // Self-host fonts via next/font — zero CLS, no render-blocking,
-// automatic preload + display:swap, only weights actually used.
+// automatic preload + display:swap. Weights trimmed to those actually
+// used (audited via grep): font-bold (700), font-medium (500), normal (400).
+// font-semibold (600) and Inter extrabold (800) are unused — removed.
 const hindSiliguri = Hind_Siliguri({
   subsets: ["bengali", "latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-hind",
   display: "swap",
   preload: true,
@@ -18,7 +20,7 @@ const hindSiliguri = Hind_Siliguri({
 
 const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "700"],
   variable: "--font-inter",
   display: "swap",
   preload: true,
