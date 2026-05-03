@@ -24,10 +24,65 @@ const inter = Inter({
   preload: true,
 });
 
+const siteName = "Sajdah Academy";
+const siteDesc =
+  "দেশের সেরা প্রিমিয়াম রিসোর্টে সম্পূর্ণ ফিজিক্যাল ট্রেনিং ও পূর্ণাঙ্গ ইসলামিক জীবনব্যবস্থা গড়ার এক অনন্য উদ্যোগ।";
+const siteUrl = "https://muraduzzamanrifat.github.io/sajdah-academy";
+
 export const metadata: Metadata = {
-  title: "Sajdah Academy",
-  description:
-    "দেশের সেরা প্রিমিয়াম রিসোর্টে সম্পূর্ণ ফিজিক্যাল ট্রেনিং ও পূর্ণাঙ্গ ইসলামিক জীবনব্যবস্থা গড়ার এক অনন্য উদ্যোগ।",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteName,
+    template: `%s · ${siteName}`,
+  },
+  description: siteDesc,
+  applicationName: siteName,
+  keywords: [
+    "Sajdah Academy",
+    "Islamic course Bangladesh",
+    "ইসলামিক কোর্স",
+    "ফিজিক্যাল ইসলামিক ট্রেনিং",
+    "Quran Tajweed",
+    "Tazkiyah",
+    "Aqeedah",
+    "Fiqh",
+    "Seerah",
+  ],
+  authors: [{ name: siteName }],
+  creator: siteName,
+  publisher: siteName,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "bn_BD",
+    url: siteUrl,
+    siteName,
+    title: siteName,
+    description: siteDesc,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDesc,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
 };
 
 export const viewport: Viewport = {
@@ -40,10 +95,71 @@ export const viewport: Viewport = {
   ],
 };
 
+/* JSON-LD: lets Google classify this site as an EducationalOrganization
+   that runs a 6-month Course. Supports rich snippets in search results. */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": `${siteUrl}/#org`,
+      name: siteName,
+      url: siteUrl,
+      description: siteDesc,
+      address: {
+        "@type": "PostalAddress",
+        addressCountry: "BD",
+        addressLocality: "Dhaka",
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+880-180-55-65-444",
+        contactType: "admissions",
+        email: "sijdah.academybd@gmail.com",
+        availableLanguage: ["Bengali", "English"],
+      },
+    },
+    {
+      "@type": "Course",
+      "@id": `${siteUrl}/#course`,
+      name: "প্রিমিয়াম রিসোর্টে ফিজিক্যাল ক্লাস ও ট্রেনিং",
+      description:
+        "৬ মাসের পূর্ণাঙ্গ ফিজিক্যাল ইসলামিক কোর্স — তিনটি ধাপে: Foundation, Understanding, Transformation।",
+      provider: { "@id": `${siteUrl}/#org` },
+      educationalLevel: "Adult",
+      inLanguage: "bn",
+      timeRequired: "P6M",
+      offers: {
+        "@type": "Offer",
+        price: "15000",
+        priceCurrency: "BDT",
+        category: "Tuition",
+        availability: "https://schema.org/InStock",
+      },
+      hasCourseInstance: {
+        "@type": "CourseInstance",
+        courseMode: "Onsite",
+        location: {
+          "@type": "Place",
+          address: {
+            "@type": "PostalAddress",
+            addressCountry: "BD",
+            addressLocality: "Gazipur",
+          },
+        },
+      },
+    },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ScrollProgress />
         <Navbar />
         {children}
