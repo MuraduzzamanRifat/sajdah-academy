@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollProgress from "./components/ScrollProgress";
+import StickyMobileCTA from "./components/StickyMobileCTA";
 
 // Self-host fonts via next/font — zero CLS, no render-blocking,
 // automatic preload + display:swap, only weights actually used.
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         {children}
         <Footer />
+        <StickyMobileCTA />
       </body>
     </html>
   );

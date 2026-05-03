@@ -136,7 +136,37 @@ export default function Routine() {
   return (
     <section className="pb-24 bg-slate-50">
       <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-100 via-transparent to-transparent" />
+        {/* Faint amber radial + Islamic 8-point star silhouette for visual
+            continuity with the home hero. Static SVG, GPU-cheap, no JS. */}
+        <div
+          className="absolute inset-0 opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 60%, rgba(245,158,11,0.18) 0%, rgba(16,185,129,0.06) 30%, transparent 60%)",
+          }}
+        />
+        <svg
+          aria-hidden
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[70vw] opacity-[0.07]"
+          viewBox="-100 -100 200 200"
+        >
+          <defs>
+            <radialGradient id="rs" cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#fbbf24" />
+              <stop offset="100%" stopColor="#f59e0b" />
+            </radialGradient>
+          </defs>
+          <polygon
+            points={Array.from({ length: 16 })
+              .map((_, i) => {
+                const r = i % 2 === 0 ? 90 : 50;
+                const a = (i / 16) * Math.PI * 2 - Math.PI / 2;
+                return `${(Math.cos(a) * r).toFixed(1)},${(Math.sin(a) * r).toFixed(1)}`;
+              })
+              .join(" ")}
+            fill="url(#rs)"
+          />
+        </svg>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -202,13 +232,12 @@ export default function Routine() {
         >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
-            const ariaSelected: "true" | "false" = isActive ? "true" : "false";
             return (
               <button
                 key={tab.id}
                 type="button"
                 role="tab"
-                aria-selected={ariaSelected}
+                aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold transition-all duration-200 flex-1 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300/60 ${
                   isActive

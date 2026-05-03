@@ -113,7 +113,7 @@ export default function PremiumExperience() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="group relative overflow-hidden rounded-3xl shadow-2xl border border-emerald-800/50"
+                className="gold-frame group relative overflow-hidden rounded-3xl shadow-2xl border border-emerald-800/50"
               >
                 <div className="aspect-[16/9] overflow-hidden relative">
                   <Image
@@ -138,6 +138,11 @@ export default function PremiumExperience() {
                     {feature.description}
                   </p>
                 </div>
+                {/* Gold line-drawing frame on hover */}
+                <span aria-hidden className="gf-line gf-top" />
+                <span aria-hidden className="gf-line gf-right" />
+                <span aria-hidden className="gf-line gf-bottom" />
+                <span aria-hidden className="gf-line gf-left" />
               </motion.div>
             );
             return (
