@@ -1,8 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import type { MotionValue } from "framer-motion";
+import { motion } from "framer-motion";
 import { BookOpen, Heart, Star, Target, CheckCircle2 } from "lucide-react";
 
 const phases = [
@@ -105,198 +103,58 @@ export default function Curriculum() {
           </div>
         </div>
 
-        {/* Mobile: stacked cards (sticky scroll is awkward on touch) */}
-        <div className="md:hidden space-y-8">
+        <div className="space-y-12">
           {phases.map((phase, idx) => (
-            <PhaseCardStatic key={phase.id} phase={phase} delay={idx * 0.05} />
-          ))}
-        </div>
+            <motion.div
+              key={phase.id}
+              initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-100"
+            >
+              <div className="bg-emerald-900 px-6 py-4 flex items-center gap-4 text-white">
+                <div className="p-2 bg-white rounded-full">{phase.icon}</div>
+                <div>
+                  <h3 className="text-xl font-bold">{phase.title}</h3>
+                  <p className="text-emerald-200 text-sm font-medium">Goal: {phase.goal}</p>
+                </div>
+              </div>
 
-        {/* Desktop: sticky scroll-stepper */}
-        <div className="hidden md:block">
-          <PhaseStepper phases={phases} />
+              <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="flex items-center gap-2 text-lg font-bold text-slate-800 mb-4">
+                    <Target className="w-5 h-5 text-emerald-600" />
+                    Focus Areas
+                  </h4>
+                  <ul className="space-y-3">
+                    {phase.focusAreas.map((area, i) => (
+                      <li key={i} className="flex items-start gap-3 text-slate-600">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
+                        <span>{area}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="bg-emerald-50 p-6 rounded-xl">
+                  <h4 className="flex items-center gap-2 text-lg font-bold text-emerald-900 mb-4">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    Outcome
+                  </h4>
+                  <ul className="space-y-3">
+                    {phase.outcomes.map((outcome, i) => (
+                      <li key={i} className="flex items-start gap-3 text-emerald-800">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                        <span className="font-medium">{outcome}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
-  );
-}
-
-/* ---------- Phase card (shared by mobile + stepper) ---------- */
-
-type Phase = (typeof phases)[number];
-
-function PhaseCardBody({ phase }: { phase: Phase }) {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-100">
-      <div className="bg-emerald-900 px-6 py-4 flex items-center gap-4 text-white">
-        <div className="p-2 bg-white rounded-full">{phase.icon}</div>
-        <div>
-          <h3 className="text-xl font-bold">{phase.title}</h3>
-          <p className="text-emerald-200 text-sm font-medium">Goal: {phase.goal}</p>
-        </div>
-      </div>
-      <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
-        <div>
-          <h4 className="flex items-center gap-2 text-lg font-bold text-slate-800 mb-4">
-            <Target className="w-5 h-5 text-emerald-600" />
-            Focus Areas
-          </h4>
-          <ul className="space-y-3">
-            {phase.focusAreas.map((area, i) => (
-              <li key={i} className="flex items-start gap-3 text-slate-600">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0" />
-                <span>{area}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="bg-emerald-50 p-6 rounded-xl">
-          <h4 className="flex items-center gap-2 text-lg font-bold text-emerald-900 mb-4">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            Outcome
-          </h4>
-          <ul className="space-y-3">
-            {phase.outcomes.map((outcome, i) => (
-              <li key={i} className="flex items-start gap-3 text-emerald-800">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                <span className="font-medium">{outcome}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PhaseCardStatic({ phase, delay }: { phase: Phase; delay: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay }}
-    >
-      <PhaseCardBody phase={phase} />
-    </motion.div>
-  );
-}
-
-/* ---------- Sticky scroll-stepper (desktop only) ---------- */
-
-function PhaseStepper({ phases }: { phases: Phase[] }) {
-  const reduce = useReducedMotion();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Outer container is N * 100vh tall — one viewport per phase
-  const heightVH = phases.length * 100;
-
-  if (reduce) {
-    // Reduced motion: render plain stacked cards, no sticky pin
-    return (
-      <div className="space-y-12">
-        {phases.map((p) => (
-          <PhaseCardBody key={p.id} phase={p} />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <div ref={containerRef} style={{ height: `${heightVH}vh` }} className="relative">
-      <div className="sticky top-24 h-[calc(100vh-6rem)] flex items-center">
-        <div className="grid grid-cols-[80px_1fr] gap-8 w-full">
-          {/* Vertical step rail */}
-          <StepRail count={phases.length} progress={scrollYProgress} />
-          {/* Stack of cards — each card fades in/out with progress */}
-          <div className="relative h-[480px]">
-            {phases.map((phase, i) => (
-              <StepCard
-                key={phase.id}
-                phase={phase}
-                index={i}
-                total={phases.length}
-                progress={scrollYProgress}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StepRail({ count, progress }: { count: number; progress: MotionValue<number> }) {
-  return (
-    <div className="relative flex flex-col items-center justify-center gap-12 py-4">
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-emerald-200 -translate-x-1/2" />
-      {Array.from({ length: count }).map((_, i) => (
-        <RailDot key={i} index={i} total={count} progress={progress} />
-      ))}
-    </div>
-  );
-}
-
-function RailDot({
-  index,
-  total,
-  progress,
-}: {
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  const start = index / total;
-  const end = (index + 1) / total;
-  // Active when scroll progress is within this dot's window (with small lead-in)
-  const opacity = useTransform(progress, [start - 0.08, start, end, end + 0.08], [0.3, 1, 1, 0.3]);
-  const scale = useTransform(progress, [start - 0.08, start, end, end + 0.08], [0.9, 1.15, 1.15, 0.9]);
-  return (
-    <motion.div
-      style={{ opacity, scale }}
-      className="relative z-10 w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold shadow-lg ring-4 ring-emerald-50"
-    >
-      {index + 1}
-    </motion.div>
-  );
-}
-
-function StepCard({
-  phase,
-  index,
-  total,
-  progress,
-}: {
-  phase: Phase;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  // Each phase owns a window of 1/total of the scroll progress.
-  // Fade-in over the first 25% of its window, hold, fade-out over the last 25%.
-  const segStart = index / total;
-  const segEnd = (index + 1) / total;
-  const fadeInEnd = segStart + (segEnd - segStart) * 0.25;
-  const fadeOutStart = segEnd - (segEnd - segStart) * 0.25;
-
-  const opacity = useTransform(
-    progress,
-    [segStart - 0.05, segStart, fadeInEnd, fadeOutStart, segEnd, segEnd + 0.05],
-    [0, 0, 1, 1, 0, 0]
-  );
-  const y = useTransform(
-    progress,
-    [segStart, fadeInEnd, fadeOutStart, segEnd],
-    [40, 0, 0, -40]
-  );
-
-  return (
-    <motion.div style={{ opacity, y }} className="absolute inset-0">
-      <PhaseCardBody phase={phase} />
-    </motion.div>
   );
 }
