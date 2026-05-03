@@ -49,13 +49,16 @@ export default function Hero() {
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
         style={reduce ? { opacity: 0.4 } : { scale: medallionScale, opacity: medallionOpacity }}
       >
+        {/* Inner wrapper exists because outer drives scroll-tied scale via
+            `style`, and framer-motion can't share the `scale` channel
+            between style-driven transforms and keyframe animations. */}
         <motion.div
           className="relative w-[88vw] max-w-[720px] aspect-square"
           animate={reduce ? undefined : { scale: [1, 1.025, 1] }}
           transition={reduce ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
         >
           <Image
-            src={asset("/hero-medallion-cutout.png")}
+            src={asset("/hero-medallion-cutout.webp")}
             alt=""
             fill
             priority

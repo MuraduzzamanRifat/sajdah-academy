@@ -2,22 +2,11 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Float, Stars, Environment } from "@react-three/drei";
+import { Stars, Environment } from "@react-three/drei";
 import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
+import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(mq.matches);
-    update();
-    mq.addEventListener?.("change", update);
-    return () => mq.removeEventListener?.("change", update);
-  }, []);
-  return reduced;
-}
 
 /* Pause render loop when hero scrolls out of viewport.
    Saves significant GPU/battery — Three.js otherwise renders
@@ -35,91 +24,6 @@ function useFrameloopForVisibility(): "always" | "demand" {
     return () => obs.disconnect();
   }, []);
   return mode;
-}
-
-/* -------------------------------------------------------------
-   Islamic 8-point star (Rub el Hizb) — extruded as 3D geometry.
-   Drawn from polar coords: alternating outer/inner radii.
-------------------------------------------------------------- */
-function IslamicStarGeometry({
-  outer = 1.4,
-  inner = 0.78,
-  depth = 0.25,
-  bevel = 0.06,
-}: {
-  outer?: number;
-  inner?: number;
-  depth?: number;
-  bevel?: number;
-}) {
-  const shape = useMemo(() => {
-    const s = new THREE.Shape();
-    const points = 8;
-    for (let i = 0; i < points * 2; i++) {
-      const r = i % 2 === 0 ? outer : inner;
-      const a = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
-      const x = Math.cos(a) * r;
-      const y = Math.sin(a) * r;
-      if (i === 0) s.moveTo(x, y);
-      else s.lineTo(x, y);
-    }
-    s.closePath();
-    return s;
-  }, [outer, inner]);
-
-  const geom = useMemo(() => {
-    const g = new THREE.ExtrudeGeometry(shape, {
-      depth,
-      bevelEnabled: true,
-      bevelThickness: bevel,
-      bevelSize: bevel,
-      bevelSegments: 6,
-      curveSegments: 24,
-    });
-    g.center();
-    return g;
-  }, [shape, depth, bevel]);
-
-  return <primitive object={geom} attach="geometry" />;
-}
-
-function CenterStar({ reduced }: { reduced: boolean }) {
-  const ref = useRef<THREE.Mesh>(null!);
-  useFrame((state) => {
-    if (!ref.current || reduced) return;
-    const t = state.clock.elapsedTime;
-    ref.current.rotation.z = t * 0.18;
-    ref.current.rotation.x = Math.sin(t * 0.4) * 0.08;
-    ref.current.rotation.y = Math.cos(t * 0.3) * 0.12;
-  });
-  return (
-    <Float
-      speed={reduced ? 0 : 1.2}
-      rotationIntensity={reduced ? 0 : 0.2}
-      floatIntensity={reduced ? 0 : 0.6}
-    >
-      {/* Polished gold star — meshPhysicalMaterial gives reliable premium sheen */}
-      <mesh ref={ref} castShadow receiveShadow>
-        <IslamicStarGeometry />
-        <meshPhysicalMaterial
-          color={"#f59e0b"} /* amber-500 */
-          emissive={"#fbbf24"} /* amber-400 — boosted for bloom catch */
-          emissiveIntensity={0.6}
-          metalness={1}
-          roughness={0.16}
-          clearcoat={1}
-          clearcoatRoughness={0.06}
-          reflectivity={1}
-          envMapIntensity={1.6}
-        />
-      </mesh>
-      {/* Subtle emerald inner halo behind the star */}
-      <mesh position={[0, 0, -0.35]} scale={1.05}>
-        <IslamicStarGeometry outer={1.42} inner={0.8} depth={0.05} bevel={0.02} />
-        <meshBasicMaterial color={"#10b981"} transparent opacity={0.18} />
-      </mesh>
-    </Float>
-  );
 }
 
 function OrbitRing({
@@ -271,7 +175,7 @@ function MouseHighlight({ reduced }: { reduced: boolean }) {
 }
 
 export default function HeroCanvas() {
-  const reduced = usePrefersReducedMotion();
+  const reduced = !!useReducedMotion();
   const visibilityFrameloop = useFrameloopForVisibility();
   // Reduced-motion users always render on demand (one frame, no animation)
   const frameloop = reduced ? "demand" : visibilityFrameloop;
@@ -291,8 +195,6 @@ export default function HeroCanvas() {
 
       <Suspense fallback={null}>
         <Environment preset="sunset" />
-        {/* CenterStar removed — replaced by the calligraphy medallion
-            in HeroBackdrop / Hero.tsx as the new focal point */}
         <MinaretRing />
         <OrbitRing radius={2.0} speed={0.25} count={8} size={0.045} color={"#fbbf24"} reduced={reduced} />
         <OrbitRing radius={2.7} speed={-0.15} count={12} size={0.025} color={"#fde68a"} reduced={reduced} />

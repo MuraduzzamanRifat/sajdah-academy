@@ -1,22 +1,19 @@
-"""Remove the uniform light-blue background from hero-medallion.png.
+"""Remove the uniform light-blue background from the source medallion
+and emit a web-optimised WebP cutout.
 
-Input:  public/hero-medallion.png
-Output: public/hero-medallion-cutout.png (transparent PNG, autocropped)
-
-Strategy: sample the four corners + center-of-corner area to learn the
-true background color, then alpha-key every pixel within an LAB-distance
-threshold. LAB distance = perceptually uniform, much better than RGB.
-Includes feathered edge (1-2 px gaussian on alpha) for clean compositing.
+Input:  public/hero-medallion.png  (or .jpg)
+Output: public/hero-medallion-cutout.webp (transparent, auto-cropped)
 """
 from PIL import Image, ImageFilter
 import sys, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = os.path.join(ROOT, "public", "hero-medallion.png")
-DST = os.path.join(ROOT, "public", "hero-medallion-cutout.png")
+SRC_CANDIDATES = ["hero-medallion.png", "hero-medallion.jpg", "hero-medallion.jpeg"]
+SRC = next((os.path.join(ROOT, "public", n) for n in SRC_CANDIDATES if os.path.exists(os.path.join(ROOT, "public", n))), None)
+DST = os.path.join(ROOT, "public", "hero-medallion-cutout.webp")
 
-if not os.path.exists(SRC):
-    sys.exit(f"missing source: {SRC}")
+if not SRC:
+    sys.exit("missing source: public/hero-medallion.{png,jpg,jpeg}")
 
 img = Image.open(SRC).convert("RGBA")
 w, h = img.size
@@ -77,6 +74,6 @@ if max(img.size) > MAX:
     img = img.resize((int(img.size[0] * scale), int(img.size[1] * scale)), Image.LANCZOS)
     print(f"resized to: {img.size}")
 
-img.save(DST, "PNG", optimize=True)
+img.save(DST, "WEBP", quality=85, method=6, lossless=False)
 sz = os.path.getsize(DST)
 print(f"saved: {DST} ({sz // 1024} KB)")

@@ -12,6 +12,11 @@ const nextConfig = {
   trailingSlash: true, // GH Pages prefers .../foo/ over .../foo
   basePath: isProd ? repoBase : undefined,
   assetPrefix: isProd ? repoBase : undefined,
+  // Expose basePath to client/server code so we can build URLs without
+  // hard-coding the repo name in multiple places (lib/asset.ts reads this).
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProd ? repoBase : "",
+  },
   outputFileTracingRoot: path.resolve("./"),
   compress: true,
   poweredByHeader: false,
