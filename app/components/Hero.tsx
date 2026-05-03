@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { Calendar, MapPin, ShieldCheck, Star } from "lucide-react";
 import HeroBackdrop from "./HeroBackdrop";
+import { asset } from "../lib/asset";
 
 export default function Hero() {
   const reduce = useReducedMotion();
@@ -54,7 +55,7 @@ export default function Hero() {
           transition={reduce ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
         >
           <Image
-            src="/hero-medallion-cutout.png"
+            src={asset("/hero-medallion-cutout.png")}
             alt=""
             fill
             priority
