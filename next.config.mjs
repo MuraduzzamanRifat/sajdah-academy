@@ -23,7 +23,13 @@ const nextConfig = {
     deviceSizes: [360, 390, 640, 768, 1024, 1280, 1440, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei"],
+  transpilePackages: [
+    "three",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "@react-three/postprocessing",
+    "postprocessing",
+  ],
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
