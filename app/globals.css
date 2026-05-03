@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Tailwind v4 theme bridge — semantic aliases derived from tokens.
+   Keeps emerald/amber/slate usable as-is, AND adds semantic classes
+   like `bg-surface-canvas`, `text-text-strong`, `shadow-elev-3`. */
+@theme {
+  --font-sans: var(--font-hind), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Semantic colors — Tailwind generates bg-/text-/border- utilities */
+  --color-surface-canvas: var(--surface-canvas);
+  --color-surface-canvas-strong: var(--surface-canvas-strong);
+  --color-surface-card: var(--surface-card);
+  --color-text-strong: var(--text-strong);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-text-on-primary: var(--text-on-primary);
+  --color-text-on-accent: var(--text-on-accent);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
+  /* Elevation — usable as `shadow-elev-1` … `shadow-elev-5` */
+  --shadow-elev-1: var(--shadow-1);
+  --shadow-elev-2: var(--shadow-2);
+  --shadow-elev-3: var(--shadow-3);
+  --shadow-elev-4: var(--shadow-4);
+  --shadow-elev-5: var(--shadow-5);
+  --shadow-glow-amber: var(--glow-amber);
+  --shadow-glow-emerald: var(--glow-emerald);
+}
+
+html, body {
+  background: var(--surface-canvas);
+  color: var(--text-strong);
+  /* Robust font chain — works even if next/font variables are empty.
+     Hind Siliguri (Bangla + Latin) → Inter (Latin) → system sans. */
+  font-family:
+    var(--font-hind, "Hind Siliguri"),
+    var(--font-inter, "Inter"),
+    "Hind Siliguri", "Inter",
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans Bengali", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Prevent horizontal scroll from any rogue scale/translate transform on
+     scroll-tied elements (e.g. hero canvas scale, parallax cards). */
+  overflow-x: hidden;
+}
+
+/* Hardware-accelerate animated layers and avoid sub-pixel rounding leaks */
+.will-change-transform { will-change: transform; }
+
+::selection {
+  background: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-neutral-100); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-950);
+  border-radius: var(--radius-md);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-900); }
