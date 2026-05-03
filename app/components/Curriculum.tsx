@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BookOpen, Heart, Star, Target, CheckCircle2 } from "lucide-react";
+import { Reveal } from "./Reveal";
 
 const phases = [
   {
@@ -70,9 +71,10 @@ const coreSubjects = [
 
 export default function Curriculum() {
   return (
-    <section id="curriculum" className="py-20 bg-slate-50 ambient-emerald relative">
+    <section id="curriculum" className="py-20 bg-slate-50 relative overflow-hidden">
+      <div aria-hidden className="ambient-orbs orbs-light" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
+        <Reveal className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
             একাডেমিক মডেল ও কারিকুলাম
           </h2>
@@ -80,7 +82,7 @@ export default function Curriculum() {
             আমাদের ৬ মাসের কোর্সটি তিনটি ধাপে বিভক্ত, যা আপনাকে ধাপে ধাপে একজন আদর্শ
             মুসলিম হিসেবে গড়ে তুলতে সাহায্য করবে।
           </p>
-        </div>
+        </Reveal>
 
         <div className="mb-20">
           <h3 className="text-2xl font-bold text-emerald-900 mb-8 text-center">

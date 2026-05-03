@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import type { MotionValue } from "framer-motion";
 import { BedDouble, Utensils, MonitorPlay, Trees } from "lucide-react";
+import { Reveal } from "./Reveal";
 
 const features = [
   {
@@ -85,25 +86,19 @@ export default function PremiumExperience() {
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-amber-200 via-transparent to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <span className="text-amber-500 font-bold tracking-wider uppercase text-sm mb-3 block">
-              Premium Physical Classes
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              প্রিমিয়াম রিসোর্টে ফিজিক্যাল ক্লাস ও ট্রেনিং
-            </h2>
-            <p className="text-lg text-emerald-100/90 max-w-3xl mx-auto leading-relaxed">
-              আমাদের প্রতিটি ক্লাস, ওয়ার্কশপ এবং সেশন পরিচালিত হবে দেশের বাছাইকৃত
-              লাক্সারি রিসোর্টগুলোতে। সম্পূর্ণ ফিজিক্যাল এই কোর্সে আপনি পাবেন আধুনিক
-              ক্লাসরুম, নিরিবিলি পরিবেশ এবং দ্বীনি শিক্ষার এক অনন্য অভিজ্ঞতা।
-            </p>
-          </motion.div>
-        </div>
+        <Reveal className="text-center mb-16">
+          <span className="text-amber-500 font-bold tracking-wider uppercase text-sm mb-3 block">
+            Premium Physical Classes
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            প্রিমিয়াম রিসোর্টে ফিজিক্যাল ক্লাস ও ট্রেনিং
+          </h2>
+          <p className="text-lg text-emerald-100/90 max-w-3xl mx-auto leading-relaxed">
+            আমাদের প্রতিটি ক্লাস, ওয়ার্কশপ এবং সেশন পরিচালিত হবে দেশের বাছাইকৃত
+            লাক্সারি রিসোর্টগুলোতে। সম্পূর্ণ ফিজিক্যাল এই কোর্সে আপনি পাবেন আধুনিক
+            ক্লাসরুম, নিরিবিলি পরিবেশ এবং দ্বীনি শিক্ষার এক অনন্য অভিজ্ঞতা।
+          </p>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 gap-8">
           {features.map((feature, idx) => {

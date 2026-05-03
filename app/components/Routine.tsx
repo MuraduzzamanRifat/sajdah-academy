@@ -136,8 +136,10 @@ export default function Routine() {
   };
 
   return (
-    <section className="pb-24 bg-slate-50 ambient-emerald">
-      <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32 ambient-dark">
+    <section className="pb-24 bg-slate-50 relative overflow-hidden">
+      <div aria-hidden className="ambient-orbs orbs-light" />
+      <div className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden pt-32">
+        <div aria-hidden className="ambient-orbs orbs-dark" />
         {/* Faint amber radial + Islamic 8-point star silhouette for visual
             continuity with the home hero. Static SVG, GPU-cheap, no JS. */}
         <div
@@ -239,7 +241,7 @@ export default function Routine() {
                 key={tab.id}
                 type="button"
                 role="tab"
-                aria-selected={isActive}
+                aria-selected={isActive ? "true" : "false"}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold transition-all duration-200 flex-1 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300/60 ${
                   isActive

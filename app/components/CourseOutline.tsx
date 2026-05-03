@@ -15,6 +15,7 @@ import {
   Sparkles,
   Compass,
 } from "lucide-react";
+import { Reveal } from "./Reveal";
 
 const courseOutline = [
   {
@@ -153,23 +154,18 @@ const courseOutline = [
 
 export default function CourseOutline() {
   return (
-    <section className="py-20 bg-emerald-50/50 ambient-emerald relative">
+    <section className="py-20 bg-emerald-50/50 relative overflow-hidden">
+      <div aria-hidden className="ambient-orbs orbs-light" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
-              Course Headline & Outline
-            </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              আমাদের কোর্সের বিস্তারিত সিলেবাস, যা আপনাকে ইসলামের প্রতিটি গুরুত্বপূর্ণ বিষয়
-              সম্পর্কে সঠিক জ্ঞান প্রদান করবে।
-            </p>
-          </motion.div>
-        </div>
+        <Reveal className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
+            Course Headline & Outline
+          </h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            আমাদের কোর্সের বিস্তারিত সিলেবাস, যা আপনাকে ইসলামের প্রতিটি গুরুত্বপূর্ণ বিষয়
+            সম্পর্কে সঠিক জ্ঞান প্রদান করবে।
+          </p>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courseOutline.map((course, idx) => (
