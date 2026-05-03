@@ -291,7 +291,8 @@ export default function HeroCanvas() {
 
       <Suspense fallback={null}>
         <Environment preset="sunset" />
-        <CenterStar reduced={reduced} />
+        {/* CenterStar removed — replaced by the calligraphy medallion
+            in HeroBackdrop / Hero.tsx as the new focal point */}
         <MinaretRing />
         <OrbitRing radius={2.0} speed={0.25} count={8} size={0.045} color={"#fbbf24"} reduced={reduced} />
         <OrbitRing radius={2.7} speed={-0.15} count={12} size={0.025} color={"#fde68a"} reduced={reduced} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { Calendar, MapPin, ShieldCheck, Star } from "lucide-react";
 import HeroBackdrop from "./HeroBackdrop";
@@ -19,6 +20,9 @@ export default function Hero() {
   const canvasScale = useTransform(scrollYProgress, [0, 1], [1, 1.18]);
   const canvasOpacity = useTransform(scrollYProgress, [0, 0.85], [1, 0.4]);
   const cueOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
+  // Medallion scales + fades subtly as the user scrolls past the hero
+  const medallionScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const medallionOpacity = useTransform(scrollYProgress, [0, 0.85], [0.65, 0]);
 
   return (
     <section
@@ -33,6 +37,31 @@ export default function Hero() {
         <HeroBackdrop />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-emerald-950/70 via-emerald-900/30 to-emerald-950/90" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,_transparent_0%,_rgba(2,44,34,0.55)_70%)]" />
+      </motion.div>
+
+      {/* Sacred calligraphy medallion — primary hero focal point.
+          Sits behind the title block; at ~65% opacity so the title reads
+          cleanly while the gold ornament still feels present. Slow breathing
+          animation; honors prefers-reduced-motion. */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        style={reduce ? { opacity: 0.4 } : { scale: medallionScale, opacity: medallionOpacity }}
+      >
+        <motion.div
+          className="relative w-[88vw] max-w-[720px] aspect-square"
+          animate={reduce ? undefined : { scale: [1, 1.025, 1] }}
+          transition={reduce ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Image
+            src="/hero-medallion-cutout.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1024px) 720px, 88vw"
+            className="object-contain drop-shadow-[0_0_60px_rgba(245,158,11,0.45)]"
+          />
+        </motion.div>
       </motion.div>
 
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
