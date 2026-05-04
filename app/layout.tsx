@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollProgress from "./components/ScrollProgress";
 import StickyMobileCTA from "./components/StickyMobileCTA";
+import Preloader from "./components/Preloader";
 
 // Self-host fonts via next/font — zero CLS, no render-blocking,
 // automatic preload + display:swap. Weights trimmed to those actually
@@ -205,6 +206,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
       </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
+        {/* Preloader: must be FIRST in body so it paints before anything else */}
+        <Preloader />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
