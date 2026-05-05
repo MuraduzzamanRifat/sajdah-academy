@@ -8,8 +8,9 @@ import { Menu, X, Tent } from "lucide-react";
 const NAV = [
   { href: "/about/", label: "About", labelBn: "পরিচিতি" },
   { href: "/courses/", label: "Courses", labelBn: "কোর্সসমূহ" },
+  { href: "/batches/", label: "Batches", labelBn: "ব্যাচসমূহ" },
   { href: "/faculty/", label: "Faculty", labelBn: "শিক্ষকমণ্ডলী" },
-  { href: "/routine/", label: "Routine", labelBn: "রুটিন" },
+  { href: "/blog/", label: "Blog", labelBn: "আর্টিকেল" },
   { href: "/faq/", label: "FAQ", labelBn: "জিজ্ঞাসা" },
   { href: "/contact/", label: "Contact", labelBn: "যোগাযোগ" },
 ];

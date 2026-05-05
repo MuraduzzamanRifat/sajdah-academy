@@ -15,7 +15,24 @@ import {
   Clock,
   Award,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
+import { modules as allModules } from "../data/modules";
+
+const moduleIconBySlug: Record<string, React.ComponentType<{ className?: string }>> = {
+  "fa-firru-ilallah": Compass,
+  "iman-aqidah": Shield,
+  "quranul-kareem": BookOpen,
+  "hadith-mubarakah": Sparkles,
+  "serratul-anbiya": Users,
+  "usuwatun-hasanah": Heart,
+  "fiqh-taharat": Droplets,
+  "fiqh-ibadat": Scale,
+  "fiqh-muamalat": Briefcase,
+  "fiqh-muasharat": Handshake,
+  "tawba-istegfar": RefreshCcw,
+  "tazkiya-islahun-nafs": Sparkles,
+};
 
 const title = "Courses — কোর্সসমূহ";
 const description =
@@ -77,22 +94,7 @@ const tiers = [
   },
 ];
 
-const modules = [
-  { id: 1, title: "Fa-Firru Ilallah", titleBn: "আল্লাহর দিকে দৌড়াও", icon: Compass, phase: "Foundation" },
-  { id: 2, title: "Iman & Aqidah", titleBn: "ঈমান ও আক্বীদা", icon: Shield, phase: "Foundation" },
-  { id: 3, title: "Quranul Kareem", titleBn: "কুরআনুল কারীম", icon: BookOpen, phase: "Foundation" },
-  { id: 4, title: "Hadith e Mubarakah", titleBn: "হাদীস ই মুবারকা", icon: Sparkles, phase: "Understanding" },
-  { id: 5, title: "Serratul Anbiya", titleBn: "সিরাতুল আম্বিয়া", icon: Users, phase: "Understanding" },
-  { id: 6, title: "Usuwatun Hasanah", titleBn: "উসওয়াতুন হাসানা ﷺ", icon: Heart, phase: "Understanding" },
-  { id: 7, title: "Fiqh-1 (তাহারাত)", titleBn: "পবিত্রতার বিধান", icon: Droplets, phase: "Understanding" },
-  { id: 8, title: "Fiqh-2 (ইবাদাত)", titleBn: "ইবাদতের বিধান", icon: Scale, phase: "Transformation" },
-  { id: 9, title: "Fiqh-3 (মু'আমালাত)", titleBn: "লেনদেনের বিধান", icon: Briefcase, phase: "Transformation" },
-  { id: 10, title: "Fiqh-4 (মু'আশারাত)", titleBn: "সামাজিক বিধান", icon: Handshake, phase: "Transformation" },
-  { id: 11, title: "Tawba & Istegfar", titleBn: "তাওবা ও ইস্তিগফার", icon: RefreshCcw, phase: "Transformation" },
-  { id: 12, title: "Tazkiya (Islahun Nafs)", titleBn: "আত্মশুদ্ধি", icon: Sparkles, phase: "Transformation" },
-];
-
-const phases = ["Foundation", "Understanding", "Transformation"];
+const phases = ["Foundation", "Understanding", "Transformation"] as const;
 
 export default function CoursesPage() {
   return (
@@ -202,21 +204,29 @@ export default function CoursesPage() {
                 <h3 className="text-xl md:text-2xl font-bold text-emerald-950">{phase}</h3>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {modules
+                {allModules
                   .filter((m) => m.phase === phase)
                   .map((m) => {
-                    const Icon = m.icon;
+                    const Icon = moduleIconBySlug[m.slug] ?? BookOpen;
                     return (
-                      <div key={m.id} className="glass-light glass-light-hover rounded-2xl p-5">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4">
-                          <Icon className="w-6 h-6 text-emerald-700" />
+                      <Link
+                        key={m.id}
+                        href={`/courses/${m.slug}/`}
+                        className="glass-light glass-light-hover rounded-2xl p-5 group block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/60"
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-amber-100 transition-colors">
+                          <Icon className="w-6 h-6 text-emerald-700 group-hover:text-amber-700" />
                         </div>
                         <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">
                           Module {String(m.id).padStart(2, "0")}
                         </span>
                         <h4 className="font-bold text-emerald-950 leading-tight mt-1">{m.title}</h4>
                         <p className="text-sm text-slate-500 mt-1">{m.titleBn}</p>
-                      </div>
+                        <span className="text-xs text-emerald-600 mt-3 flex items-center gap-1 font-medium">
+                          View details
+                          <ArrowRight className="w-3 h-3" />
+                        </span>
+                      </Link>
                     );
                   })}
               </div>

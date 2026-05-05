@@ -8,18 +8,28 @@ const sitemap = [
     links: [
       { label: "About", href: "/about/" },
       { label: "Faculty", href: "/faculty/" },
+      { label: "Gallery", href: "/gallery/" },
+      { label: "Press & Media", href: "/press/" },
+    ],
+  },
+  {
+    title: "Programs",
+    titleBn: "প্রোগ্রাম",
+    links: [
+      { label: "All Courses", href: "/courses/" },
+      { label: "Upcoming Batches", href: "/batches/" },
       { label: "Routine", href: "/routine/" },
       { label: "FAQ", href: "/faq/" },
     ],
   },
   {
-    title: "Courses",
-    titleBn: "কোর্সসমূহ",
+    title: "Resources",
+    titleBn: "রিসোর্স",
     links: [
-      { label: "All Courses", href: "/courses/" },
-      { label: "Basic Course-1", href: "/courses/#basic" },
-      { label: "Foundation Program", href: "/courses/#foundation" },
-      { label: "6-Month Program", href: "/courses/#full" },
+      { label: "Blog · Articles", href: "/blog/" },
+      { label: "Support Us · Sadaqah", href: "/donate/" },
+      { label: "Privacy Policy", href: "/privacy/" },
+      { label: "Terms", href: "/privacy/#terms" },
     ],
   },
   {
@@ -28,8 +38,8 @@ const sitemap = [
     links: [
       { label: "Contact", href: "/contact/" },
       { label: "Enroll Now", href: "/enroll/" },
-      { label: "Privacy Policy", href: "/privacy/" },
-      { label: "Terms", href: "/privacy/#terms" },
+      { label: "WhatsApp", href: "https://wa.me/880180556544" },
+      { label: "Email", href: "mailto:sijdah.academybd@gmail.com" },
     ],
   },
 ];
@@ -71,7 +81,7 @@ export default function Footer() {
           </div>
 
           {/* Sitemap columns */}
-          <div className="lg:col-span-6 grid sm:grid-cols-3 gap-8">
+          <div className="lg:col-span-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {sitemap.map((col) => (
               <div key={col.title}>
                 <h4 className="text-white font-bold mb-1 text-base">{col.title}</h4>
