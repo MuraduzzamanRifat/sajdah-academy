@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: "/sajdah-academy/routine/",
+    canonical: "/routine/",
   },
 };
 

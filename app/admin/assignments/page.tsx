@@ -3,7 +3,7 @@ import { Plus, FileText, Clock, CheckCircle2, AlertTriangle, Filter } from "luci
 
 export const metadata: Metadata = {
   title: "Admin · Assignments",
-  alternates: { canonical: "/sajdah-academy/admin/assignments/" },
+  alternates: { canonical: "/admin/assignments/" },
   robots: { index: false, follow: false },
 };
 

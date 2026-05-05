@@ -5,7 +5,7 @@ import { posts } from "../../data/posts";
 
 export const metadata: Metadata = {
   title: "Admin · Blog",
-  alternates: { canonical: "/sajdah-academy/admin/blog/" },
+  alternates: { canonical: "/admin/blog/" },
   robots: { index: false, follow: false },
 };
 

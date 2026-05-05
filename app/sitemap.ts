@@ -4,7 +4,9 @@ import { posts } from "./data/posts";
 
 export const dynamic = "force-static";
 
-const SITE = "https://muraduzzamanrifat.github.io/sajdah-academy";
+const SITE =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

@@ -3,7 +3,7 @@ import { Globe, Bell, Eye, Trash2, Moon } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Settings — সেটিংস",
-  alternates: { canonical: "/sajdah-academy/dashboard/settings/" },
+  alternates: { canonical: "/dashboard/settings/" },
   robots: { index: false, follow: false },
 };
 

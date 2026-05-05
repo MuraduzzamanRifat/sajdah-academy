@@ -3,7 +3,7 @@ import { Plus, Calendar, MapPin, Users, ChevronRight, Edit3 } from "lucide-react
 
 export const metadata: Metadata = {
   title: "Admin · Batches",
-  alternates: { canonical: "/sajdah-academy/admin/batches/" },
+  alternates: { canonical: "/admin/batches/" },
   robots: { index: false, follow: false },
 };
 

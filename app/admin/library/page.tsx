@@ -3,7 +3,7 @@ import { Plus, FileText, Video, Headphones, Book, Download, Edit3, Trash2 } from
 
 export const metadata: Metadata = {
   title: "Admin · Library",
-  alternates: { canonical: "/sajdah-academy/admin/library/" },
+  alternates: { canonical: "/admin/library/" },
   robots: { index: false, follow: false },
 };
 

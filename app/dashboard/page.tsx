@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Student Portal — Preview",
   description:
     "Sajdah Academy student dashboard preview — কোর্স প্রগ্রেস, অ্যাসাইনমেন্ট, রুটিন, আমল ট্র্যাকার, পেমেন্ট।",
-  alternates: { canonical: "/sajdah-academy/dashboard/" },
+  alternates: { canonical: "/dashboard/" },
   robots: { index: false, follow: false },
 };
 

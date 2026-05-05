@@ -3,7 +3,7 @@ import { Globe, Mail, Phone, MapPin, ShieldCheck, KeyRound, Bell, Database, Save
 
 export const metadata: Metadata = {
   title: "Admin · Settings",
-  alternates: { canonical: "/sajdah-academy/admin/settings/" },
+  alternates: { canonical: "/admin/settings/" },
   robots: { index: false, follow: false },
 };
 

@@ -4,7 +4,7 @@ import { modules } from "../../data/modules";
 
 export const metadata: Metadata = {
   title: "Admin · Courses",
-  alternates: { canonical: "/sajdah-academy/admin/courses/" },
+  alternates: { canonical: "/admin/courses/" },
   robots: { index: false, follow: false },
 };
 

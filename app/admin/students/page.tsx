@@ -3,7 +3,7 @@ import { Plus, Filter, Download, MoreHorizontal, Mail, Phone, Search } from "luc
 
 export const metadata: Metadata = {
   title: "Admin · Students",
-  alternates: { canonical: "/sajdah-academy/admin/students/" },
+  alternates: { canonical: "/admin/students/" },
   robots: { index: false, follow: false },
 };
 

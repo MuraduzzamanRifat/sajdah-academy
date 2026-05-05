@@ -3,7 +3,7 @@ import { Download, Send, AlertCircle, TrendingUp, CheckCircle2, Clock, MoreHoriz
 
 export const metadata: Metadata = {
   title: "Admin · Payments",
-  alternates: { canonical: "/sajdah-academy/admin/payments/" },
+  alternates: { canonical: "/admin/payments/" },
   robots: { index: false, follow: false },
 };
 

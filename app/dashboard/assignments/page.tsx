@@ -3,7 +3,7 @@ import { Upload, CheckCircle2, Clock, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Assignments — অ্যাসাইনমেন্ট",
-  alternates: { canonical: "/sajdah-academy/dashboard/assignments/" },
+  alternates: { canonical: "/dashboard/assignments/" },
   robots: { index: false, follow: false },
 };
 

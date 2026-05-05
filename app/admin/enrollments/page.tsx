@@ -3,7 +3,7 @@ import { Check, X, MessageSquare, ChevronRight, AlertCircle } from "lucide-react
 
 export const metadata: Metadata = {
   title: "Admin · Enrollments",
-  alternates: { canonical: "/sajdah-academy/admin/enrollments/" },
+  alternates: { canonical: "/admin/enrollments/" },
   robots: { index: false, follow: false },
 };
 

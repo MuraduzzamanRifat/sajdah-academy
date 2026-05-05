@@ -3,7 +3,7 @@ import { Download, Save, AlertCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin · Grades",
-  alternates: { canonical: "/sajdah-academy/admin/grades/" },
+  alternates: { canonical: "/admin/grades/" },
   robots: { index: false, follow: false },
 };
 

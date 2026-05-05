@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Admin · Dashboard",
-  alternates: { canonical: "/sajdah-academy/admin/" },
+  alternates: { canonical: "/admin/" },
   robots: { index: false, follow: false },
 };
 

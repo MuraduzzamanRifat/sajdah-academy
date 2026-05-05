@@ -8,7 +8,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/press/" },
+  alternates: { canonical: "/press/" },
 };
 
 const facts = [

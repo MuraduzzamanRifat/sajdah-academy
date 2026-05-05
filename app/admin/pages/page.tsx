@@ -4,7 +4,7 @@ import { Edit3, Eye, ExternalLink, FileText, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin · Pages",
-  alternates: { canonical: "/sajdah-academy/admin/pages/" },
+  alternates: { canonical: "/admin/pages/" },
   robots: { index: false, follow: false },
 };
 

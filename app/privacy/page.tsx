@@ -7,7 +7,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/privacy/" },
+  alternates: { canonical: "/privacy/" },
 };
 
 export default function PrivacyPage() {

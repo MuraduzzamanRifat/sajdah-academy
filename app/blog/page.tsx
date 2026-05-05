@@ -10,7 +10,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/blog/" },
+  alternates: { canonical: "/blog/" },
 };
 
 const sorted = [...posts].sort((a, b) => b.date.localeCompare(a.date));

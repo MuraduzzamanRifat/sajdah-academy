@@ -3,7 +3,7 @@ import { TrendingUp, Award } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Grades — মূল্যায়ন",
-  alternates: { canonical: "/sajdah-academy/dashboard/grades/" },
+  alternates: { canonical: "/dashboard/grades/" },
   robots: { index: false, follow: false },
 };
 

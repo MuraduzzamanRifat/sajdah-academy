@@ -4,7 +4,7 @@ import MedallionMark from "../../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "Admin · Certificates",
-  alternates: { canonical: "/sajdah-academy/admin/certificates/" },
+  alternates: { canonical: "/admin/certificates/" },
   robots: { index: false, follow: false },
 };
 

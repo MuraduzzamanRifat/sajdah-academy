@@ -3,7 +3,7 @@ import { Save, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin · Attendance",
-  alternates: { canonical: "/sajdah-academy/admin/attendance/" },
+  alternates: { canonical: "/admin/attendance/" },
   robots: { index: false, follow: false },
 };
 

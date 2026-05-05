@@ -3,7 +3,7 @@ import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit3 } from
 
 export const metadata: Metadata = {
   title: "Admin · Schedule",
-  alternates: { canonical: "/sajdah-academy/admin/schedule/" },
+  alternates: { canonical: "/admin/schedule/" },
   robots: { index: false, follow: false },
 };
 

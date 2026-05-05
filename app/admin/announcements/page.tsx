@@ -3,7 +3,7 @@ import { Megaphone, Send, Edit3, Trash2, Calendar } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin · Announcements",
-  alternates: { canonical: "/sajdah-academy/admin/announcements/" },
+  alternates: { canonical: "/admin/announcements/" },
   robots: { index: false, follow: false },
 };
 

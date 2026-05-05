@@ -3,7 +3,7 @@ import { Upload, Image as ImageIcon, Folder, MoreHorizontal, CheckCircle2 } from
 
 export const metadata: Metadata = {
   title: "Admin · Gallery",
-  alternates: { canonical: "/sajdah-academy/admin/gallery/" },
+  alternates: { canonical: "/admin/gallery/" },
   robots: { index: false, follow: false },
 };
 

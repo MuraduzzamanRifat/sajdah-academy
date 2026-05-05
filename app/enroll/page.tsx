@@ -10,7 +10,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/enroll/" },
+  alternates: { canonical: "/enroll/" },
 };
 
 export default function EnrollPage() {

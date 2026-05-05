@@ -10,7 +10,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/gallery/" },
+  alternates: { canonical: "/gallery/" },
 };
 
 /* Placeholder photos from Unsplash. Swap with real photos by changing

@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle, AlertCircle, Calendar } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Attendance — উপস্থিতি",
-  alternates: { canonical: "/sajdah-academy/dashboard/attendance/" },
+  alternates: { canonical: "/dashboard/attendance/" },
   robots: { index: false, follow: false },
 };
 

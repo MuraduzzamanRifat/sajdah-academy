@@ -9,7 +9,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/faq/" },
+  alternates: { canonical: "/faq/" },
 };
 
 const faqs = [

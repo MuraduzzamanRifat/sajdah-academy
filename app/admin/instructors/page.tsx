@@ -3,7 +3,7 @@ import { Plus, Mail, Phone, BookOpen, Star, MoreHorizontal } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Admin · Instructors",
-  alternates: { canonical: "/sajdah-academy/admin/instructors/" },
+  alternates: { canonical: "/admin/instructors/" },
   robots: { index: false, follow: false },
 };
 

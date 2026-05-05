@@ -41,7 +41,7 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  alternates: { canonical: "/sajdah-academy/courses/" },
+  alternates: { canonical: "/courses/" },
 };
 
 const tiers = [

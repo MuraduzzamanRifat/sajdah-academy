@@ -3,7 +3,7 @@ import { Search, Star, AlertCircle, MessageSquare, Send } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Admin · Messages",
-  alternates: { canonical: "/sajdah-academy/admin/messages/" },
+  alternates: { canonical: "/admin/messages/" },
   robots: { index: false, follow: false },
 };
 

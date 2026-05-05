@@ -30,13 +30,12 @@ const inter = Inter({
 const siteName = "Sajdah Academy";
 const siteDesc =
   "দেশের সেরা প্রিমিয়াম রিসোর্টে সম্পূর্ণ ফিজিক্যাল ট্রেনিং ও পূর্ণাঙ্গ ইসলামিক জীবনব্যবস্থা গড়ার এক অনন্য উদ্যোগ।";
-const siteHost = "https://muraduzzamanrifat.github.io"; // for metadataBase only
-const siteUrl = `${siteHost}/sajdah-academy`; // for JSON-LD / sitemap
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001");
 
 export const metadata: Metadata = {
-  // metadataBase is the HOST only — Next prepends basePath itself,
-  // otherwise auto-generated routes (opengraph-image, etc.) get path doubled.
-  metadataBase: new URL(siteHost),
+  metadataBase: new URL(siteUrl),
   title: {
     default: siteName,
     template: `%s · ${siteName}`,
@@ -58,7 +57,7 @@ export const metadata: Metadata = {
   creator: siteName,
   publisher: siteName,
   alternates: {
-    canonical: "/sajdah-academy/",
+    canonical: "/",
     languages: {
       "bn-BD": "/sajdah-academy/",
       "x-default": "/sajdah-academy/",

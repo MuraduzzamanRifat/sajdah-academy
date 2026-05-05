@@ -3,7 +3,7 @@ import { Send, Search, Paperclip } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Messages — বার্তা",
-  alternates: { canonical: "/sajdah-academy/dashboard/messages/" },
+  alternates: { canonical: "/dashboard/messages/" },
   robots: { index: false, follow: false },
 };
 
