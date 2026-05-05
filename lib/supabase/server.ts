@@ -1,7 +1,9 @@
 /* Supabase client for Server Components, Route Handlers, and Server Actions.
    Reads + writes cookies via next/headers so auth state stays in sync.
    The `set` calls inside Server Components throw, so we swallow them — the
-   middleware refreshes cookies on every request anyway. */
+   middleware refreshes cookies on every request anyway.
+   For service-role (RLS-bypass) tasks, see ./service.ts instead. */
+import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -27,17 +29,5 @@ export async function createClient() {
         },
       },
     }
-  );
-}
-
-/* Service-role client. Server-only. Use ONLY for admin tasks that need to
-   bypass RLS (e.g. seeding, system jobs). Never import in client code. */
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-
-export function createServiceClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } }
   );
 }

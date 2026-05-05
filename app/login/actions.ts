@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
+import { safeNext } from "../../lib/safe-redirect";
 
+/* Server actions return AuthState only on FAILURE — success paths
+   throw NEXT_REDIRECT via redirect(). useActionState handles the
+   throw transparently; just be aware the type is "happy-path lies". */
 export type AuthState = { error?: string; ok?: boolean } | null;
 
 export async function signIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -19,7 +23,7 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   if (error) return { error: error.message };
 
   revalidatePath("/", "layout");
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(safeNext(next));
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {

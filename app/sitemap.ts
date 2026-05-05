@@ -1,12 +1,11 @@
 import type { MetadataRoute } from "next";
 import { modules } from "./data/modules";
 import { posts } from "./data/posts";
+import { SITE_URL } from "../lib/site-url";
 
 export const dynamic = "force-static";
 
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001");
+const SITE = SITE_URL;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

@@ -4,8 +4,7 @@
    logic between createServerClient and supabase.auth.getUser(). */
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-const ADMIN_ROLES = new Set(["super_admin", "academic_admin", "finance"]);
+import { isAdminRole } from "../roles";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -59,7 +58,7 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (!profile || !ADMIN_ROLES.has(profile.role)) {
+    if (!isAdminRole(profile?.role)) {
       // Logged-in non-admins get sent to their student dashboard
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";

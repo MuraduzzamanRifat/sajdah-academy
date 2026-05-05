@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
+import { safeNext } from "../../lib/safe-redirect";
 import LoginForm from "./LoginForm";
 import MedallionMark from "../components/MedallionMark";
 
@@ -21,9 +22,7 @@ export default async function LoginPage({
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
-    // Already signed in — bounce to wherever they were headed (or dashboard)
-    const next = sp.next?.startsWith("/") ? sp.next : "/dashboard";
-    redirect(next);
+    redirect(safeNext(sp.next));
   }
 
   return (

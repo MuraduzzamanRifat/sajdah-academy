@@ -1,10 +1,7 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL as SITE } from "../lib/site-url";
 
 export const dynamic = "force-static";
-
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3001");
 
 export default function robots(): MetadataRoute.Robots {
   return {

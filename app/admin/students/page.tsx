@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus, Filter, Download, MoreHorizontal, Mail, Phone, Search, AlertCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
+import { initials } from "../../../lib/initials";
 
 export const metadata: Metadata = {
   title: "Admin · Students",
@@ -9,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic"; // always fresh — admin tables don't cache
+
+const PAGE_SIZE = 50;
 
 const statusBadge: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700",
@@ -38,19 +41,26 @@ type StudentRow = {
 export default async function AdminStudentsPage() {
   const supabase = await createClient();
 
-  const { data: students, error, count } = await supabase
-    .from("profiles")
-    .select(
-      `id, email, full_name, full_name_bn, phone, student_id, status, joined_at,
-       batches:batch_id ( name, code )`,
-      { count: "exact" }
-    )
-    .eq("role", "student")
-    .order("joined_at", { ascending: false })
-    .limit(50);
+  /* Run the list query and the per-status counts concurrently — they
+     are independent. Using `count: 'estimated'` for the headline total
+     avoids a full COUNT(*) on every refresh; per-status counts use
+     'exact' since we need the precise breakdown. */
+  const [listRes, totals] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        `id, email, full_name, full_name_bn, phone, student_id, status, joined_at,
+         batches:batch_id ( name, code )`,
+        { count: "estimated" }
+      )
+      .eq("role", "student")
+      .order("joined_at", { ascending: false })
+      .limit(PAGE_SIZE),
+    getCounts(supabase),
+  ]);
 
+  const { data: students, error, count } = listRes;
   const rows = (students ?? []) as unknown as StudentRow[];
-  const totals = await getCounts(supabase);
 
   return (
     <div className="space-y-4">
@@ -120,7 +130,6 @@ export default async function AdminStudentsPage() {
               <tbody>
                 {rows.map((s) => {
                   const display = s.full_name_bn || s.full_name || s.email;
-                  const initials = (s.full_name || s.email).split(/[\s@]/).filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
                   return (
                     <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50 last:border-0">
                       <td className="px-5 py-3">
@@ -129,7 +138,7 @@ export default async function AdminStudentsPage() {
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold shrink-0">
-                            {initials}
+                            {initials(s.full_name ?? s.email)}
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-emerald-950 leading-tight truncate">{display}</p>
@@ -180,7 +189,10 @@ export default async function AdminStudentsPage() {
       </div>
 
       <p className="text-xs text-emerald-700 text-center font-bold">
-        ✓ Live data from Supabase · {rows.length} of {count ?? 0} shown
+        ✓ Live data from Supabase
+        {count !== null && count > rows.length
+          ? ` · showing first ${rows.length} of ~${count}`
+          : ` · ${rows.length} total`}
       </p>
     </div>
   );
