@@ -158,7 +158,11 @@ create index if not exists enrollments_status_idx on enrollments(status);
 
 -- ============================================================
 -- 8. payments
+--    (sequence MUST exist before the table because txn_code
+--     default calls nextval at table-creation parse time)
 -- ============================================================
+create sequence if not exists payments_seq start 1000;
+
 create table if not exists payments (
   id uuid primary key default uuid_generate_v4(),
   txn_code text unique not null default ('TXN-' || lpad(nextval('payments_seq')::text, 6, '0')),
@@ -174,7 +178,6 @@ create table if not exists payments (
   created_at timestamptz not null default now()
 );
 
-create sequence if not exists payments_seq start 1000;
 create index if not exists payments_student_idx on payments(student_id);
 create index if not exists payments_status_idx on payments(status);
 
