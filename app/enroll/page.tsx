@@ -29,7 +29,7 @@ export default function EnrollPage() {
             ৪টি সহজ ধাপ। ৫ মিনিটের মধ্যে আবেদন সম্পন্ন। আমাদের টিম ২৪ ঘণ্টার মধ্যে যোগাযোগ করবে।
           </p>
           <Link
-            href="/dashboard/"
+            href="/student-dashboard/"
             className="inline-flex items-center gap-2 mt-6 text-amber-300 hover:text-amber-200 text-sm font-medium underline-offset-4 hover:underline"
           >
             <LayoutDashboard className="w-4 h-4" />

@@ -3,7 +3,7 @@ import { FileText, Play, BookOpen, Download, Headphones, Video } from "lucide-re
 
 export const metadata: Metadata = {
   title: "Library — রিসোর্স",
-  alternates: { canonical: "/dashboard/library/" },
+  alternates: { canonical: "/student-dashboard/library/" },
   robots: { index: false, follow: false },
 };
 

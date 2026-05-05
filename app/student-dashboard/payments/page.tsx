@@ -3,7 +3,7 @@ import { CreditCard, CheckCircle2, AlertCircle, Clock, Download, Smartphone } fr
 
 export const metadata: Metadata = {
   title: "Payments — পেমেন্ট",
-  alternates: { canonical: "/dashboard/payments/" },
+  alternates: { canonical: "/student-dashboard/payments/" },
   robots: { index: false, follow: false },
 };
 

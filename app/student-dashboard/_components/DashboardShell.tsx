@@ -38,35 +38,35 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: "Overview",
     items: [
-      { href: "/dashboard/", label: "ড্যাশবোর্ড", labelEn: "Dashboard", icon: LayoutDashboard },
-      { href: "/dashboard/profile/", label: "আমার প্রোফাইল", labelEn: "My Profile", icon: User },
+      { href: "/student-dashboard/", label: "ড্যাশবোর্ড", labelEn: "Dashboard", icon: LayoutDashboard },
+      { href: "/student-dashboard/profile/", label: "আমার প্রোফাইল", labelEn: "My Profile", icon: User },
     ],
   },
   {
     group: "Learning",
     items: [
-      { href: "/dashboard/modules/", label: "আমার মডিউল", labelEn: "My Modules", icon: BookOpen, badge: "৪" },
-      { href: "/dashboard/assignments/", label: "অ্যাসাইনমেন্ট", labelEn: "Assignments", icon: ClipboardCheck, badge: "৩" },
-      { href: "/dashboard/grades/", label: "মূল্যায়ন", labelEn: "Grades", icon: Award },
-      { href: "/dashboard/schedule/", label: "রুটিন", labelEn: "Schedule", icon: Calendar },
-      { href: "/dashboard/library/", label: "রিসোর্স", labelEn: "Library", icon: Library },
+      { href: "/student-dashboard/modules/", label: "আমার মডিউল", labelEn: "My Modules", icon: BookOpen, badge: "৪" },
+      { href: "/student-dashboard/assignments/", label: "অ্যাসাইনমেন্ট", labelEn: "Assignments", icon: ClipboardCheck, badge: "৩" },
+      { href: "/student-dashboard/grades/", label: "মূল্যায়ন", labelEn: "Grades", icon: Award },
+      { href: "/student-dashboard/schedule/", label: "রুটিন", labelEn: "Schedule", icon: Calendar },
+      { href: "/student-dashboard/library/", label: "রিসোর্স", labelEn: "Library", icon: Library },
     ],
   },
   {
     group: "Spiritual & Tracking",
     items: [
-      { href: "/dashboard/spiritual/", label: "আমল ট্র্যাকার", labelEn: "Spiritual Tracker", icon: Heart },
-      { href: "/dashboard/attendance/", label: "উপস্থিতি", labelEn: "Attendance", icon: CheckSquare },
+      { href: "/student-dashboard/spiritual/", label: "আমল ট্র্যাকার", labelEn: "Spiritual Tracker", icon: Heart },
+      { href: "/student-dashboard/attendance/", label: "উপস্থিতি", labelEn: "Attendance", icon: CheckSquare },
     ],
   },
   {
     group: "Account",
     items: [
-      { href: "/dashboard/payments/", label: "পেমেন্ট", labelEn: "Payments", icon: CreditCard },
-      { href: "/dashboard/certificates/", label: "সার্টিফিকেট", labelEn: "Certificates", icon: GraduationCap },
-      { href: "/dashboard/announcements/", label: "ঘোষণা", labelEn: "Announcements", icon: Megaphone, badge: "৫" },
-      { href: "/dashboard/messages/", label: "বার্তা", labelEn: "Messages", icon: MessageSquare, badge: "২" },
-      { href: "/dashboard/settings/", label: "সেটিংস", labelEn: "Settings", icon: Settings },
+      { href: "/student-dashboard/payments/", label: "পেমেন্ট", labelEn: "Payments", icon: CreditCard },
+      { href: "/student-dashboard/certificates/", label: "সার্টিফিকেট", labelEn: "Certificates", icon: GraduationCap },
+      { href: "/student-dashboard/announcements/", label: "ঘোষণা", labelEn: "Announcements", icon: Megaphone, badge: "৫" },
+      { href: "/student-dashboard/messages/", label: "বার্তা", labelEn: "Messages", icon: MessageSquare, badge: "২" },
+      { href: "/student-dashboard/settings/", label: "সেটিংস", labelEn: "Settings", icon: Settings },
     ],
   },
 ];
@@ -80,7 +80,7 @@ const TITLES: Record<string, string> = Object.fromEntries(
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const title = TITLES[pathname ?? "/dashboard/"] ?? "ড্যাশবোর্ড";
+  const title = TITLES[pathname ?? "/student-dashboard/"] ?? "ড্যাশবোর্ড";
 
   return (
     <main className="pt-20 pb-12 bg-slate-100 min-h-screen">
@@ -194,7 +194,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                   <span>খুঁজুন...</span>
                 </div>
                 <Link
-                  href="/dashboard/announcements/"
+                  href="/student-dashboard/announcements/"
                   className="relative w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center justify-center"
                   aria-label="Notifications"
                 >

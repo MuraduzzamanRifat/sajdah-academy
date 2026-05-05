@@ -4,7 +4,7 @@ import MedallionMark from "../../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "Certificates — সার্টিফিকেট",
-  alternates: { canonical: "/dashboard/certificates/" },
+  alternates: { canonical: "/student-dashboard/certificates/" },
   robots: { index: false, follow: false },
 };
 

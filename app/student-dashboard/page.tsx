@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Student Portal — Preview",
   description:
     "Sajdah Academy student dashboard preview — কোর্স প্রগ্রেস, অ্যাসাইনমেন্ট, রুটিন, আমল ট্র্যাকার, পেমেন্ট।",
-  alternates: { canonical: "/dashboard/" },
+  alternates: { canonical: "/student-dashboard/" },
   robots: { index: false, follow: false },
 };
 
@@ -97,7 +97,7 @@ export default function DashboardPage() {
           </div>
         </div>
         <Link
-          href="/dashboard/payments/"
+          href="/student-dashboard/payments/"
           className="block bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors"
         >
           <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
@@ -120,7 +120,7 @@ export default function DashboardPage() {
               আজকের আমল
             </h3>
             <Link
-              href="/dashboard/spiritual/"
+              href="/student-dashboard/spiritual/"
               className="text-xs text-amber-300 hover:text-amber-200 font-medium inline-flex items-center gap-1"
             >
               পূর্ণ ট্র্যাকার <ChevronRight className="w-3 h-3" />
@@ -164,7 +164,7 @@ export default function DashboardPage() {
         </div>
         <div className="grid lg:grid-cols-2 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
-            <SectionHeader title="আমার মডিউল" link="/dashboard/modules/" linkText="সব দেখুন" />
+            <SectionHeader title="আমার মডিউল" link="/student-dashboard/modules/" linkText="সব দেখুন" />
             <div className="space-y-3">
               {modules.map((m) => (
                 <div key={m.title} className="flex items-center gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0">
@@ -190,7 +190,7 @@ export default function DashboardPage() {
 
           <div className="space-y-4">
             <div className="bg-white border border-slate-200 rounded-2xl p-5">
-              <SectionHeader title="আসন্ন অ্যাসাইনমেন্ট" link="/dashboard/assignments/" linkText="সব" />
+              <SectionHeader title="আসন্ন অ্যাসাইনমেন্ট" link="/student-dashboard/assignments/" linkText="সব" />
               <div className="space-y-2.5">
                 {assignments.map((a) => (
                   <div key={a.title} className="flex items-center gap-2.5">
@@ -207,7 +207,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-5">
-              <SectionHeader title="আজকের রুটিন" link="/dashboard/schedule/" linkText="ক্যালেন্ডার" />
+              <SectionHeader title="আজকের রুটিন" link="/student-dashboard/schedule/" linkText="ক্যালেন্ডার" />
               <div className="space-y-2.5">
                 {todaySchedule.map((s) => (
                   <div key={s.time} className="flex items-start gap-2.5">
@@ -225,7 +225,7 @@ export default function DashboardPage() {
         </div>
         <div className="grid lg:grid-cols-2 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
-            <SectionHeader title="ঘোষণা" link="/dashboard/announcements/" linkText="সব ঘোষণা" />
+            <SectionHeader title="ঘোষণা" link="/student-dashboard/announcements/" linkText="সব ঘোষণা" />
             <div className="space-y-3">
               {announcements.map((a) => (
                 <div key={a.title} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0">
@@ -243,7 +243,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
-            <SectionHeader title="সাম্প্রতিক মূল্যায়ন" link="/dashboard/grades/" linkText="পূর্ণ রিপোর্ট" />
+            <SectionHeader title="সাম্প্রতিক মূল্যায়ন" link="/student-dashboard/grades/" linkText="পূর্ণ রিপোর্ট" />
             <div className="space-y-2.5">
               {grades.map((g, i) => (
                 <div key={i} className="flex items-center gap-2.5">

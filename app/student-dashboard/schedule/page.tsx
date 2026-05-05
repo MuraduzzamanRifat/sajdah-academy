@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon, Download } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Schedule — রুটিন",
-  alternates: { canonical: "/dashboard/schedule/" },
+  alternates: { canonical: "/student-dashboard/schedule/" },
   robots: { index: false, follow: false },
 };
 

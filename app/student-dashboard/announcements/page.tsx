@@ -3,7 +3,7 @@ import { Megaphone, Pin, Calendar, AlertCircle, Heart, Award } from "lucide-reac
 
 export const metadata: Metadata = {
   title: "Announcements — ঘোষণা",
-  alternates: { canonical: "/dashboard/announcements/" },
+  alternates: { canonical: "/student-dashboard/announcements/" },
   robots: { index: false, follow: false },
 };
 

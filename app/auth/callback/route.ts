@@ -10,7 +10,7 @@ const NO_STORE = { "Cache-Control": "no-store" } as const;
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = safeNext(searchParams.get("next"), "/dashboard");
+  const next = safeNext(searchParams.get("next"), "/student-dashboard");
 
   if (code) {
     const supabase = await createClient();

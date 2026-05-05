@@ -6,8 +6,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  /* Auth check only runs on protected and auth-related routes — public
-     marketing pages skip middleware entirely (no Supabase round-trip
-     per page view, no quota burn for guests). */
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/login", "/auth/:path*"],
+  /* Matcher must include `/` and arbitrary paths because:
+     - Subdomain routing rewrites `api.sijdahacademy.com/foo` → `/admin/foo`
+       (won't trigger if middleware doesn't see `/foo`)
+     - Auth gate covers `/admin/*` and `/student-dashboard/*`
+     - Auth flow covers `/login` and `/auth/*`
+     Static asset paths are excluded so we don't burn Supabase round-trips
+     on every CSS/JS/image fetch. */
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|css|js|woff2?|ttf|mp4|webmanifest)$).*)",
+  ],
 };

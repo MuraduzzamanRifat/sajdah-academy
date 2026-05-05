@@ -3,7 +3,7 @@ import { Heart, Moon, BookOpen, Sparkles, Flame, TrendingUp } from "lucide-react
 
 export const metadata: Metadata = {
   title: "Spiritual Tracker — আমল ট্র্যাকার",
-  alternates: { canonical: "/dashboard/spiritual/" },
+  alternates: { canonical: "/student-dashboard/spiritual/" },
   robots: { index: false, follow: false },
 };
 

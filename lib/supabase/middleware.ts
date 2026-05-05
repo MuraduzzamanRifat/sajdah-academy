@@ -1,13 +1,72 @@
-/* Edge middleware helper. On every request: refresh the auth session,
-   then enforce role-based access on /admin/* and /dashboard/*.
-   This is the canonical Next.js + @supabase/ssr pattern — DO NOT add
-   logic between createServerClient and supabase.auth.getUser(). */
+/* Edge middleware. Two responsibilities:
+
+   1. SUBDOMAIN ROUTING — `api.sijdahacademy.com` is the admin panel.
+      Requests to that host get internally rewritten so `/foo` serves the
+      page at `/admin/foo` (users see clean URLs without `/admin/`).
+      Conversely, the main domain blocks `/admin/*` and redirects to api.
+
+   2. AUTH GATE — refresh the Supabase session on every request, then
+      enforce role-based access on /admin/* (admin roles only) and
+      /student-dashboard/* (any logged-in user). */
+
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminRole } from "../roles";
 
+const ADMIN_HOST_RE = /^api\./i;
+
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const url = request.nextUrl;
+  const host = request.headers.get("host") ?? "";
+  const isAdminHost = ADMIN_HOST_RE.test(host);
+
+  // ---------- Step 1: subdomain routing ----------
+
+  // On api.*: any path that doesn't already start with /admin gets
+  // rewritten to /admin + path, so api.foo.com/students/ serves
+  // /admin/students/. /login and /auth pass through untouched so the
+  // sign-in flow works on either host.
+  if (isAdminHost) {
+    const path = url.pathname;
+    const passThrough =
+      path.startsWith("/admin") ||
+      path.startsWith("/login") ||
+      path.startsWith("/auth") ||
+      path.startsWith("/_next") ||
+      path.startsWith("/api");
+    if (!passThrough) {
+      const rewritten = url.clone();
+      rewritten.pathname = `/admin${path === "/" ? "" : path}`;
+      return continueWithAuth(request, NextResponse.rewrite(rewritten));
+    }
+  }
+
+  // On the main domain: /admin/* should not be reachable. Redirect to
+  // the admin host (preserve the path so a bookmarked /admin/students/
+  // ends up at api.sijdahacademy.com/students/).
+  if (!isAdminHost && url.pathname.startsWith("/admin")) {
+    const target = new URL(url.toString());
+    target.host = host.replace(/^(www\.)?/, "api.");
+    target.pathname = url.pathname.replace(/^\/admin/, "") || "/";
+    return NextResponse.redirect(target);
+  }
+
+  // ---------- Step 2: auth gate (everything else flows through) ----------
+  return continueWithAuth(request, NextResponse.next({ request }));
+}
+
+async function continueWithAuth(request: NextRequest, baseResponse: NextResponse) {
+  // Read the path first — for purely public requests on the main domain
+  // we skip the Supabase round-trip entirely (huge win since the matcher
+  // catches every page for subdomain-routing reasons).
+  const path = request.nextUrl.pathname;
+  const isAdmin = path.startsWith("/admin");
+  const isStudent = path.startsWith("/student-dashboard");
+  const isAuthFlow = path.startsWith("/login") || path.startsWith("/auth");
+
+  if (!isAdmin && !isStudent && !isAuthFlow) return baseResponse;
+
+  let response = baseResponse;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,30 +87,20 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh the session — required on every request that touches Supabase auth
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  const isAdmin = path.startsWith("/admin");
-  const isDashboard = path.startsWith("/dashboard");
-  const isLogin = path.startsWith("/login");
-  const isAuthCallback = path.startsWith("/auth");
+  if (!isAdmin && !isStudent) return response;
 
-  // Public routes — pass through
-  if (!isAdmin && !isDashboard) return response;
-
-  // Protected route, no user → bounce to /login with return path
-  if (!user && !isLogin && !isAuthCallback) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("next", path);
-    return NextResponse.redirect(url);
+  if (!user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("next", path);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // Logged in but role check needed for /admin
-  if (user && isAdmin) {
+  if (isAdmin) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -59,9 +108,8 @@ export async function updateSession(request: NextRequest) {
       .single();
 
     if (!isAdminRole(profile?.role)) {
-      // Logged-in non-admins get sent to their student dashboard
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = "/student-dashboard";
       return NextResponse.redirect(url);
     }
   }

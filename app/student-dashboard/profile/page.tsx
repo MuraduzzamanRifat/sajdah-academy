@@ -3,7 +3,7 @@ import { Camera, Lock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "My Profile — আমার প্রোফাইল",
-  alternates: { canonical: "/dashboard/profile/" },
+  alternates: { canonical: "/student-dashboard/profile/" },
   robots: { index: false, follow: false },
 };
 

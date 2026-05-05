@@ -124,7 +124,7 @@ export default function AdminShell({
             ওয়েবসাইটের সমস্ত কনটেন্ট এখান থেকে নিয়ন্ত্রণ করা যাবে।
           </p>
           <Link
-            href="/dashboard/"
+            href="/student-dashboard/"
             className="ml-auto shrink-0 inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-bold whitespace-nowrap"
           >
             Student view <ChevronRight className="w-4 h-4" />

@@ -6,7 +6,7 @@ import MedallionMark from "../../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "My Modules — আমার মডিউল",
-  alternates: { canonical: "/dashboard/modules/" },
+  alternates: { canonical: "/student-dashboard/modules/" },
   robots: { index: false, follow: false },
 };
 
