@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CreditCard, CheckCircle2, AlertCircle, Clock, Download, Smartphone } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Payments — পেমেন্ট",
@@ -53,9 +52,7 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; label
 
 export default function PaymentsPage() {
   return (
-    <DashboardShell title="পেমেন্ট · Payments">
-      <div className="space-y-4">
-        {/* Outstanding alert */}
+    <div className="space-y-4">
         <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 flex items-start gap-4">
           <div className="w-10 h-10 rounded-lg bg-amber-200 text-amber-700 flex items-center justify-center shrink-0">
             <AlertCircle className="w-5 h-5" />
@@ -73,15 +70,11 @@ export default function PaymentsPage() {
             এখন পরিশোধ করুন
           </button>
         </div>
-
-        {/* Fee summary */}
         <div className="grid sm:grid-cols-3 gap-3">
           <SummaryCard label="মোট কোর্স ফি" value={fmtBdt(totalFee)} />
           <SummaryCard label="পরিশোধিত" value={fmtBdt(paidSoFar)} color="emerald" />
           <SummaryCard label="অবশিষ্ট" value={fmtBdt(remaining)} color="amber" />
         </div>
-
-        {/* Progress bar */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-emerald-950">পেমেন্ট প্রগ্রেস</h3>
@@ -96,8 +89,6 @@ export default function PaymentsPage() {
             />
           </div>
         </div>
-
-        {/* Installment schedule */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -157,8 +148,6 @@ export default function PaymentsPage() {
             })}
           </div>
         </div>
-
-        {/* Payment methods */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <h3 className="font-bold text-emerald-950 mb-4">পেমেন্ট মাধ্যম</h3>
           <div className="grid sm:grid-cols-3 gap-3">
@@ -179,8 +168,6 @@ export default function PaymentsPage() {
             </div>
           </div>
         </div>
-
-        {/* Payment history */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <h3 className="font-bold text-emerald-950 mb-4">লেনদেনের ইতিহাস</h3>
           <table className="w-full text-sm">
@@ -208,8 +195,7 @@ export default function PaymentsPage() {
             </tbody>
           </table>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }
 

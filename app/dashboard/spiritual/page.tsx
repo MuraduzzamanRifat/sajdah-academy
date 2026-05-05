@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Heart, Moon, BookOpen, Sparkles, Flame, TrendingUp } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Spiritual Tracker — আমল ট্র্যাকার",
@@ -37,9 +36,7 @@ const adhkar = [
 export default function SpiritualPage() {
   const todayPrayers = prayers.filter((p) => p.done).length;
   return (
-    <DashboardShell title="আমল ট্র্যাকার · Spiritual Tracker">
-      <div className="space-y-4">
-        {/* Hero stats */}
+    <div className="space-y-4">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             icon={<Heart className="w-5 h-5" />}
@@ -66,8 +63,6 @@ export default function SpiritualPage() {
             color="amber"
           />
         </div>
-
-        {/* Today's prayers */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -95,10 +90,7 @@ export default function SpiritualPage() {
             ))}
           </div>
         </div>
-
-        {/* Tahajjud + Quran two-up */}
         <div className="grid lg:grid-cols-2 gap-4">
-          {/* Tahajjud */}
           <div className="bg-emerald-900 text-white rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold flex items-center gap-2">
@@ -124,8 +116,6 @@ export default function SpiritualPage() {
               ))}
             </div>
           </div>
-
-          {/* Quran */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -152,8 +142,6 @@ export default function SpiritualPage() {
             </div>
           </div>
         </div>
-
-        {/* Adhkar checklist */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -181,8 +169,6 @@ export default function SpiritualPage() {
             ))}
           </div>
         </div>
-
-        {/* Insights */}
         <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5">
           <h3 className="font-bold text-amber-900 flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4" /> মেন্টরের পর্যবেক্ষণ
@@ -193,8 +179,7 @@ export default function SpiritualPage() {
           </p>
           <p className="text-xs text-amber-700">— মাওলানা আবদুল্লাহ মাহমুদ · ২ দিন আগে</p>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }
 

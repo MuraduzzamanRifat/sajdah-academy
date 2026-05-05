@@ -3,7 +3,7 @@
    is consistent with the hero focal point.
    The divider sits on the section ABOVE it (the `from` color is its
    background) so it visually belongs to the previous section. */
-import { asset } from "../lib/asset";
+import MedallionMark from "./MedallionMark";
 
 const colorMap: Record<string, string> = {
   "slate-50": "#f8fafc",
@@ -50,14 +50,7 @@ export default function SectionBlend({
       }}
     >
       <div style={{ flex: 1, maxWidth: 280, height: 1, background: stroke }} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={asset("/medallion-128.webp")}
-        alt=""
-        width={48}
-        height={48}
-        style={{ width: 48, height: 48, objectFit: "contain", flexShrink: 0 }}
-      />
+      <MedallionMark size={48} className="w-12 h-12" />
       <div style={{ flex: 1, maxWidth: 280, height: 1, background: stroke }} />
     </div>
   );

@@ -14,7 +14,7 @@ import {
   Sunrise,
   Sunset,
 } from "lucide-react";
-import { asset } from "../lib/asset";
+import MedallionMark from "./MedallionMark";
 
 const thursdayRoutine = [
   { time: "Before Magrib", event: "Arrival", duration: "10 Mins", icon: <Clock className="w-5 h-5" /> },
@@ -150,12 +150,9 @@ export default function Routine() {
               "radial-gradient(circle at 50% 60%, rgba(245,158,11,0.18) 0%, rgba(16,185,129,0.06) 30%, transparent 60%)",
           }}
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          aria-hidden
-          src={asset("/medallion-128.webp")}
-          alt=""
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[70vw] opacity-[0.10] object-contain"
+        <MedallionMark
+          size={420}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] max-w-[70vw] opacity-[0.10]"
         />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div

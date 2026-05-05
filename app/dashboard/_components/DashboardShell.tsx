@@ -24,7 +24,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { asset } from "../../lib/asset";
+import MedallionMark from "../../components/MedallionMark";
 
 type NavItem = {
   href: string;
@@ -71,15 +71,16 @@ const NAV: { group: string; items: NavItem[] }[] = [
   },
 ];
 
-export default function DashboardShell({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+/* Single source of truth for in-app page titles.
+   Keeps the topbar in sync with the sidebar without per-page prop drilling. */
+const TITLES: Record<string, string> = Object.fromEntries(
+  NAV.flatMap((g) => g.items.map((i) => [i.href, `${i.label} · ${i.labelEn}`]))
+);
+
+export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const title = TITLES[pathname ?? "/dashboard/"] ?? "ড্যাশবোর্ড";
 
   return (
     <main className="pt-20 pb-12 bg-slate-100 min-h-screen">
@@ -111,14 +112,7 @@ export default function DashboardShell({
           >
             <div className="h-14 flex items-center gap-3 px-4 border-b border-slate-200 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-emerald-950 flex items-center justify-center overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={asset("/medallion-128.webp")}
-                  alt=""
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-contain"
-                />
+                <MedallionMark size={24} className="w-6 h-6" />
               </div>
               <span className="text-sm font-bold text-emerald-950">Sajdah Portal</span>
               <button

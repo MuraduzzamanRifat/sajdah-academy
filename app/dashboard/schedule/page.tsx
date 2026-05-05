@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Calendar as CalendarIcon, Download } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Schedule — রুটিন",
@@ -41,6 +40,13 @@ const eventColors: Record<string, string> = {
   rose: "bg-rose-100 text-rose-700 border-rose-300",
   blue: "bg-blue-100 text-blue-700 border-blue-300",
 };
+const eventBar: Record<string, string> = {
+  emerald: "bg-emerald-500",
+  purple: "bg-purple-500",
+  amber: "bg-amber-500",
+  rose: "bg-rose-500",
+  blue: "bg-blue-500",
+};
 
 const fullToday = [
   { time: "৪:৩০ AM", title: "তাহাজ্জুদ + Class-2", sub: "Hall A · মাওলানা আবদুল্লাহ", duration: "৪৫ মিনিট", color: "emerald" },
@@ -57,9 +63,7 @@ const fullToday = [
 
 export default function SchedulePage() {
   return (
-    <DashboardShell title="রুটিন · Schedule">
-      <div className="space-y-4">
-        {/* Week strip */}
+    <div className="space-y-4">
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -102,8 +106,6 @@ export default function SchedulePage() {
             ))}
           </div>
         </div>
-
-        {/* Today timeline */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <h3 className="font-bold text-emerald-950 mb-4">শুক্রবার ১০ মে — পূর্ণ দিনের রুটিন</h3>
           <div className="space-y-2">
@@ -113,7 +115,7 @@ export default function SchedulePage() {
                 className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 border-l-4 border-transparent hover:border-emerald-500 transition-colors"
               >
                 <span className="text-xs font-mono text-slate-500 min-w-[80px] pt-0.5 shrink-0">{e.time}</span>
-                <div className={`w-1 rounded-full self-stretch ${eventColors[e.color].split(" ")[0]}`} />
+                <div className={`w-1 rounded-full self-stretch ${eventBar[e.color]}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-emerald-950">{e.title}</p>
                   <p className="text-[11px] text-slate-500 mt-0.5">{e.sub}</p>
@@ -123,7 +125,6 @@ export default function SchedulePage() {
             ))}
           </div>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

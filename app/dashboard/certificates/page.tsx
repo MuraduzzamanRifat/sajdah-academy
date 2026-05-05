@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Award, Download, Lock, CheckCircle2, Share2 } from "lucide-react";
-import { asset } from "../../lib/asset";
-import DashboardShell from "../_components/DashboardShell";
+import MedallionMark from "../../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "Certificates — সার্টিফিকেট",
@@ -47,9 +46,7 @@ const upcoming = [
 
 export default function CertificatesPage() {
   return (
-    <DashboardShell title="সার্টিফিকেট · Certificates">
-      <div className="space-y-5">
-        {/* Earned */}
+    <div className="space-y-5">
         <section>
           <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">
             Earned · অর্জিত
@@ -61,14 +58,7 @@ export default function CertificatesPage() {
                 className="bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900 text-white rounded-2xl p-6 relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-40 h-40 opacity-10">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={asset("/medallion-128.webp")}
-                    alt=""
-                    width={160}
-                    height={160}
-                    className="w-full h-full object-contain"
-                  />
+                  <MedallionMark size={160} className="w-full h-full" />
                 </div>
                 <div className="relative">
                   <Award className="w-12 h-12 text-amber-400 mb-4" />
@@ -124,8 +114,6 @@ export default function CertificatesPage() {
             ))}
           </div>
         </section>
-
-        {/* In progress */}
         <section>
           <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">
             In Progress · চলমান
@@ -167,8 +155,6 @@ export default function CertificatesPage() {
             </div>
           </article>
         </section>
-
-        {/* Upcoming */}
         <section>
           <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">
             Upcoming · আসন্ন
@@ -187,7 +173,6 @@ export default function CertificatesPage() {
             ))}
           </div>
         </section>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

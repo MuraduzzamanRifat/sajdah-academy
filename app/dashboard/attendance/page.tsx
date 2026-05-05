@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { CheckCircle2, XCircle, AlertCircle, Calendar } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Attendance — উপস্থিতি",
@@ -39,9 +38,7 @@ export default function AttendancePage() {
   const requirementMet = percent >= 80;
 
   return (
-    <DashboardShell title="উপস্থিতি · Attendance">
-      <div className="space-y-4">
-        {/* Hero stat */}
+    <div className="space-y-4">
         <div className={`rounded-2xl p-6 ${requirementMet ? "bg-emerald-900" : "bg-amber-700"} text-white`}>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
@@ -60,18 +57,16 @@ export default function AttendancePage() {
               <p className="text-xs text-emerald-200">সার্টিফিকেটের জন্য প্রয়োজন: ৮০%+</p>
             </div>
           </div>
-          <div className="h-2 bg-emerald-950/50 rounded-full mt-4 overflow-hidden">
-            <div
-              className="h-full bg-amber-400 rounded-full transition-all"
-              style={{ width: `${percent}%` }}
-            />
-            <div className="absolute" style={{ left: "80%" }}>
-              <div className="w-0.5 h-2 bg-white" />
+          <div className="relative mt-4">
+            <div className="h-2 bg-emerald-950/50 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-amber-400 rounded-full transition-all"
+                style={{ width: `${percent}%` }}
+              />
             </div>
+            <div className="absolute top-0 w-0.5 h-2 bg-white" style={{ left: "80%" }} />
           </div>
         </div>
-
-        {/* Per-module breakdown */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <h3 className="font-bold text-emerald-950 mb-4">মডিউল অনুযায়ী</h3>
           <div className="space-y-3">
@@ -95,8 +90,6 @@ export default function AttendancePage() {
             ))}
           </div>
         </div>
-
-        {/* Detailed log */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">
@@ -128,8 +121,6 @@ export default function AttendancePage() {
             })}
           </div>
         </div>
-
-        {/* Absence request form */}
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
           <h3 className="font-bold text-emerald-950 mb-2">আগাম অনুপস্থিতি জানাতে চান?</h3>
           <p className="text-sm text-emerald-800 mb-4 leading-relaxed">
@@ -144,7 +135,6 @@ export default function AttendancePage() {
             অনুপস্থিতির অনুরোধ পাঠান (Preview)
           </button>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

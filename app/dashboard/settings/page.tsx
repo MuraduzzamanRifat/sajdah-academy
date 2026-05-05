@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Globe, Bell, Eye, Trash2, Moon } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Settings — সেটিংস",
@@ -50,12 +49,11 @@ const sections = [
 
 export default function SettingsPage() {
   return (
-    <DashboardShell title="সেটিংস · Settings">
-      <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 max-w-3xl">
         {sections.map((s) => {
           const I = s.icon;
           return (
-            <div key={s.title} className="bg-white border border-slate-200 rounded-2xl p-5">
+    <div key={s.title} className="bg-white border border-slate-200 rounded-2xl p-5">
               <h3 className="font-bold text-emerald-950 mb-4 flex items-center gap-2">
                 <I className="w-4 h-4 text-amber-600" />
                 {s.title}
@@ -71,8 +69,6 @@ export default function SettingsPage() {
             </div>
           );
         })}
-
-        {/* Danger zone */}
         <div className="bg-rose-50 border border-rose-300 rounded-2xl p-5">
           <h3 className="font-bold text-rose-900 mb-4 flex items-center gap-2">
             <Trash2 className="w-4 h-4" />
@@ -105,8 +101,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }
 

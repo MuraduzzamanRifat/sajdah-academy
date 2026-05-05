@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, MapPin, ChevronRight, Heart, Moon, BookOpen, AlertCircle, Megaphone } from "lucide-react";
-import { asset } from "../lib/asset";
-import DashboardShell from "./_components/DashboardShell";
+import MedallionMark from "../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "Student Portal — Preview",
@@ -70,9 +69,7 @@ const scheduleColor: Record<string, string> = {
 
 export default function DashboardPage() {
   return (
-    <DashboardShell title="ড্যাশবোর্ড">
-      <div className="space-y-4">
-        {/* Profile banner */}
+    <div className="space-y-4">
         <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-base font-bold shrink-0">
             MI
@@ -99,8 +96,6 @@ export default function DashboardPage() {
             <Stat value="৯৩%" label="উপস্থিতি" />
           </div>
         </div>
-
-        {/* Outstanding fee alert */}
         <Link
           href="/dashboard/payments/"
           className="block bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors"
@@ -112,16 +107,12 @@ export default function DashboardPage() {
           </div>
           <ChevronRight className="w-4 h-4 text-amber-600 shrink-0" />
         </Link>
-
-        {/* Quick stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <MiniStat value="৮২%" label="সামগ্রিক প্রগ্রেস" />
           <MiniStat value="৩" label="এই সপ্তাহের অ্যাসাইনমেন্ট" color="text-amber-700" />
           <MiniStat value="১২" label="দিন একটানা তাহাজ্জুদ" color="text-emerald-700" />
           <MiniStat value="৯৩%" label="উপস্থিতি" color="text-emerald-700" />
         </div>
-
-        {/* Spiritual tracker widget */}
         <div className="bg-emerald-900 text-white rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold flex items-center gap-2">
@@ -171,18 +162,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Two columns */}
         <div className="grid lg:grid-cols-2 gap-4">
-          {/* Modules */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
             <SectionHeader title="আমার মডিউল" link="/dashboard/modules/" linkText="সব দেখুন" />
             <div className="space-y-3">
               {modules.map((m) => (
                 <div key={m.title} className="flex items-center gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                   <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={asset("/medallion-128.webp")} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                    <MedallionMark size={28} className="w-7 h-7" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-emerald-950 leading-tight">{m.title}</p>
@@ -202,7 +189,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {/* Assignments */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5">
               <SectionHeader title="আসন্ন অ্যাসাইনমেন্ট" link="/dashboard/assignments/" linkText="সব" />
               <div className="space-y-2.5">
@@ -220,8 +206,6 @@ export default function DashboardPage() {
                 ))}
               </div>
             </div>
-
-            {/* Today's schedule */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5">
               <SectionHeader title="আজকের রুটিন" link="/dashboard/schedule/" linkText="ক্যালেন্ডার" />
               <div className="space-y-2.5">
@@ -239,8 +223,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Announcements + Recent grades */}
         <div className="grid lg:grid-cols-2 gap-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-5">
             <SectionHeader title="ঘোষণা" link="/dashboard/announcements/" linkText="সব ঘোষণা" />
@@ -266,8 +248,7 @@ export default function DashboardPage() {
               {grades.map((g, i) => (
                 <div key={i} className="flex items-center gap-2.5">
                   <div className="w-5 h-5 rounded bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={asset("/medallion-128.webp")} alt="" width={16} height={16} className="w-4 h-4 object-contain" />
+                    <MedallionMark size={16} className="w-4 h-4" />
                   </div>
                   <span className="flex-1 text-xs text-slate-600 truncate">{g.course}</span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
@@ -279,11 +260,10 @@ export default function DashboardPage() {
                   <span className="text-xs font-mono font-medium text-emerald-950 min-w-[36px] text-right">{g.score}</span>
                 </div>
               ))}
-            </div>
           </div>
         </div>
       </div>
-    </DashboardShell>
+    </div>
   );
 }
 

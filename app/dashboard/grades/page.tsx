@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { TrendingUp, Award } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Grades — মূল্যায়ন",
@@ -32,9 +31,7 @@ const gradeColor: Record<string, string> = {
 
 export default function GradesPage() {
   return (
-    <DashboardShell title="মূল্যায়ন · Grades">
-      <div className="space-y-4">
-        {/* Overall */}
+    <div className="space-y-4">
         <div className="grid sm:grid-cols-3 gap-3">
           <div className="bg-emerald-900 text-white rounded-2xl p-5">
             <Award className="w-6 h-6 text-amber-400 mb-3" />
@@ -54,8 +51,6 @@ export default function GradesPage() {
             <p className="text-xs text-slate-500 mt-2">৪০ জনের মধ্যে</p>
           </div>
         </div>
-
-        {/* Per-module breakdown */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 overflow-hidden">
           <h3 className="font-bold text-emerald-950 mb-4">মডিউল অনুযায়ী বিস্তারিত</h3>
           <div className="overflow-x-auto -mx-5 px-5">
@@ -98,8 +93,6 @@ export default function GradesPage() {
             </table>
           </div>
         </div>
-
-        {/* Strengths */}
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
             <h3 className="font-bold text-emerald-950 mb-2">আপনার শক্তি</h3>
@@ -117,7 +110,6 @@ export default function GradesPage() {
             </ul>
           </div>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

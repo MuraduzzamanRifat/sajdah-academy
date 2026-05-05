@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Megaphone, Pin, Calendar, AlertCircle, Heart, Award } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Announcements — ঘোষণা",
@@ -77,9 +76,7 @@ export default function AnnouncementsPage() {
   const others = announcements.filter((a) => !a.pinned);
 
   return (
-    <DashboardShell title="ঘোষণা · Announcements">
-      <div className="space-y-4">
-        {/* Pinned */}
+    <div className="space-y-4">
         {pinned.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3 flex items-center gap-1.5">
@@ -92,8 +89,6 @@ export default function AnnouncementsPage() {
             </div>
           </div>
         )}
-
-        {/* Recent */}
         <div>
           <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Recent</h3>
           <div className="space-y-3">
@@ -102,8 +97,7 @@ export default function AnnouncementsPage() {
             ))}
           </div>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }
 

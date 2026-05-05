@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Upload, CheckCircle2, Clock, FileText } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Assignments — অ্যাসাইনমেন্ট",
@@ -63,12 +62,11 @@ const statusConfig: Record<string, { color: string; label: string; icon: React.R
 
 export default function AssignmentsPage() {
   return (
-    <DashboardShell title="অ্যাসাইনমেন্ট · Assignments">
-      <div className="space-y-3">
+    <div className="space-y-3">
         {assignments.map((a, i) => {
           const cfg = statusConfig[a.status];
           return (
-            <article key={i} className="bg-white border border-slate-200 rounded-2xl p-5">
+    <article key={i} className="bg-white border border-slate-200 rounded-2xl p-5">
               <div className="flex items-start gap-4">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${cfg.color}`}>
                   {cfg.icon}
@@ -120,7 +118,6 @@ export default function AssignmentsPage() {
             </article>
           );
         })}
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

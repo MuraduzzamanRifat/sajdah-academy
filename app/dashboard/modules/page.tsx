@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Play, FileText, ChevronRight } from "lucide-react";
-import { asset } from "../../lib/asset";
 import { modules } from "../../data/modules";
-import DashboardShell from "../_components/DashboardShell";
+import MedallionMark from "../../components/MedallionMark";
 
 export const metadata: Metadata = {
   title: "My Modules — আমার মডিউল",
@@ -28,17 +27,15 @@ const enrolledProgress: Record<string, number> = {
 
 export default function MyModulesPage() {
   return (
-    <DashboardShell title="আমার মডিউল · My Modules">
-      <div className="space-y-3">
+    <div className="space-y-3">
         {modules.map((m) => {
           const progress = enrolledProgress[m.slug] ?? 0;
           const status =
             progress === 100 ? "complete" : progress === 0 ? "locked" : progress < 40 ? "behind" : "active";
           return (
-            <article key={m.slug} className="bg-white border border-slate-200 rounded-2xl p-5 flex items-start gap-4">
+    <article key={m.slug} className="bg-white border border-slate-200 rounded-2xl p-5 flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={asset("/medallion-128.webp")} alt="" width={36} height={36} className="w-9 h-9 object-contain" />
+                <MedallionMark size={36} className="w-9 h-9" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1.5">
@@ -92,7 +89,6 @@ export default function MyModulesPage() {
             </article>
           );
         })}
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

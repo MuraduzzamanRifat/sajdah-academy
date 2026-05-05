@@ -15,19 +15,7 @@ import {
   Compass,
 } from "lucide-react";
 import { Reveal } from "./Reveal";
-import { asset } from "../lib/asset";
-
-/* eslint-disable-next-line @next/next/no-img-element */
-const MedallionMark = () => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img
-    src={asset("/medallion-128.webp")}
-    alt=""
-    width={24}
-    height={24}
-    className="w-6 h-6 object-contain"
-  />
-);
+import MedallionMark from "./MedallionMark";
 
 const courseOutline = [
   {

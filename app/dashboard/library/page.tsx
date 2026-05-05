@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { FileText, Play, BookOpen, Download, Headphones, Video } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "Library — রিসোর্স",
@@ -94,9 +93,7 @@ const typeConfig: Record<string, { icon: React.ReactNode; color: string; label: 
 
 export default function LibraryPage() {
   return (
-    <DashboardShell title="রিসোর্স · Library">
-      <div className="space-y-4">
-        {/* Stats */}
+    <div className="space-y-4">
         <div className="grid grid-cols-4 gap-3">
           {[
             { count: "২৪", label: "ক্লাস নোট", color: "blue" },
@@ -116,8 +113,6 @@ export default function LibraryPage() {
             </div>
           ))}
         </div>
-
-        {/* Tab bar */}
         <div className="bg-white border border-slate-200 rounded-xl p-1 flex gap-1 overflow-x-auto">
           {tabs.map((t, i) => (
             <button
@@ -133,8 +128,6 @@ export default function LibraryPage() {
             </button>
           ))}
         </div>
-
-        {/* Resources grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {resources.map((r, i) => {
             const cfg = typeConfig[r.type];
@@ -175,7 +168,6 @@ export default function LibraryPage() {
             );
           })}
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }

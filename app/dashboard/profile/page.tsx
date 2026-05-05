@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Camera, Lock } from "lucide-react";
-import DashboardShell from "../_components/DashboardShell";
 
 export const metadata: Metadata = {
   title: "My Profile — আমার প্রোফাইল",
@@ -13,9 +12,7 @@ const inputBase =
 
 export default function ProfilePage() {
   return (
-    <DashboardShell title="আমার প্রোফাইল · My Profile">
-      <div className="space-y-4 max-w-3xl">
-        {/* Avatar + identity */}
+    <div className="space-y-4 max-w-3xl">
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center gap-5">
             <div className="relative shrink-0">
@@ -47,8 +44,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-
-        {/* Personal info */}
         <FormSection title="ব্যক্তিগত তথ্য · Personal Info">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="পূর্ণ নাম" defaultValue="Muhammad Ibrahim Hossain" />
@@ -57,8 +52,6 @@ export default function ProfilePage() {
             <Field label="জন্মতারিখ" type="date" defaultValue="2000-03-15" />
           </div>
         </FormSection>
-
-        {/* Contact */}
         <FormSection title="যোগাযোগ · Contact">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="ইমেইল" type="email" defaultValue="ibrahim@sajdah-alumni.org" />
@@ -75,16 +68,12 @@ export default function ProfilePage() {
             />
           </div>
         </FormSection>
-
-        {/* Emergency contact */}
         <FormSection title="জরুরি যোগাযোগ · Emergency Contact">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="নাম" defaultValue="Abdul Karim Hossain (পিতা)" />
             <Field label="ফোন" type="tel" defaultValue="+880 18 0010 9876" />
           </div>
         </FormSection>
-
-        {/* Security */}
         <FormSection title="নিরাপত্তা · Security" icon={<Lock className="w-4 h-4" />}>
           <div className="space-y-3">
             <button
@@ -119,8 +108,6 @@ export default function ProfilePage() {
             </button>
           </div>
         </FormSection>
-
-        {/* Save bar */}
         <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
           <p className="text-xs text-slate-500">পরিবর্তন জমা দেওয়ার আগে সব তথ্য যাচাই করে নিন।</p>
           <div className="flex gap-2 shrink-0">
@@ -139,8 +126,7 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-      </div>
-    </DashboardShell>
+    </div>
   );
 }
 
@@ -176,11 +162,7 @@ function Field({
   return (
     <div>
       <label className="block text-xs font-medium text-slate-700 mb-1.5">{label}</label>
-      <input
-        type={type}
-        defaultValue={defaultValue}
-        className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm"
-      />
+      <input type={type} defaultValue={defaultValue} className={inputBase} />
     </div>
   );
 }
