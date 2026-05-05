@@ -27,9 +27,9 @@ const sitemap = [
     titleBn: "রিসোর্স",
     links: [
       { label: "Blog · Articles", href: "/blog/" },
+      { label: "Student Portal Preview", href: "/dashboard/" },
       { label: "Support Us · Sadaqah", href: "/donate/" },
       { label: "Privacy Policy", href: "/privacy/" },
-      { label: "Terms", href: "/privacy/#terms" },
     ],
   },
   {
