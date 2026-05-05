@@ -1,9 +1,17 @@
 import path from "node:path";
 
+/* The Vercel Supabase Marketplace integration injects SUPABASE_URL (no
+   NEXT_PUBLIC_ prefix), but the JS SDK needs the URL in the browser bundle.
+   Mirror it at build time so client components don't crash. */
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: true,
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+  },
   outputFileTracingRoot: path.resolve("./"),
   compress: true,
   poweredByHeader: false,

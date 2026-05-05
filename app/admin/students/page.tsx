@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Plus, Filter, Download, MoreHorizontal, Mail, Phone, Search } from "lucide-react";
+import { Plus, Filter, Download, MoreHorizontal, Mail, Phone, Search, AlertCircle } from "lucide-react";
+import { createClient } from "../../../lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Admin · Students",
@@ -7,43 +8,59 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const students = [
-  { name: "Muhammad Ibrahim", id: "SA-2026-0418", batch: "ব্যাচ-৪", phase: "Foundation", phone: "+880 17 4288 6543", email: "ibrahim@…", status: "active", progress: 72, fee: "✓ পরিশোধিত", joined: "১২ এপ্রিল ২০২৬" },
-  { name: "Abdul Hannan", id: "SA-2026-0419", batch: "ব্যাচ-৪", phase: "Foundation", phone: "+880 18 9712 0034", email: "hannan@…", status: "active", progress: 68, fee: "✓ পরিশোধিত", joined: "১২ এপ্রিল ২০২৬" },
-  { name: "Tariq Aziz", id: "SA-2026-0420", batch: "ব্যাচ-৪", phase: "Foundation", phone: "+880 19 1122 3344", email: "tariq@…", status: "pending", progress: 0, fee: "অপেক্ষমাণ", joined: "৩ মে ২০২৬" },
-  { name: "Fardin Hossain", id: "SA-2026-0421", batch: "ব্যাচ-৪", phase: "Foundation", phone: "+880 16 5544 9988", email: "fardin@…", status: "pending", progress: 0, fee: "অপেক্ষমাণ", joined: "৩ মে ২০২৬" },
-  { name: "Sadman Khan", id: "SA-2025-0312", batch: "ব্যাচ-৩", phase: "Understanding", phone: "+880 17 9988 1122", email: "sadman@…", status: "active", progress: 88, fee: "✓ পরিশোধিত", joined: "৫ জানু ২০২৬" },
-  { name: "Yousuf Reza", id: "SA-2025-0314", batch: "ব্যাচ-৩", phase: "Understanding", phone: "+880 18 3344 5566", email: "yousuf@…", status: "inactive", progress: 24, fee: "বকেয়া ৳৩০,০০০", joined: "৫ জানু ২০২৬" },
-  { name: "Imran Khalil", id: "SA-2025-0301", batch: "ব্যাচ-৩", phase: "Understanding", phone: "+880 19 2233 4455", email: "imran@…", status: "active", progress: 92, fee: "✓ পরিশোধিত", joined: "৫ জানু ২০২৬" },
-  { name: "Mahdi Karim", id: "SA-2024-0210", batch: "ব্যাচ-২", phase: "Transformation", phone: "+880 17 8877 6655", email: "mahdi@…", status: "active", progress: 100, fee: "✓ সম্পন্ন", joined: "১০ সেপ্ট ২০২৫" },
-];
-
-const tabs = [
-  { key: "all", label: "সব ছাত্র", count: 42 },
-  { key: "active", label: "সক্রিয়", count: 35 },
-  { key: "pending", label: "অপেক্ষমাণ", count: 4 },
-  { key: "inactive", label: "নিষ্ক্রিয়", count: 3 },
-];
+export const dynamic = "force-dynamic"; // always fresh — admin tables don't cache
 
 const statusBadge: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700",
   pending: "bg-amber-100 text-amber-700",
   inactive: "bg-slate-100 text-slate-500",
+  graduated: "bg-blue-100 text-blue-700",
 };
 const statusLabel: Record<string, string> = {
   active: "সক্রিয়",
   pending: "অপেক্ষমাণ",
   inactive: "নিষ্ক্রিয়",
+  graduated: "সমাপ্ত",
 };
 
-export default function AdminStudentsPage() {
+type StudentRow = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  full_name_bn: string | null;
+  phone: string | null;
+  student_id: string | null;
+  status: keyof typeof statusBadge;
+  joined_at: string;
+  batches: { name: string; code: string } | null;
+};
+
+export default async function AdminStudentsPage() {
+  const supabase = await createClient();
+
+  const { data: students, error, count } = await supabase
+    .from("profiles")
+    .select(
+      `id, email, full_name, full_name_bn, phone, student_id, status, joined_at,
+       batches:batch_id ( name, code )`,
+      { count: "exact" }
+    )
+    .eq("role", "student")
+    .order("joined_at", { ascending: false })
+    .limit(50);
+
+  const rows = (students ?? []) as unknown as StudentRow[];
+  const totals = await getCounts(supabase);
+
   return (
     <div className="space-y-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-lg font-bold text-emerald-950">৪২ জন ছাত্র</h2>
-            <p className="text-xs text-slate-500 mt-0.5">৪ ব্যাচ · ৩ ফেইজ · গড় ৭৩% উপস্থিতি</p>
+            <h2 className="text-lg font-bold text-emerald-950">{count ?? 0} জন ছাত্র</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {totals.active} সক্রিয় · {totals.pending} অপেক্ষমাণ · {totals.inactive} নিষ্ক্রিয়
+            </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <button type="button" className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold">
@@ -63,134 +80,124 @@ export default function AdminStudentsPage() {
             <Search className="w-3.5 h-3.5" />
             <span>নাম / ID / ফোন দিয়ে খুঁজুন...</span>
           </div>
-          <select defaultValue="all" className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs">
-            <option value="all">সব ব্যাচ</option>
-            <option>ব্যাচ-৪</option>
-            <option>ব্যাচ-৩</option>
-            <option>ব্যাচ-২</option>
-          </select>
-          <select defaultValue="all" className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs">
-            <option value="all">সব ফেইজ</option>
-            <option>Foundation</option>
-            <option>Understanding</option>
-            <option>Transformation</option>
-          </select>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <div className="border-b border-slate-200 flex">
-          {tabs.map((t, i) => (
-            <button
-              key={t.key}
-              type="button"
-              className={`px-4 py-3 text-xs font-bold border-b-2 transition-colors ${
-                i === 0
-                  ? "border-emerald-700 text-emerald-700"
-                  : "border-transparent text-slate-500 hover:text-slate-900"
-              }`}
-            >
-              {t.label}
-              <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${i === 0 ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-                {t.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200 bg-slate-50">
-                <th className="px-5 py-2.5 font-bold w-10">
-                  <input type="checkbox" className="rounded border-slate-300" />
-                </th>
-                <th className="px-3 py-2.5 font-bold">ছাত্র</th>
-                <th className="px-3 py-2.5 font-bold">ব্যাচ / ফেইজ</th>
-                <th className="px-3 py-2.5 font-bold">যোগাযোগ</th>
-                <th className="px-3 py-2.5 font-bold">প্রগ্রেস</th>
-                <th className="px-3 py-2.5 font-bold">পেমেন্ট</th>
-                <th className="px-3 py-2.5 font-bold">অবস্থা</th>
-                <th className="px-3 py-2.5 font-bold w-10"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50 last:border-0">
-                  <td className="px-5 py-3">
-                    <input type="checkbox" className="rounded border-slate-300" />
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold shrink-0">
-                        {s.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-emerald-950 leading-tight truncate">{s.name}</p>
-                        <p className="text-[10px] text-slate-500 font-mono">{s.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <p className="text-xs font-medium text-emerald-950">{s.batch}</p>
-                    <p className="text-[10px] text-slate-500">{s.phase}</p>
-                  </td>
-                  <td className="px-3 py-3">
-                    <p className="text-[11px] text-slate-700 inline-flex items-center gap-1">
-                      <Phone className="w-2.5 h-2.5" /> {s.phone}
-                    </p>
-                    <p className="text-[10px] text-slate-500 inline-flex items-center gap-1 mt-0.5">
-                      <Mail className="w-2.5 h-2.5" /> {s.email}
-                    </p>
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="flex items-center gap-2 min-w-[110px]">
-                      <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            s.progress >= 75 ? "bg-emerald-600" : s.progress >= 40 ? "bg-blue-600" : s.progress > 0 ? "bg-amber-500" : "bg-slate-300"
-                          }`}
-                          style={{ width: `${s.progress}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-mono text-slate-700 font-bold w-8 text-right">{s.progress}%</span>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-[11px] text-slate-700 whitespace-nowrap">{s.fee}</td>
-                  <td className="px-3 py-3">
-                    <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge[s.status]}`}>
-                      {statusLabel[s.status]}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <button type="button" className="p-1 text-slate-400 hover:text-slate-700" aria-label="More">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="px-5 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs">
-          <span className="text-slate-500">৮ এর মধ্যে ৮ দেখানো হচ্ছে</span>
-          <div className="flex gap-1">
-            <button type="button" className="px-3 py-1 border border-slate-200 rounded text-slate-500 hover:bg-white" disabled>
-              ‹
-            </button>
-            <button type="button" className="px-3 py-1 border border-emerald-300 bg-emerald-50 text-emerald-700 font-bold rounded">
-              ১
-            </button>
-            <button type="button" className="px-3 py-1 border border-slate-200 rounded text-slate-700 hover:bg-white">
-              ২
-            </button>
-            <button type="button" className="px-3 py-1 border border-slate-200 rounded text-slate-700 hover:bg-white">
-              ›
-            </button>
+      {error && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-rose-900">ডেটা লোড করতে সমস্যা</p>
+            <p className="text-xs text-rose-700 mt-1">{error.message}</p>
           </div>
         </div>
+      )}
+
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+        {rows.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <p className="text-sm text-slate-700 font-bold">এখনো কোনো ছাত্র নেই</p>
+            <p className="text-xs text-slate-500 mt-1">
+              ভর্তির আবেদন গ্রহণ করলে স্বয়ংক্রিয়ভাবে এখানে যুক্ত হবে।
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500 border-b border-slate-200 bg-slate-50">
+                  <th className="px-5 py-2.5 font-bold w-10">
+                    <input type="checkbox" aria-label="Select all students" className="rounded border-slate-300" />
+                  </th>
+                  <th className="px-3 py-2.5 font-bold">ছাত্র</th>
+                  <th className="px-3 py-2.5 font-bold">ব্যাচ</th>
+                  <th className="px-3 py-2.5 font-bold">যোগাযোগ</th>
+                  <th className="px-3 py-2.5 font-bold">অবস্থা</th>
+                  <th className="px-3 py-2.5 font-bold">যোগদান</th>
+                  <th className="px-3 py-2.5 font-bold w-10"><span className="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((s) => {
+                  const display = s.full_name_bn || s.full_name || s.email;
+                  const initials = (s.full_name || s.email).split(/[\s@]/).filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+                  return (
+                    <tr key={s.id} className="border-b border-slate-100 hover:bg-slate-50 last:border-0">
+                      <td className="px-5 py-3">
+                        <input type="checkbox" aria-label={`Select ${display}`} className="rounded border-slate-300" />
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {initials}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-emerald-950 leading-tight truncate">{display}</p>
+                            <p className="text-[10px] text-slate-500 font-mono">{s.student_id ?? "—"}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-xs">
+                        {s.batches ? (
+                          <>
+                            <p className="font-medium text-emerald-950">{s.batches.name}</p>
+                            <p className="text-[10px] text-slate-500">{s.batches.code}</p>
+                          </>
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">বরাদ্দ হয়নি</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <p className="text-[11px] text-slate-700 inline-flex items-center gap-1">
+                          <Mail className="w-2.5 h-2.5" /> {s.email}
+                        </p>
+                        {s.phone && (
+                          <p className="text-[10px] text-slate-500 inline-flex items-center gap-1 mt-0.5">
+                            <Phone className="w-2.5 h-2.5" /> {s.phone}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge[s.status]}`}>
+                          {statusLabel[s.status]}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3 text-[11px] text-slate-600 whitespace-nowrap">
+                        {new Date(s.joined_at).toLocaleDateString("en-GB")}
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <button type="button" className="p-1 text-slate-400 hover:text-slate-700" aria-label="More">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
+      <p className="text-xs text-emerald-700 text-center font-bold">
+        ✓ Live data from Supabase · {rows.length} of {count ?? 0} shown
+      </p>
     </div>
   );
+}
+
+async function getCounts(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const states = ["active", "pending", "inactive"] as const;
+  const out: Record<(typeof states)[number], number> = { active: 0, pending: 0, inactive: 0 };
+  await Promise.all(
+    states.map(async (s) => {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "student")
+        .eq("status", s);
+      out[s] = count ?? 0;
+    })
+  );
+  return out;
 }

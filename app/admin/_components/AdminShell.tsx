@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createClient } from "../../../lib/supabase/client";
+import SignOutButton from "../../components/SignOutButton";
 import {
   LayoutDashboard,
   Users,
@@ -99,7 +101,25 @@ const TITLES: Record<string, string> = Object.fromEntries(
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [me, setMe] = useState<{ name: string; email: string; role: string } | null>(null);
   const title = TITLES[pathname ?? "/admin/"] ?? "Admin";
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name, email, role")
+        .eq("id", user.id)
+        .single();
+      setMe({
+        name: profile?.full_name ?? user.email ?? "Admin",
+        email: profile?.email ?? user.email ?? "",
+        role: profile?.role ?? "—",
+      });
+    });
+  }, []);
 
   return (
     <main className="pt-20 pb-12 bg-slate-100 min-h-screen">
@@ -185,12 +205,15 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </nav>
             <div className="border-t border-emerald-900 p-3 flex items-center gap-2.5 shrink-0">
               <div className="w-9 h-9 rounded-full bg-amber-500 text-emerald-950 flex items-center justify-center font-bold text-xs shrink-0">
-                AD
+                {me ? me.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "··"}
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-white truncate">Admin User</p>
-                <p className="text-[11px] text-emerald-300">Super Admin</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-white truncate">{me?.name ?? "…"}</p>
+                <p className="text-[11px] text-emerald-300 capitalize">{me?.role.replace("_", " ") ?? "—"}</p>
               </div>
+              <SignOutButton
+                className="p-1.5 text-emerald-300 hover:text-amber-400 rounded shrink-0"
+              />
             </div>
           </aside>
 
