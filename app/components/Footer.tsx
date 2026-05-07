@@ -1,39 +1,46 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Tent, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { getSettingsByPrefix, pick } from "../../lib/settings";
 
-const sitemap = [
+type FooterColumn = {
+  title?: string;
+  title_bn?: string;
+  links_text?: string;
+};
+
+const DEFAULT_COLUMNS: FooterColumn[] = [
   {
     title: "Academy",
-    titleBn: "একাডেমি",
-    links: [
-      { label: "About", href: "/about/" },
-      { label: "Faculty", href: "/faculty/" },
-      { label: "Gallery", href: "/gallery/" },
-      { label: "Press & Media", href: "/press/" },
-    ],
+    title_bn: "একাডেমি",
+    links_text: "About|/about/\nFaculty|/faculty/\nGallery|/gallery/\nPress & Media|/press/",
   },
   {
     title: "Programs",
-    titleBn: "প্রোগ্রাম",
-    links: [
-      { label: "All Courses", href: "/courses/" },
-      { label: "Upcoming Batches", href: "/batches/" },
-      { label: "Routine", href: "/routine/" },
-      { label: "FAQ", href: "/faq/" },
-    ],
+    title_bn: "প্রোগ্রাম",
+    links_text: "All Courses|/courses/\nUpcoming Batches|/batches/\nRoutine|/routine/\nFAQ|/faq/",
   },
   {
     title: "Resources",
-    titleBn: "রিসোর্স",
-    links: [
-      { label: "Blog · Articles", href: "/blog/" },
-      { label: "Student Portal Preview", href: "/student-dashboard/" },
-      { label: "Support Us · Sadaqah", href: "/donate/" },
-      { label: "Privacy Policy", href: "/privacy/" },
-    ],
+    title_bn: "রিসোর্স",
+    links_text:
+      "Blog · Articles|/blog/\nStudent Portal Preview|/student-dashboard/\nSupport Us · Sadaqah|/donate/\nPrivacy Policy|/privacy/",
   },
 ];
+
+/* Each line of links_text is "Label|URL". Empty/malformed lines drop. */
+function parseLinks(text: string | undefined): { label: string; href: string }[] {
+  if (!text) return [];
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [label, href] = line.split("|").map((p) => p?.trim() ?? "");
+      return label && href ? { label, href } : null;
+    })
+    .filter((x): x is { label: string; href: string } => x !== null);
+}
 
 export default async function Footer() {
   // Footer reads identity + contact + footer-specific settings, all in
@@ -49,10 +56,19 @@ export default async function Footer() {
   const email = pick(contact, "contact.email_main", "info@sijdahacademy.com");
   const address = pick(contact, "contact.address_bn", "Dhaka, Bangladesh");
   const siteName = pick(site, "site.name", "Sajdah Academy");
+  const logoUrl = pick(site, "site.logo", "");
   const tagline = pick(footerS, "footer.tagline_bn",
     "৬ মাসের ফিজিক্যাল ইসলামিক ট্রেনিং — দেশের সেরা প্রিমিয়াম রিসোর্টে।");
   const copyright = pick(footerS, "footer.copyright_bn",
     `© ${new Date().getFullYear()} Sajdah Academy. All rights reserved.`);
+  const columns = pick<FooterColumn[]>(footerS, "footer.columns", DEFAULT_COLUMNS);
+  const broadcastTitle = pick(footerS, "footer.broadcast_title_bn", "পরবর্তী ব্যাচের আপডেট");
+  const broadcastBody = pick(
+    footerS,
+    "footer.broadcast_body_bn",
+    "নতুন ব্যাচের ঘোষণা পেতে আমাদের WhatsApp ব্রডকাস্টে যুক্ত হোন।"
+  );
+  const broadcastButton = pick(footerS, "footer.broadcast_button_bn", "Join Updates");
 
   const phoneTel = phone.replace(/[^0-9+]/g, "");
   const waNumber = whatsapp.replace(/[^0-9]/g, "");
@@ -70,7 +86,13 @@ export default async function Footer() {
         <div className="grid lg:grid-cols-12 gap-10 mb-12">
           <div className="lg:col-span-4">
             <div className="flex items-center gap-2 mb-4">
-              <Tent className="w-8 h-8 text-amber-500" />
+              {logoUrl ? (
+                <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                  <Image src={logoUrl} alt={siteName} fill sizes="40px" className="object-contain" />
+                </div>
+              ) : (
+                <Tent className="w-8 h-8 text-amber-500" />
+              )}
               <span className="text-2xl font-bold text-white">{siteName}</span>
             </div>
             <p className="text-emerald-400 mb-6 max-w-sm leading-relaxed whitespace-pre-line">
@@ -98,24 +120,27 @@ export default async function Footer() {
           </div>
 
           <div className="lg:col-span-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {sitemap.map((col) => (
-              <div key={col.title}>
-                <h4 className="text-white font-bold mb-1 text-base">{col.title}</h4>
-                <p className="text-emerald-500 text-xs mb-4">{col.titleBn}</p>
-                <ul className="space-y-2.5">
-                  {col.links.map((l) => (
-                    <li key={l.href}>
-                      <Link
-                        href={l.href}
-                        className="text-emerald-300 hover:text-amber-400 transition-colors text-sm"
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {columns.map((col, i) => {
+              const links = parseLinks(col.links_text);
+              return (
+                <div key={col.title ?? i}>
+                  {col.title && <h4 className="text-white font-bold mb-1 text-base">{col.title}</h4>}
+                  {col.title_bn && <p className="text-emerald-500 text-xs mb-4">{col.title_bn}</p>}
+                  <ul className="space-y-2.5">
+                    {links.map((l) => (
+                      <li key={l.href}>
+                        <Link
+                          href={l.href}
+                          className="text-emerald-300 hover:text-amber-400 transition-colors text-sm"
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
             <div>
               <h4 className="text-white font-bold mb-1 text-base">Get in Touch</h4>
               <p className="text-emerald-500 text-xs mb-4">যোগাযোগ</p>
@@ -132,16 +157,14 @@ export default async function Footer() {
           </div>
 
           <div className="lg:col-span-2">
-            <h4 className="text-white font-bold mb-4 text-base">পরবর্তী ব্যাচের আপডেট</h4>
-            <p className="text-emerald-400 text-sm mb-4 leading-relaxed">
-              নতুন ব্যাচের ঘোষণা পেতে আমাদের WhatsApp ব্রডকাস্টে যুক্ত হোন।
-            </p>
+            <h4 className="text-white font-bold mb-4 text-base">{broadcastTitle}</h4>
+            <p className="text-emerald-400 text-sm mb-4 leading-relaxed">{broadcastBody}</p>
             <a
               href={`https://wa.me/${waNumber}`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-lg transition-colors text-sm"
             >
               <MessageCircle className="w-4 h-4" />
-              Join Updates
+              {broadcastButton}
             </a>
           </div>
         </div>

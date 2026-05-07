@@ -2,20 +2,29 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, Tent } from "lucide-react";
 
-const NAV = [
-  { href: "/about/", label: "About", labelBn: "পরিচিতি" },
-  { href: "/courses/", label: "Courses", labelBn: "কোর্সসমূহ" },
-  { href: "/batches/", label: "Batches", labelBn: "ব্যাচসমূহ" },
-  { href: "/faculty/", label: "Faculty", labelBn: "শিক্ষকমণ্ডলী" },
-  { href: "/blog/", label: "Blog", labelBn: "আর্টিকেল" },
-  { href: "/faq/", label: "FAQ", labelBn: "জিজ্ঞাসা" },
-  { href: "/contact/", label: "Contact", labelBn: "যোগাযোগ" },
-];
+export type NavItem = {
+  href: string;
+  label: string;
+  label_bn: string;
+};
 
-export default function Navbar() {
+export default function Navbar({
+  items,
+  ctaLabel,
+  ctaHref,
+  siteName,
+  logoUrl,
+}: {
+  items: NavItem[];
+  ctaLabel: string;
+  ctaHref: string;
+  siteName: string;
+  logoUrl?: string;
+}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -45,14 +54,20 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-4">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className={`p-2 rounded-lg ${logoIconClass}`}>
-              <Tent className="w-6 h-6" />
-            </div>
-            <span className={`text-xl font-bold ${logoTextClass}`}>Sajdah Academy</span>
+            {logoUrl ? (
+              <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                <Image src={logoUrl} alt={siteName} fill sizes="40px" className="object-contain" />
+              </div>
+            ) : (
+              <div className={`p-2 rounded-lg ${logoIconClass}`}>
+                <Tent className="w-6 h-6" />
+              </div>
+            )}
+            <span className={`text-xl font-bold ${logoTextClass}`}>{siteName}</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-6">
-            {NAV.map((item) => {
+            {items.map((item) => {
               const active = pathname === item.href;
               return (
                 <Link
@@ -67,10 +82,10 @@ export default function Navbar() {
               );
             })}
             <Link
-              href="/enroll/"
+              href={ctaHref}
               className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold text-sm rounded-lg transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/60 shrink-0"
             >
-              Enroll Now
+              {ctaLabel}
             </Link>
           </div>
 
@@ -88,7 +103,7 @@ export default function Navbar() {
 
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg py-4 px-4 flex flex-col gap-2 max-h-[calc(100vh-80px)] overflow-y-auto">
-          {NAV.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -96,15 +111,15 @@ export default function Navbar() {
               className="text-slate-700 font-medium p-3 hover:bg-emerald-50 rounded-lg min-h-[44px] flex items-center justify-between"
             >
               <span>{item.label}</span>
-              <span className="text-xs text-slate-400">{item.labelBn}</span>
+              <span className="text-xs text-slate-400">{item.label_bn}</span>
             </Link>
           ))}
           <Link
-            href="/enroll/"
+            href={ctaHref}
             onClick={() => setIsMobileMenuOpen(false)}
             className="text-center p-3 bg-amber-500 text-emerald-950 font-bold rounded-lg mt-2"
           >
-            Enroll Now · এখনই রেজিস্টার করুন
+            {ctaLabel}
           </Link>
         </div>
       )}

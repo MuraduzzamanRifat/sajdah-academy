@@ -4,7 +4,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, Smartphone, CheckCircle } from "lucide-react";
 
-export default function Registration() {
+export default function Registration({
+  title = "অনলাইন রেজিস্ট্রেশন",
+  subtitle = "আপনার সিট বুকিং করতে নিচের ফর্মটি পূরণ করুন এবং পেমেন্ট সম্পন্ন করুন।",
+}: {
+  title?: string;
+  subtitle?: string;
+}) {
   const [step, setStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("bkash");
 
@@ -22,12 +28,8 @@ export default function Registration() {
       <div aria-hidden className="ambient-orbs orbs-dark" />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            অনলাইন রেজিস্ট্রেশন
-          </h2>
-          <p className="text-emerald-200">
-            আপনার সিট বুকিং করতে নিচের ফর্মটি পূরণ করুন এবং পেমেন্ট সম্পন্ন করুন।
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+          <p className="text-emerald-200">{subtitle}</p>
         </div>
 
         <div className="glass-light text-slate-800 rounded-2xl overflow-hidden">

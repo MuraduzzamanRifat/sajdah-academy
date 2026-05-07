@@ -51,6 +51,13 @@ export default async function Home() {
   const testimonialsTitle = pick(settings, "home.testimonials.title_bn", "ছাত্রদের অভিজ্ঞতা");
   const testimonialItems = pick<Testimonial[]>(settings, "home.testimonials.items", []);
 
+  const regTitle = pick(settings, "home.registration.title_bn", "অনলাইন রেজিস্ট্রেশন");
+  const regSubtitle = pick(
+    settings,
+    "home.registration.subtitle_bn",
+    "আপনার সিট বুকিং করতে নিচের ফর্মটি পূরণ করুন এবং পেমেন্ট সম্পন্ন করুন।"
+  );
+
   return (
     <main>
       <Hero texts={heroTexts} />
@@ -68,7 +75,7 @@ export default async function Home() {
       <CourseOutline />
       <HomeTestimonials title={testimonialsTitle} items={testimonialItems} />
       <SectionBlend from="emerald-50" to="emerald-900" />
-      <Registration />
+      <Registration title={regTitle} subtitle={regSubtitle} />
     </main>
   );
 }

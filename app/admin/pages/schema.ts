@@ -149,6 +149,13 @@ export const PAGE_DEFS: PageDef[] = [
           { key: "home.cta.button_bn", label: "বাটন লেবেল", kind: "string" },
         ],
       },
+      {
+        title: "Registration সেকশন (homepage শেষ ব্লক)",
+        fields: [
+          { key: "home.registration.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "home.registration.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+        ],
+      },
     ],
   },
   {
@@ -267,10 +274,11 @@ export const PAGE_DEFS: PageDef[] = [
   },
   {
     slug: "site",
-    label: "সাইট পরিচয়",
-    labelEn: "Site Identity",
+    label: "সাইট পরিচয় ও Nav/Footer",
+    labelEn: "Site / Nav / Footer",
     publicPath: "/",
-    description: "সাইট-ব্যাপী মেটাডেটা, লোগো ও ব্র্যান্ডিং।",
+    description:
+      "সাইট-ব্যাপী মেটাডেটা, লোগো, navbar links, footer columns — সব পেজের chrome এখান থেকে নিয়ন্ত্রিত।",
     groups: [
       {
         title: "Identity",
@@ -285,21 +293,44 @@ export const PAGE_DEFS: PageDef[] = [
         ],
       },
       {
+        title: "Top Navigation (সব পেজের navbar)",
+        fields: [
+          {
+            key: "nav.items",
+            label: "Navbar links",
+            kind: "list",
+            itemLabel: "Link",
+            itemFields: [
+              { key: "label", label: "Label (English)", kind: "string", placeholder: "About" },
+              { key: "label_bn", label: "Label (Bangla)", kind: "string", placeholder: "পরিচিতি" },
+              { key: "href", label: "Path (URL)", kind: "string", placeholder: "/about/" },
+            ],
+            hint: "ক্রম পরিবর্তন করতে item-এর up/down বাটন ব্যবহার করুন।",
+          },
+          { key: "nav.cta_label", label: "CTA বাটন লেবেল", kind: "string" },
+          { key: "nav.cta_href", label: "CTA বাটন লিংক", kind: "string" },
+        ],
+      },
+      {
         title: "Footer",
         fields: [
           { key: "footer.tagline_bn", label: "Footer ট্যাগলাইন", kind: "string" },
           { key: "footer.copyright_bn", label: "Copyright টেক্সট", kind: "string" },
           {
-            key: "footer.links",
+            key: "footer.columns",
             label: "Footer link columns",
             kind: "list",
             itemLabel: "Column",
             itemFields: [
-              { key: "title_bn", label: "Column শিরোনাম", kind: "string" },
-              { key: "links_json", label: "Links (এক লাইনে: লেবেল|URL)", kind: "text", rows: 5 },
+              { key: "title", label: "Column শিরোনাম (English)", kind: "string", placeholder: "Academy" },
+              { key: "title_bn", label: "Column শিরোনাম (Bangla)", kind: "string", placeholder: "একাডেমি" },
+              { key: "links_text", label: "Links — প্রতি লাইনে: লেবেল|URL", kind: "text", rows: 5 },
             ],
-            hint: 'প্রতি লাইনে একটি লিংক, যেমন: "ভর্তি|/enroll/"',
+            hint: 'উদাহরণ: "About|/about/" — প্রতি লাইনে একটি লিংক।',
           },
+          { key: "footer.broadcast_title_bn", label: "WhatsApp ব্রডকাস্ট কার্ড শিরোনাম", kind: "string" },
+          { key: "footer.broadcast_body_bn", label: "WhatsApp কার্ড টেক্সট", kind: "text", rows: 2 },
+          { key: "footer.broadcast_button_bn", label: "WhatsApp কার্ড বাটন", kind: "string" },
         ],
       },
     ],
