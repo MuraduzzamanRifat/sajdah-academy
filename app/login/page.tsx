@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import { safeNext } from "../../lib/safe-redirect";
+import { isAdminRole } from "../../lib/roles";
 import LoginForm from "./LoginForm";
 import MedallionMark from "../components/MedallionMark";
 
@@ -22,7 +23,17 @@ export default async function LoginPage({
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(safeNext(sp.next));
+    // Already signed in — bounce by role (admin → /admin/, student → /student-dashboard/)
+    // unless an explicit `?next=` was passed (e.g. middleware sent them here)
+    if (sp.next) {
+      redirect(safeNext(sp.next));
+    }
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    redirect(isAdminRole(profile?.role) ? "/admin/" : "/student-dashboard/");
   }
 
   return (

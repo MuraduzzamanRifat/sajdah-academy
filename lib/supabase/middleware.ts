@@ -30,6 +30,13 @@ function planRouting(request: NextRequest): Plan {
 
   // api.*  →  rewrite "/foo" to internal "/admin/foo"
   if (isAdminHost) {
+    // /student-dashboard/* on the admin host → bounce to the main domain
+    // (admin host is for admins; student dashboard belongs on sijdahacademy.com)
+    if (path.startsWith("/student-dashboard")) {
+      const target = new URL(url.toString());
+      target.host = host.replace(/^api\./i, "");
+      return { kind: "redirect", target };
+    }
     const passThrough =
       path.startsWith("/admin") ||
       path.startsWith("/login") ||

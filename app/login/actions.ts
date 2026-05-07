@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
 import { safeNext } from "../../lib/safe-redirect";
+import { isAdminRole } from "../../lib/roles";
 
 /* Server actions return AuthState only on FAILURE — success paths
    throw NEXT_REDIRECT via redirect(). useActionState handles the
@@ -18,12 +19,23 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   if (!email || !password) return { error: "ইমেইল ও পাসওয়ার্ড দুটোই দিন।" };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) return { error: error.message };
 
   revalidatePath("/", "layout");
-  redirect(safeNext(next));
+
+  // Honor explicit ?next= if provided (e.g. middleware redirected here);
+  // otherwise route by role so admins don't land on the student dashboard.
+  if (next) {
+    redirect(safeNext(next));
+  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .single();
+  redirect(isAdminRole(profile?.role) ? "/admin/" : "/student-dashboard/");
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
