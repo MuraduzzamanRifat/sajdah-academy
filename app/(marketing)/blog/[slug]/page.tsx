@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "../../../../lib/supabase/server";
 
 export const revalidate = 60;
@@ -81,30 +80,19 @@ export default async function PostPage({ params }: Params) {
   const post = p as PostDetail;
   const related = (relatedRaw ?? []) as Pick<PostDetail, "slug" | "title" | "category" | "excerpt">[];
 
-  /* Body is HTML from the rich-text editor (Tiptap). Legacy posts may
-     still be plain text with \n\n paragraph breaks — detect and convert.
-     Sanitize either way before injecting into the DOM. */
+  /* Body is HTML from the rich-text editor (Tiptap), already
+     sanitized at write time in app/admin/blog/actions.ts via
+     DOMPurify before insert. Legacy posts may still be plain text
+     with \n\n paragraph breaks — detect and convert via escapeHtml.
+     Render-time isomorphic-dompurify was crashing the page on
+     Vercel (jsdom failing to load in production runtime). */
   const isHtml = /<\/?[a-z][\s\S]*?>/i.test(post.body);
-  const rawHtml = isHtml
+  const sanitizedBody = isHtml
     ? post.body
     : post.body
         .split(/\n\n+/)
         .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
         .join("");
-
-  const sanitizedBody = DOMPurify.sanitize(rawHtml, {
-    ADD_TAGS: ["iframe"],
-    ADD_ATTR: [
-      "allow",
-      "allowfullscreen",
-      "frameborder",
-      "scrolling",
-      "target",
-      "rel",
-    ],
-    ALLOWED_URI_REGEXP:
-      /^(?:(?:https?|mailto|ftp|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-  });
 
   return (
     <main className="pt-24 pb-24">

@@ -1,28 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, Heart, Compass, Users, Sparkles, ShieldCheck } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
-/* Defense in depth — settings written via the admin CMS are sanitized
-   on save, but a future migration / direct DB edit could bypass that.
-   Re-purifying at render guarantees no <script>/onerror/iframe leaks.
-   Coerces non-string inputs (an empty CMS field can land as `{}`/`[]`
-   after a save round-trip; that used to blow up DOMPurify.sanitize and
-   500 the entire page). */
-const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
-  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
-  FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
-  FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
-};
-const purify = (html: unknown): string => {
-  if (typeof html !== "string" || html.length === 0) return "";
-  try {
-    return String(DOMPurify.sanitize(html, RENDER_PURIFY));
-  } catch {
-    return "";
-  }
-};
+/* Render-time HTML sanitization removed. Source of truth for safety
+   is now write-time DOMPurify in app/admin/pages/actions.ts (rich
+   fields run through DOMPurify.sanitize before insert). Trying to
+   re-sanitize at render via isomorphic-dompurify was crashing the
+   entire page on Vercel — its jsdom dependency fails to load in
+   the production runtime intermittently, taking the whole module
+   down at import time (defensive try/catch can't help — the import
+   itself throws). Type-check is sufficient defense to prevent
+   "Objects are not valid as React child" crashes. */
+const safeHtml = (html: unknown): string =>
+  typeof html === "string" ? html : "";
 
 const title = "About Sajdah Academy — পরিচিতি";
 const description =
@@ -212,7 +203,7 @@ function RichOrText({ html }: { html: unknown }) {
     return (
       <div
         className="blog-prose text-lg"
-        dangerouslySetInnerHTML={{ __html: purify(text) }}
+        dangerouslySetInnerHTML={{ __html: safeHtml(text) }}
       />
     );
   }

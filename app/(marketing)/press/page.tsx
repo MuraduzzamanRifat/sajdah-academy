@@ -1,23 +1,14 @@
 import type { Metadata } from "next";
 import { Mail, Download, Image as ImageIcon, FileText, Phone } from "lucide-react";
-import DOMPurify from "isomorphic-dompurify";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
-const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
-  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
-  FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
-  FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
-};
-/* Coerces non-string inputs (an empty CMS field can land as `{}`/`[]`
-   after a save round-trip; that used to blow up DOMPurify.sanitize). */
-const purify = (html: unknown): string => {
-  if (typeof html !== "string" || html.length === 0) return "";
-  try {
-    return String(DOMPurify.sanitize(html, RENDER_PURIFY));
-  } catch {
-    return "";
-  }
-};
+/* Render-time HTML sanitization removed. Source of truth for safety
+   is now write-time DOMPurify in app/admin/pages/actions.ts. The
+   isomorphic-dompurify import was crashing this page on Vercel —
+   its jsdom dependency fails to load in the production runtime,
+   taking the whole module down at import time. */
+const safeHtml = (html: unknown): string =>
+  typeof html === "string" ? html : "";
 
 const title = "Press & Media — সংবাদমাধ্যম";
 const description =
@@ -93,7 +84,7 @@ export default async function PressPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="glass-light rounded-3xl p-8 md:p-10 mb-10">
             <h2 className="text-2xl font-bold text-emerald-950 mb-4">{aboutTitle}</h2>
-            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: purify(aboutBody) }} />
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: safeHtml(aboutBody) }} />
           </div>
 
           {facts.length > 0 && (
