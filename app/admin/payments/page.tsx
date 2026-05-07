@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Download, Send, AlertCircle, TrendingUp, CheckCircle2, Clock, MoreHorizontal } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Payments",
@@ -33,6 +34,7 @@ const statusLabel: Record<string, string> = {
 export default function AdminPaymentsPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="পেমেন্ট গেটওয়ে (bKash/Nagad/Bank) এবং রিমাইন্ডার-ডিসপ্যাচ এখনো ব্যাকএন্ডে wired হয়নি — সংখ্যাগুলো ডেমো।" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KPI icon={<TrendingUp className="w-4 h-4" />} value="৳ ৪.২L" label="MTD সংগ্রহ" delta="+১৮%" tone="emerald" />
         <KPI icon={<Clock className="w-4 h-4" />} value="৳ ৯০K" label="বকেয়া" delta="৩ ছাত্র" tone="rose" />

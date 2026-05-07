@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit3 } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Schedule",
@@ -36,6 +37,7 @@ const colorMap: Record<string, string> = {
 export default function AdminSchedulePage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="ইভেন্ট তৈরি / সপ্তাহ ন্যাভিগেশন / শিক্ষক পুনঃবরাদ্দ এখনো ব্যাকএন্ডে wired হয়নি — শিডিউল হার্ডকোডেড।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <button type="button" className="p-2 border border-slate-200 hover:bg-slate-50 rounded-lg" aria-label="Previous week">

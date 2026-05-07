@@ -48,10 +48,10 @@ const statTone: Record<string, { bg: string; fg: string }> = {
 };
 
 const quickActions = [
-  { href: "/admin/students/", label: "নতুন ছাত্র", icon: Users },
-  { href: "/admin/courses/", label: "নতুন কোর্স", icon: BookOpen },
-  { href: "/admin/announcements/", label: "ঘোষণা পাঠান", icon: Activity },
-  { href: "/admin/payments/", label: "পেমেন্ট চেক", icon: TrendingUp },
+  { href: "/dashboard/students/", label: "নতুন ছাত্র", icon: Users },
+  { href: "/dashboard/courses/", label: "নতুন কোর্স", icon: BookOpen },
+  { href: "/dashboard/announcements/", label: "ঘোষণা পাঠান", icon: Activity },
+  { href: "/dashboard/payments/", label: "পেমেন্ট চেক", icon: TrendingUp },
 ];
 
 type StudentRow = {

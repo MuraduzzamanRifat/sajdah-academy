@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Save, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Attendance",
@@ -38,6 +39,7 @@ export default function AdminAttendancePage() {
 
   return (
     <div className="space-y-4">
+      <ComingSoon body="P/L/A মার্কিং সংরক্ষণ এখনো ব্যাকএন্ডে wired হয়নি — ক্লিক করলেও ডেটা স্থায়ী হবে না।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-emerald-950 inline-flex items-center gap-2">

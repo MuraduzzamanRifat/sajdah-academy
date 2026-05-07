@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus, Download, Eye, FileBadge, CheckCircle2 } from "lucide-react";
 import MedallionMark from "../../components/MedallionMark";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Certificates",
@@ -24,6 +25,7 @@ const eligible = [
 export default function AdminCertificatesPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="সার্টিফিকেট ইস্যু / PDF জেনারেশন / QR ভেরিফিকেশন এখনো ব্যাকএন্ডে wired হয়নি।" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat value="৪" label="ইস্যুকৃত" />
         <Stat value="১" label="ইস্যুর জন্য প্রস্তুত" tone="amber" />

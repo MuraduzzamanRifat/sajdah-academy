@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus, FileText, Video, Headphones, Book, Download, Edit3, Trash2 } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Library",
@@ -26,6 +27,7 @@ const typeMap: Record<string, { icon: React.ReactNode; bg: string; fg: string; l
 export default function AdminLibraryPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="রিসোর্স আপলোড / সম্পাদনা / মুছে ফেলা এখনো ব্যাকএন্ডে wired হয়নি — সব ফাইল স্ট্যাটিক ডেমো।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-emerald-950">৬৪ রিসোর্স</h2>

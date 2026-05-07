@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Globe, Mail, Phone, MapPin, ShieldCheck, KeyRound, Bell, Database, Save, AlertTriangle } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Settings",
@@ -13,6 +14,7 @@ const inputBase =
 export default function AdminSettingsPage() {
   return (
     <div className="space-y-4 max-w-4xl">
+      <ComingSoon body="সেটিংস সংরক্ষণ / অ্যাডমিন ব্যবস্থাপনা / সিকিউরিটি টগল এখনো ব্যাকএন্ডে wired হয়নি — পরিবর্তন সংরক্ষিত হবে না।" />
       <Section title="সাইট পরিচয় · Site Identity" icon={<Globe className="w-4 h-4" />}>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="সাইটের নাম (বাংলা)" defaultValue="সাজদাহ একাডেমি" />

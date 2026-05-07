@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Download, Save, AlertCircle } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Grades",
@@ -41,6 +42,7 @@ function letterTone(g: string): string {
 export default function AdminGradesPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="স্কোর ইনপুট সংরক্ষণ / CSV এক্সপোর্ট / কম্পোজিট গ্রেড পার্সিস্টেন্স এখনো ব্যাকএন্ডে wired হয়নি।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-emerald-950">গ্রেডবুক · Iman & Aqidah</h2>

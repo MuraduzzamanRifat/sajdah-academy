@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
-import { createClient } from "./supabase/server";
+import { createServiceClient } from "./supabase/service";
+import { createClient as createUserClient } from "./supabase/server";
 import { getCurrentUser } from "./auth/current-user";
 
 /* Append-only audit log writer.
@@ -26,12 +27,20 @@ export type AuditEntry = {
 
 export async function audit(entry: AuditEntry): Promise<void> {
   try {
-    const me = await getCurrentUser();
-    const h = await headers();
-    const supabase = await createClient();
+    /* Trust path: read actor identity from the user-scoped client
+       (auth.uid()), NOT from the request header. A header can be
+       spoofed if middleware ever skips a route; auth.uid() is bound
+       to the verified Supabase JWT cookie. */
+    const userClient = await createUserClient();
+    const { data: authData } = await userClient.auth.getUser();
+    const verifiedActorId = authData.user?.id ?? null;
 
-    // Best-effort IP + UA. The real client IP comes from x-forwarded-for
-    // on Vercel; fallback to the cf-connecting-ip header behind Cloudflare.
+    /* Fall back to header-derived id only when the user isn't signed
+       in (system actions). Header is sanitised by middleware. */
+    const me = verifiedActorId ? null : await getCurrentUser();
+    const actorId = verifiedActorId ?? me?.id ?? null;
+
+    const h = await headers();
     const ip =
       h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       h.get("cf-connecting-ip") ??
@@ -39,8 +48,13 @@ export async function audit(entry: AuditEntry): Promise<void> {
       null;
     const ua = h.get("user-agent");
 
-    await supabase.from("audit_log").insert({
-      actor_id: me?.id ?? null,
+    /* Use the service-role client so writes succeed regardless of
+       RLS policies on audit_log. The table has SELECT-only admin
+       policy in migration 0001 — without service role, every audit
+       insert silently fails (security gap closed in 0004). */
+    const svc = createServiceClient();
+    await svc.from("audit_log").insert({
+      actor_id: actorId,
       action: entry.action,
       entity_type: entry.entityType ?? null,
       entity_id: entry.entityId ?? null,
@@ -109,6 +123,10 @@ export const Actions = {
     audit({ action: "enrollment.reject", entityType: "enrollment", entityId: id }),
   enrollmentWaitlist: (id: string) =>
     audit({ action: "enrollment.waitlist", entityType: "enrollment", entityId: id }),
+  enrollmentReview: (id: string) =>
+    audit({ action: "enrollment.review", entityType: "enrollment", entityId: id }),
+  enrollmentSubmit: (id: string) =>
+    audit({ action: "enrollment.submit", entityType: "enrollment", entityId: id }),
 
   // Settings (CMS edits)
   settingsUpdate: (changedKeys: string[]) =>

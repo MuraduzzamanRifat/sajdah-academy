@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Megaphone, Send, Edit3, Trash2, Calendar } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Announcements",
@@ -28,6 +29,7 @@ const statusLabel: Record<string, string> = {
 export default function AdminAnnouncementsPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="ঘোষণা পাঠানো / সিডিউল / সংরক্ষণ এখনো ব্যাকএন্ডে wired হয়নি — শুধু লেআউট প্রিভিউ।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <h3 className="font-bold text-emerald-950 mb-4 flex items-center gap-2">
           <Megaphone className="w-4 h-4 text-amber-600" /> নতুন ঘোষণা পাঠান

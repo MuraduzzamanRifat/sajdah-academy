@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Search, Star, AlertCircle, MessageSquare, Send } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Messages",
@@ -19,7 +20,9 @@ const inbox = [
 
 export default function AdminMessagesPage() {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex h-[640px]">
+    <div>
+      <ComingSoon body="ম্যাসেজ পাঠানো এখনো ব্যাকএন্ডে wired হয়নি — Inbox/Sent/Drafts ও থ্রেড সবই স্ট্যাটিক প্রিভিউ।" />
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex h-[640px]">
       <div className="w-72 border-r border-slate-200 flex flex-col shrink-0">
         <div className="px-3 py-3 border-b border-slate-200">
           <div className="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 rounded-lg text-xs">
@@ -133,6 +136,7 @@ export default function AdminMessagesPage() {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

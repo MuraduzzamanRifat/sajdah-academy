@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
+import { requireAdmin } from "../../../lib/auth/current-user";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -17,11 +18,16 @@ function fld(formData: FormData, name: string): string {
 
 function revalidateAll() {
   revalidatePath("/faculty");
+  revalidatePath("/dashboard/instructors");
   revalidatePath("/admin/instructors");
   revalidatePath("/admin");
+  revalidatePath("/");
 }
 
 export async function createInstructor(formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const name = fld(formData, "name");
   if (!name) return { error: "নাম দিন।" };
@@ -48,10 +54,13 @@ export async function createInstructor(formData: FormData): Promise<ActionResult
   if (error) return { error: error.message };
   if (created) await Actions.instructorCreate(created.id, { name });
   revalidateAll();
-  redirect("/admin/instructors/");
+  redirect("/dashboard/instructors/");
 }
 
 export async function updateInstructor(id: string, formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const name = fld(formData, "name");
   if (!name) return { error: "নাম খালি রাখা যাবে না।" };
@@ -77,10 +86,13 @@ export async function updateInstructor(id: string, formData: FormData): Promise<
   if (error) return { error: error.message };
   await Actions.instructorUpdate(id, { name });
   revalidateAll();
-  redirect("/admin/instructors/");
+  redirect("/dashboard/instructors/");
 }
 
 export async function deleteInstructor(id: string): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const { error } = await supabase.from("instructors").delete().eq("id", id);
   if (error) return { error: error.message };

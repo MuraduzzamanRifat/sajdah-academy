@@ -104,19 +104,19 @@ export default async function PressPage() {
           </p>
           <div className="grid md:grid-cols-3 gap-5">
             <a
-              href="/sajdah-academy/icon.png"
+              href="/icon-32.png"
               download
               className="glass-light glass-light-hover rounded-2xl p-6 block text-center group"
             >
               <ImageIcon className="w-10 h-10 text-emerald-700 mx-auto mb-3" />
               <h3 className="font-bold text-emerald-950 mb-1">Logo (Square)</h3>
-              <p className="text-xs text-slate-500 mb-3">PNG · 32x32 / 180x180</p>
+              <p className="text-xs text-slate-500 mb-3">PNG · 32x32</p>
               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 group-hover:text-amber-700">
                 <Download className="w-3.5 h-3.5" /> Download
               </span>
             </a>
             <a
-              href="/sajdah-academy/medallion-512.png"
+              href="/medallion-512.png"
               download
               className="glass-light glass-light-hover rounded-2xl p-6 block text-center group"
             >
@@ -128,15 +128,16 @@ export default async function PressPage() {
               </span>
             </a>
             <a
-              href="/sajdah-academy/opengraph-image"
-              download
+              href="/opengraph-image"
+              target="_blank"
+              rel="noopener"
               className="glass-light glass-light-hover rounded-2xl p-6 block text-center group"
             >
               <FileText className="w-10 h-10 text-emerald-700 mx-auto mb-3" />
               <h3 className="font-bold text-emerald-950 mb-1">Social Card</h3>
-              <p className="text-xs text-slate-500 mb-3">PNG · 1200x630 OG</p>
+              <p className="text-xs text-slate-500 mb-3">PNG · 1200x630 OG (auto-generated)</p>
               <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 group-hover:text-amber-700">
-                <Download className="w-3.5 h-3.5" /> Download
+                <Download className="w-3.5 h-3.5" /> View
               </span>
             </a>
           </div>

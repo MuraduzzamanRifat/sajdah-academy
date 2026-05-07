@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
+import { requireAdmin } from "../../../lib/auth/current-user";
 import { PAGE_DEFS } from "./schema";
 
 export type StorageType = "string" | "number" | "boolean" | "json" | "rich";
@@ -70,13 +71,21 @@ function pathsToRevalidate(keys: string[]): { paths: Set<string>; chromeChanged:
 export async function saveSettings(
   fields: { key: string; type: StorageType; value: string }[]
 ): Promise<SaveResult> {
-  const supabase = await createClient();
-  const { data: user } = await supabase.auth.getUser();
-  if (!user.user) return { error: "Sign in required." };
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
 
-  const rows = fields.map(({ key, type, value }) => {
-    let parsed: unknown;
+  const supabase = await createClient();
+
+  /* Per-field error collection — one bad JSON value used to abort the
+     entire bulk save, losing every other edit on the form. Now the
+     bad field is reported and the rest go through. */
+  type Row = { key: string; value: unknown; updated_by: string; updated_at: string };
+  const rows: Row[] = [];
+  const errors: string[] = [];
+
+  for (const { key, type, value } of fields) {
     try {
+      let parsed: unknown;
       switch (type) {
         case "string":
           parsed = value;
@@ -88,24 +97,28 @@ export async function saveSettings(
           parsed = value === "true" || value === "on";
           break;
         case "json":
-          parsed = value === "" ? null : JSON.parse(value);
+          /* Empty list/json field: write empty array (jsonb NOT NULL
+             rejects raw NULL). Lists serialize as "[]" on empty state. */
+          parsed = value === "" ? [] : JSON.parse(value);
           break;
         case "rich":
-          /* Sanitize once at write time. Public pages can then trust the
-             stored HTML and skip a per-render DOMPurify pass. */
           parsed = value === "" ? "" : String(DOMPurify.sanitize(value, RICH_PURIFY_CONFIG));
           break;
       }
+      rows.push({
+        key,
+        value: parsed as object,
+        updated_by: me.id,
+        updated_at: new Date().toISOString(),
+      });
     } catch (e) {
-      throw new Error(`Invalid value in "${key}": ${(e as Error).message}`);
+      errors.push(`${key}: ${(e as Error).message}`);
     }
-    return {
-      key,
-      value: parsed as object,
-      updated_by: user.user!.id,
-      updated_at: new Date().toISOString(),
-    };
-  });
+  }
+
+  if (errors.length > 0 && rows.length === 0) {
+    return { error: `Invalid values: ${errors.join("; ")}` };
+  }
 
   try {
     const { error } = await supabase
@@ -140,15 +153,13 @@ export async function saveSettings(
    on /dashboard/pages/. Invalidates the entire layout tree — every
    public route loses its ISR cache and re-renders on next request. */
 export async function refreshAllCaches(): Promise<{ ok: true } | { error: string }> {
-  const supabase = await createClient();
-  const { data: user } = await supabase.auth.getUser();
-  if (!user.user) return { error: "Sign in required." };
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
 
   revalidatePath("/", "layout");
+  revalidatePath("/dashboard/pages");
   revalidatePath("/admin/pages");
 
-  /* Audit the manual cache flush so we have a paper trail if it
-     becomes a recurring pattern (sign of stale cache bugs). */
   await Actions.settingsUpdate(["__manual_cache_refresh__"]);
 
   return { ok: true };

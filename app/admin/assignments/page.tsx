@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus, FileText, Clock, CheckCircle2, AlertTriangle, Filter } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Assignments",
@@ -31,6 +32,7 @@ const tone: Record<string, { bg: string; fg: string }> = {
 export default function AdminAssignmentsPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="অ্যাসাইনমেন্ট তৈরি / মূল্যায়ন / জমা ট্র্যাকিং এখনো ব্যাকএন্ডে wired হয়নি — সব ডেটা স্ট্যাটিক প্রিভিউ।" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((s) => {
           const I = s.icon;

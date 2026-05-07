@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Upload, Image as ImageIcon, Folder, MoreHorizontal, CheckCircle2 } from "lucide-react";
+import ComingSoon from "../_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Admin · Gallery",
@@ -33,6 +34,7 @@ const recent = Array.from({ length: 12 }).map((_, i) => ({
 export default function AdminGalleryPage() {
   return (
     <div className="space-y-4">
+      <ComingSoon body="মিডিয়া আপলোড / অ্যালবাম তৈরি / লাইভ-ড্রাফট টগল এখনো ব্যাকএন্ডে wired হয়নি।" />
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-lg font-bold text-emerald-950">গ্যালারি · মোট ২৬৯ মিডিয়া</h2>

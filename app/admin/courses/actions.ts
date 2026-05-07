@@ -1,15 +1,14 @@
 "use server";
 
-/* Course CRUD server actions. RLS already restricts writes to admin
-   roles via courses_admin_write policy — these actions just pass
-   through. We call revalidatePath on every public route that reads
-   the courses table so changes appear instantly (rather than waiting
-   on the 60s ISR window). */
+/* Course CRUD server actions. Defense in depth: RLS blocks the DB
+   write, requireAdmin() blocks the action call itself. Both must
+   permit for the operation to succeed. */
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
+import { requireAdmin } from "../../../lib/auth/current-user";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -25,17 +24,31 @@ function fldArr(formData: FormData, name: string): string[] {
     .filter(Boolean);
 }
 
+/* Slugify with run-collapse + trim — see also fix #20 in audit.
+   "Hello — World!" → "hello-world", not "hello-----world-". */
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function revalidateAll() {
   revalidatePath("/courses");
   revalidatePath("/courses/[slug]", "page");
+  revalidatePath("/dashboard/courses");
   revalidatePath("/admin/courses");
   revalidatePath("/admin"); // overview KPIs
   revalidatePath("/"); // homepage curriculum block
 }
 
 export async function createCourse(formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
-  const slug = fld(formData, "slug").toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  const slug = slugify(fld(formData, "slug") || fld(formData, "title"));
   const title = fld(formData, "title");
   const phase = fld(formData, "phase");
 
@@ -66,10 +79,13 @@ export async function createCourse(formData: FormData): Promise<ActionResult> {
   if (error) return { error: error.message };
   if (created) await Actions.courseCreate(created.id, { slug, title, phase });
   revalidateAll();
-  redirect("/admin/courses/");
+  redirect("/dashboard/courses/");
 }
 
 export async function updateCourse(id: string, formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const title = fld(formData, "title");
   const phase = fld(formData, "phase");
@@ -98,10 +114,13 @@ export async function updateCourse(id: string, formData: FormData): Promise<Acti
   if (error) return { error: error.message };
   await Actions.courseUpdate(id, { title, phase });
   revalidateAll();
-  redirect("/admin/courses/");
+  redirect("/dashboard/courses/");
 }
 
 export async function togglePublish(id: string, currentlyPublished: boolean): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const next = !currentlyPublished;
   const { error } = await supabase
@@ -115,6 +134,9 @@ export async function togglePublish(id: string, currentlyPublished: boolean): Pr
 }
 
 export async function deleteCourse(id: string): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const { error } = await supabase.from("courses").delete().eq("id", id);
   if (error) return { error: error.message };
@@ -124,6 +146,9 @@ export async function deleteCourse(id: string): Promise<ActionResult> {
 }
 
 export async function duplicateCourse(id: string): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const { data: src, error: readErr } = await supabase
     .from("courses")

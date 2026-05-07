@@ -2,12 +2,14 @@
 
 /* Public enrollment submission. Anyone can call (RLS policy
    enrollments_public_insert allows insert with check (true)).
-   Inserts a row into enrollments → admin sees it under
-   /admin/enrollments. */
+   Capacity + window enforcement is handled by the public.enroll_applicant
+   Postgres function (migration 0004) which row-locks the batch and
+   re-counts seats inside a transaction — fixes the TOCTOU race. */
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type EnrollResult = { ok: true; reference: string } | { error: string };
 
@@ -27,29 +29,36 @@ export type EnrollPayload = {
   batch?: string;
   paymentPlan?: string;
   hearAbout?: string;
-  /* Honeypot — visually hidden in the form, real users leave it blank.
-     Bots that auto-fill every field will fill it. */
+  /* Honeypot — visually hidden in the form, real users leave it blank. */
   website?: string;
 };
 
-/* Public form rate limits. The submitEnrollment action is unauthenticated
-   (RLS allows insert with check(true)) so without these guards anyone can
-   flood the enrollments table.  We use the existing data — no Redis dep,
-   no extra service. */
 const MAX_PER_EMAIL_PER_HOUR = 3;
 const MAX_PER_PHONE_PER_HOUR = 5;
+const MAX_PER_IP_PER_HOUR = 10;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function isRateLimited(
   supabase: Awaited<ReturnType<typeof createClient>>,
   email: string,
-  phone: string
+  phone: string,
+  ip: string | null
 ): Promise<{ limited: false } | { limited: true; reason: string }> {
   const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString();
 
-  // Run the two count queries in parallel — Supabase honours head-only
-  // count requests fast.
-  const [emailRes, phoneRes] = await Promise.all([
+  /* IP-keyed counter via notes ILIKE — blunt but works without a new
+     table; rotates emails/phones can't bypass any longer. */
+  const ipQuery = ip
+    ? supabase
+        .from("enrollments")
+        .select("id", { count: "exact", head: true })
+        .ilike("notes", `%Source IP: ${ip}%`)
+        .gte("created_at", since)
+    : Promise.resolve({ count: 0 } as { count: number });
+
+  const [emailRes, phoneRes, ipRes] = await Promise.all([
     supabase
       .from("enrollments")
       .select("id", { count: "exact", head: true })
@@ -60,6 +69,7 @@ async function isRateLimited(
       .select("id", { count: "exact", head: true })
       .eq("phone", phone)
       .gte("created_at", since),
+    ipQuery,
   ]);
 
   if ((emailRes.count ?? 0) >= MAX_PER_EMAIL_PER_HOUR) {
@@ -68,11 +78,15 @@ async function isRateLimited(
   if ((phoneRes.count ?? 0) >= MAX_PER_PHONE_PER_HOUR) {
     return { limited: true, reason: "এই ফোন নম্বর থেকে অনেকগুলি আবেদন এসেছে। ১ ঘণ্টা পরে আবার চেষ্টা করুন।" };
   }
+  const ipCount = "count" in ipRes ? (ipRes.count ?? 0) : 0;
+  if (ipCount >= MAX_PER_IP_PER_HOUR) {
+    return { limited: true, reason: "একই নেটওয়ার্ক থেকে অনেক আবেদন এসেছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।" };
+  }
   return { limited: false };
 }
 
 export async function submitEnrollment(payload: EnrollPayload): Promise<EnrollResult> {
-  // Honeypot check — silently reject without telling the bot why.
+  /* Honeypot — silent reject so bots can't tune. */
   if (payload.website && payload.website.trim().length > 0) {
     return { error: "আবেদন পাঠাতে সমস্যা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।" };
   }
@@ -83,26 +97,40 @@ export async function submitEnrollment(payload: EnrollPayload): Promise<EnrollRe
 
   const email = payload.email.trim().toLowerCase();
   const phone = payload.phone.trim();
+
+  if (!EMAIL_RE.test(email)) return { error: "সঠিক ইমেইল দিন।" };
+
   const supabase = await createClient();
 
-  // Per-identity rate limit — checked before insert to keep the
-  // enrollments table clean.
-  const rl = await isRateLimited(supabase, email, phone);
-  if (rl.limited) return { error: rl.reason };
-
-  const reference = `SA-${Date.now().toString(36).toUpperCase()}`;
-  const ageNum = payload.age ? parseInt(String(payload.age), 10) : null;
-  const profession = [payload.occupation, payload.educationLevel].filter(Boolean).join(" · ") || null;
-
-  /* Capture the source IP into notes so admins can see clusters of
-     submissions from the same network. We don't add a dedicated column
-     yet — minimal schema churn. */
   const h = await headers();
   const ip =
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     h.get("cf-connecting-ip") ??
     h.get("x-real-ip") ??
     null;
+
+  const rl = await isRateLimited(supabase, email, phone, ip);
+  if (rl.limited) return { error: rl.reason };
+
+  const reference = `SA-${Date.now().toString(36).toUpperCase()}`;
+  const ageNum = payload.age ? parseInt(String(payload.age), 10) : null;
+  const profession = [payload.occupation, payload.educationLevel].filter(Boolean).join(" · ") || null;
+
+  /* Resolve the batch preference text (e.g. "ব্যাচ-৫") to an actual
+     batches.id so the capacity-check function can lock it. If the
+     preference is missing or doesn't match a batch, we accept the
+     application without a seat reservation; admins can assign later. */
+  let targetBatchId: string | null = null;
+  if (payload.batch?.trim()) {
+    const { data: batch } = await supabase
+      .from("batches")
+      .select("id")
+      .or(`code.ilike.%${payload.batch.trim()}%,name.ilike.%${payload.batch.trim()}%`)
+      .in("status", ["open", "running"])
+      .limit(1)
+      .maybeSingle();
+    targetBatchId = batch?.id ?? null;
+  }
 
   const noteLines = [
     payload.fatherName ? `Father: ${payload.fatherName}` : null,
@@ -115,22 +143,47 @@ export async function submitEnrollment(payload: EnrollPayload): Promise<EnrollRe
     ip ? `Source IP: ${ip}` : null,
   ].filter(Boolean).join("\n");
 
-  const { error } = await supabase.from("enrollments").insert({
-    applicant_email: email,
-    applicant_name: payload.fullName.trim(),
-    age: ageNum && ageNum > 0 && ageNum < 120 ? ageNum : null,
-    profession,
-    city: payload.city ?? null,
-    phone,
-    motivation: payload.motivation ?? null,
-    referral_source: payload.hearAbout ?? null,
-    status: "submitted",
-    notes: noteLines,
+  /* Call the capacity-aware RPC instead of a bare INSERT. The function
+     takes a row lock on the batch, re-counts active seats, and rejects
+     atomically if full or if the enrollment window closed. */
+  const { data: rpcResult, error: rpcError } = await supabase.rpc("enroll_applicant", {
+    p_batch_id: targetBatchId,
+    p_applicant_name: payload.fullName.trim(),
+    p_applicant_email: email,
+    p_phone: phone,
+    p_age: ageNum && ageNum > 0 && ageNum < 120 ? ageNum : null,
+    p_city: payload.city ?? null,
+    p_profession: profession,
+    p_motivation: payload.motivation ?? null,
+    p_referral: payload.hearAbout ?? null,
+    p_notes: noteLines,
   });
 
-  if (error) return { error: error.message };
+  if (rpcError) {
+    /* Translate the function's raise messages to user-friendly Bengali.
+       Never leak raw Postgres errors to the public form. */
+    const msg = rpcError.message.toLowerCase();
+    let userMsg = "আবেদন পাঠাতে সমস্যা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।";
+    if (msg.includes("batch full")) {
+      userMsg = "এই ব্যাচ এখন পূর্ণ। অন্য ব্যাচ বেছে নিন বা পরবর্তী ব্যাচের জন্য অপেক্ষা করুন।";
+    } else if (msg.includes("window closed")) {
+      userMsg = "এই ব্যাচের ভর্তির সময়সীমা শেষ। পরবর্তী ব্যাচের জন্য আমাদের সাথে যোগাযোগ করুন।";
+    } else if (msg.includes("batch not found")) {
+      userMsg = "নির্বাচিত ব্যাচ পাওয়া যায়নি। অন্য ব্যাচ বেছে নিন।";
+    }
+    console.error("[enroll] rpcError", rpcError);
+    return { error: userMsg };
+  }
 
+  const newId = (rpcResult as Array<{ id: string }>)?.[0]?.id;
+  if (newId) {
+    /* Best-effort audit — failure won't block the success path. */
+    await Actions.enrollmentSubmit(newId);
+  }
+
+  revalidatePath("/dashboard/enrollments");
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
+  revalidatePath("/batches");
   return { ok: true, reference };
 }

@@ -1,29 +1,42 @@
 "use server";
 
-/* Enrollment review actions. Accept = mark accepted (and optionally
-   create a profile invite — TODO; for now just status change).
-   Reject = mark rejected. Waitlist = mark waitlisted. */
+/* Enrollment review actions. Defense in depth: requireAdmin() at the
+   action level, RLS at the DB level. Each status flip uses the typed
+   Actions.* helper so the audit-log taxonomy stays consistent. */
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
-import { getCurrentUser } from "../../../lib/auth/current-user";
-import { audit } from "../../../lib/audit";
+import { requireAdmin } from "../../../lib/auth/current-user";
+import { Actions } from "../../../lib/audit";
 
 export type ActionResult = { ok: true } | { error: string };
 
-async function setStatus(id: string, status: "accepted" | "rejected" | "waitlisted" | "reviewing"): Promise<ActionResult> {
+type Status = "accepted" | "rejected" | "waitlisted" | "reviewing";
+
+const AUDITORS: Record<Status, (id: string) => Promise<void>> = {
+  accepted: Actions.enrollmentAccept,
+  rejected: Actions.enrollmentReject,
+  waitlisted: Actions.enrollmentWaitlist,
+  reviewing: Actions.enrollmentReview,
+};
+
+async function setStatus(id: string, status: Status): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
-  const me = await getCurrentUser();  // header-based; no Supabase round-trip
   const { error } = await supabase
     .from("enrollments")
     .update({
       status,
-      reviewed_by: me?.id ?? null,
+      reviewed_by: me.id,
       reviewed_at: new Date().toISOString(),
     })
     .eq("id", id);
   if (error) return { error: error.message };
-  await audit({ action: `enrollment.${status}`, entityType: "enrollment", entityId: id });
+
+  await AUDITORS[status](id);
+  revalidatePath("/dashboard/enrollments");
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
   return { ok: true };

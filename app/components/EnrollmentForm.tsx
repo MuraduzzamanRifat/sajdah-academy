@@ -351,7 +351,7 @@ export default function EnrollmentForm() {
                 />
                 <span className="text-sm text-slate-700 leading-relaxed">
                   আমি{" "}
-                  <a href="/sajdah-academy/privacy/" className="text-emerald-700 underline hover:text-emerald-900">
+                  <a href="/privacy/" className="text-emerald-700 underline hover:text-emerald-900">
                     গোপনীয়তা নীতি
                   </a>{" "}
                   ও কোর্সের শর্তাবলীর সাথে সম্মত। জমাকৃত তথ্যের সঠিকতা নিশ্চিত করছি।

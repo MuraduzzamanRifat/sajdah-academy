@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
+import { requireAdmin } from "../../../lib/auth/current-user";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -16,11 +17,16 @@ function fld(formData: FormData, name: string): string {
 
 function revalidateAll() {
   revalidatePath("/batches");
+  revalidatePath("/dashboard/batches");
   revalidatePath("/admin/batches");
   revalidatePath("/admin");
+  revalidatePath("/");
 }
 
 export async function createBatch(formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const code = fld(formData, "code");
   const name = fld(formData, "name");
@@ -51,10 +57,13 @@ export async function createBatch(formData: FormData): Promise<ActionResult> {
   if (error) return { error: error.message };
   if (created) await Actions.batchCreate(created.id, { code, name, status });
   revalidateAll();
-  redirect("/admin/batches/");
+  redirect("/dashboard/batches/");
 }
 
 export async function updateBatch(id: string, formData: FormData): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const name = fld(formData, "name");
   const status = fld(formData, "status") as BatchStatus;
@@ -81,10 +90,13 @@ export async function updateBatch(id: string, formData: FormData): Promise<Actio
   if (error) return { error: error.message };
   await Actions.batchUpdate(id, { name, status });
   revalidateAll();
-  redirect("/admin/batches/");
+  redirect("/dashboard/batches/");
 }
 
 export async function deleteBatch(id: string): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
   const supabase = await createClient();
   const { error } = await supabase.from("batches").delete().eq("id", id);
   if (error) return { error: error.message };
