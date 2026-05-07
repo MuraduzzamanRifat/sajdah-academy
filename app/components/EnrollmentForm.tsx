@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, ArrowLeft, ArrowRight, User, GraduationCap, Calendar, FileCheck } from "lucide-react";
-import { submitEnrollment } from "../enroll/actions";
+import { submitEnrollment } from "../(marketing)/enroll/actions";
 
 /* Multi-step enrollment.
    On submit: posts the application to Supabase via the submitEnrollment

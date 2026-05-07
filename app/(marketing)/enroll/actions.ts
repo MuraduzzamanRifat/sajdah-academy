@@ -8,7 +8,7 @@
    invitation flow (TODO). */
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "../../lib/supabase/server";
+import { createClient } from "../../../lib/supabase/server";
 
 export type EnrollResult = { ok: true; reference: string } | { error: string };
 

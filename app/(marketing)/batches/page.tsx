@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
-import BatchCountdown from "../components/BatchCountdown";
-import { createClient } from "../../lib/supabase/server";
+import BatchCountdown from "../../components/BatchCountdown";
+import { createClient } from "../../../lib/supabase/server";
 
 const title = "Batches — ব্যাচসমূহ";
 const description =

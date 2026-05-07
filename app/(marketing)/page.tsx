@@ -1,10 +1,10 @@
-import Hero, { type HeroTexts } from "./components/Hero";
-import PremiumExperience from "./components/PremiumExperience";
-import Curriculum from "./components/Curriculum";
-import CourseOutline from "./components/CourseOutline";
-import Registration from "./components/Registration";
-import SectionBlend from "./components/SectionBlend";
-import { getSettingsByPrefix, pick } from "../lib/settings";
+import Hero, { type HeroTexts } from "../components/Hero";
+import PremiumExperience from "../components/PremiumExperience";
+import Curriculum from "../components/Curriculum";
+import CourseOutline from "../components/CourseOutline";
+import Registration from "../components/Registration";
+import SectionBlend from "../components/SectionBlend";
+import { getSettingsByPrefix, pick } from "../../lib/settings";
 
 /* Homepage is now driven by site_settings rows. ISR window is short
    so admin edits show up within ~minute even if revalidatePath misses

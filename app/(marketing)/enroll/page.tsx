@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
-import EnrollmentForm from "../components/EnrollmentForm";
+import EnrollmentForm from "../../components/EnrollmentForm";
 
 const title = "Enroll — ভর্তি";
 const description =

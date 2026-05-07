@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, Heart, Compass, Users, Sparkles, ShieldCheck } from "lucide-react";
-import { getSettingsByPrefix, pick } from "../../lib/settings";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "About Sajdah Academy — পরিচিতি";
 const description =

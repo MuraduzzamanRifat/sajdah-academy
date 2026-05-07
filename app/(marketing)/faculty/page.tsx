@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, Mail, BookOpen } from "lucide-react";
-import { createClient } from "../../lib/supabase/server";
-import { initials } from "../../lib/initials";
+import { createClient } from "../../../lib/supabase/server";
+import { initials } from "../../../lib/initials";
 
 const title = "Faculty — শিক্ষকমণ্ডলী";
 const description =

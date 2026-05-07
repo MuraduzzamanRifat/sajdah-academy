@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Routine from "../components/Routine";
+import Routine from "../../components/Routine";
 
 const title = "Effective Routine — দিনের পূর্ণাঙ্গ রুটিন";
 const description =

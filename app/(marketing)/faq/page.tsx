@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle } from "lucide-react";
-import { getSetting } from "../../lib/settings";
+import { getSetting } from "../../../lib/settings";
 
 const title = "FAQ — সাধারণ জিজ্ঞাসা";
 const description =

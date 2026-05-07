@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight, BookOpen } from "lucide-react";
-import { createClient } from "../../lib/supabase/server";
+import { createClient } from "../../../lib/supabase/server";
 
 const title = "Blog — আর্টিকেল";
 const description =

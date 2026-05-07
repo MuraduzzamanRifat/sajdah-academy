@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen, Clock, Layers, Target, CheckCircle2 } from "lucide-react";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient } from "../../../../lib/supabase/server";
 
 /* ISR with 60s revalidate. Pages render on first request and cache;
    admin server actions call revalidatePath on edit so changes appear

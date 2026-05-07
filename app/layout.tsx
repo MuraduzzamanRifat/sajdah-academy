@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri, Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import ScrollProgress from "./components/ScrollProgress";
-import StickyMobileCTA from "./components/StickyMobileCTA";
-import Preloader from "./components/Preloader";
+import { SITE_URL } from "../lib/site-url";
 
-// Self-host fonts via next/font — zero CLS, no render-blocking,
-// automatic preload + display:swap. Weights trimmed to those actually
-// used (audited via grep): font-bold (700), font-medium (500), normal (400).
-// font-semibold (600) and Inter extrabold (800) are unused — removed.
+/* Root layout is intentionally MINIMAL and SYNC.
+   - No host detection (would force every route dynamic).
+   - No public chrome (Navbar/Footer/Preloader live in (marketing)/layout.tsx).
+   - Admin and student-dashboard render their own chrome.
+   - This layout only sets up the html/body shell, fonts, security
+     metadata, and the bare site-wide <Metadata>. Everything else
+     lives in nested layouts. */
+
 const hindSiliguri = Hind_Siliguri({
   subsets: ["bengali", "latin"],
   weight: ["400", "500", "700"],
@@ -26,8 +26,6 @@ const inter = Inter({
   display: "swap",
   preload: true,
 });
-
-import { SITE_URL } from "../lib/site-url";
 
 const siteName = "Sajdah Academy";
 const siteDesc =
@@ -59,8 +57,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
     languages: {
-      "bn-BD": "/sajdah-academy/",
-      "x-default": "/sajdah-academy/",
+      "bn-BD": "/",
+      "x-default": "/",
     },
   },
   openGraph: {
@@ -95,21 +93,13 @@ export const metadata: Metadata = {
   referrer: "strict-origin-when-cross-origin",
 };
 
-/* CSP — hardened for our static export. GitHub Pages can't set HTTP headers,
-   so this lives in <meta http-equiv>. Notes:
-   - 'unsafe-inline' for scripts is required by Next.js hydration data
-     (cannot use nonces with static export — no per-request server).
-   - 'unsafe-inline' for styles is required by framer-motion (inline style attrs).
-   - Unsplash whitelisted for Premium Experience hero photos.
-   - frame-ancestors / X-Frame-Options is header-only, can't be set on
-     GH Pages — clickjacking risk not addressable on this hosting tier. */
 const CSP = [
   "default-src 'self'",
   "img-src 'self' data: blob: https://images.unsplash.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self'",
+  "connect-src 'self' https://*.supabase.co",
   "worker-src 'self' blob:",
   "form-action 'self'",
   "base-uri 'self'",
@@ -126,7 +116,7 @@ const PERMISSIONS = [
   "magnetometer=()",
   "payment=()",
   "usb=()",
-  "interest-cohort=()", // opt out of FLoC
+  "interest-cohort=()",
 ].join(", ");
 
 export const viewport: Viewport = {
@@ -139,76 +129,7 @@ export const viewport: Viewport = {
   ],
 };
 
-/* JSON-LD: lets Google classify this site as an EducationalOrganization
-   that runs a 6-month Course. Supports rich snippets in search results. */
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "EducationalOrganization",
-      "@id": `${siteUrl}/#org`,
-      name: siteName,
-      url: siteUrl,
-      description: siteDesc,
-      address: {
-        "@type": "PostalAddress",
-        addressCountry: "BD",
-        addressLocality: "Dhaka",
-      },
-      contactPoint: {
-        "@type": "ContactPoint",
-        telephone: "+880-180-55-65-444",
-        contactType: "admissions",
-        email: "sijdah.academybd@gmail.com",
-        availableLanguage: ["Bengali", "English"],
-      },
-    },
-    {
-      "@type": "Course",
-      "@id": `${siteUrl}/#course`,
-      name: "প্রিমিয়াম রিসোর্টে ফিজিক্যাল ক্লাস ও ট্রেনিং",
-      description:
-        "৬ মাসের পূর্ণাঙ্গ ফিজিক্যাল ইসলামিক কোর্স — তিনটি ধাপে: Foundation, Understanding, Transformation।",
-      provider: { "@id": `${siteUrl}/#org` },
-      educationalLevel: "Adult",
-      inLanguage: "bn",
-      timeRequired: "P6M",
-      offers: {
-        "@type": "Offer",
-        price: "15000",
-        priceCurrency: "BDT",
-        category: "Tuition",
-        availability: "https://schema.org/InStock",
-      },
-      hasCourseInstance: {
-        "@type": "CourseInstance",
-        courseMode: "Onsite",
-        location: {
-          "@type": "Place",
-          address: {
-            "@type": "PostalAddress",
-            addressCountry: "BD",
-            addressLocality: "Gazipur",
-          },
-        },
-      },
-    },
-  ],
-};
-
-import { headers } from "next/headers";
-import { isAdminHost } from "../lib/site-url";
-
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  /* The admin host (api.sijdahacademy.com) gets a clean chrome-free shell —
-     no public Navbar/Footer/StickyCTA, no marketing JSON-LD, no Preloader.
-     The AdminShell component renders its own sidebar + topbar instead.
-     TODO: pulling host headers here forces every page (incl. public marketing)
-     to render dynamically. Follow-up: split into route groups so the
-     marketing layout stays static. */
-  const h = await headers();
-  const adminHost = isAdminHost(h.get("host"));
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
       <head>
@@ -217,24 +138,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
       </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
-        {!adminHost && (
-          <>
-            <Preloader />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-            <ScrollProgress />
-            <Navbar />
-          </>
-        )}
         {children}
-        {!adminHost && (
-          <>
-            <Footer />
-            <StickyMobileCTA />
-          </>
-        )}
       </body>
     </html>
   );

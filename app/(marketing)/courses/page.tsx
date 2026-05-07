@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
-import { createClient } from "../../lib/supabase/server";
+import { createClient } from "../../../lib/supabase/server";
 
 /* ISR: cached 60s. Admin server actions call revalidatePath("/courses")
    so edits appear immediately rather than waiting on the cache. */

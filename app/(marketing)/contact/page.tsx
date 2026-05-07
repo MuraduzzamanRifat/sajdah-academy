@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Phone, Mail, MapPin, MessageCircle, Clock } from "lucide-react";
-import ContactForm from "../components/ContactForm";
-import { getSettingsByPrefix, pick } from "../../lib/settings";
+import ContactForm from "../../components/ContactForm";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "Contact — যোগাযোগ";
 const description =
