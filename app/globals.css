@@ -272,19 +272,13 @@ html, body {
   contain-intrinsic-size: 1px 800px;
 }
 
-/* Mobile-friendly scroll defaults — only apply when the user has not
-   opted into reduced-motion (smooth-scroll for anchor jumps is a
-   delight on desktop, motion-sickness trigger for some users). */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
+/* Smooth wheel scroll is now handled by Lenis (app/components/
+   LenisProvider.tsx). Lenis has its own anchor-jump handling, so
+   `scroll-behavior: smooth` on html would fight the Lenis animation
+   loop and cause double-eased motion. We rely on Lenis on the marketing
+   surface; the rest of the site uses native browser scroll. */
 
-/* Better touch scrolling on iOS Safari. -webkit-overflow-scrolling
-   has been the default since iOS 13 but webkit-* is still cheap to
-   include for stragglers. overscroll-behavior keeps modal scrolls
-   from bleeding into the document scroll. */
+/* Prevent modal/overlay scrolls from bleeding into the document. */
 body {
   overscroll-behavior-y: none;
 }
