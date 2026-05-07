@@ -92,8 +92,9 @@ const DEFAULT_TIERS: Tier[] = [
   },
 ];
 
-function parseFeatures(text: string | undefined): string[] {
-  return (text ?? "")
+function parseFeatures(text: unknown): string[] {
+  if (typeof text !== "string") return [];
+  return text
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);

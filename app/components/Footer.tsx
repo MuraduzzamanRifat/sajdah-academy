@@ -33,9 +33,12 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   },
 ];
 
-/* Each line of links_text is "Label|URL". Empty/malformed lines drop. */
-function parseLinks(text: string | undefined): { label: string; href: string }[] {
-  if (!text) return [];
+/* Each line of links_text is "Label|URL". Empty/malformed lines drop.
+   Accepts unknown — CMS round-trip can store non-strings in list-item
+   subfields, which would crash .split() before the pick() type-guard
+   fix. Belt-and-suspenders. */
+function parseLinks(text: unknown): { label: string; href: string }[] {
+  if (typeof text !== "string" || text.length === 0) return [];
   return text
     .split("\n")
     .map((line) => line.trim())
