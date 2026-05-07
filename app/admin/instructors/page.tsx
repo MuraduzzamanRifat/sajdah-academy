@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { Plus, Star, MoreHorizontal, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { Plus, Star, AlertCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
 import { initials } from "../../../lib/initials";
+import InstructorRowActions from "./_components/InstructorRowActions";
 
 export const metadata: Metadata = {
   title: "Admin · Instructors",
@@ -44,9 +46,12 @@ export default async function AdminInstructorsPage() {
           <h2 className="text-lg font-bold text-emerald-950">{instructors.length} জন শিক্ষক</h2>
           <p className="text-xs text-slate-500 mt-0.5">{regulars} নিয়মিত · {guests} অতিথি · গড় রেটিং {avgRating}/৫</p>
         </div>
-        <button type="button" className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold">
+        <Link
+          href="/admin/instructors/new/"
+          className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold"
+        >
           <Plus className="w-3.5 h-3.5" /> নতুন শিক্ষক
-        </button>
+        </Link>
       </div>
 
       {error && (
@@ -89,13 +94,7 @@ export default async function AdminInstructorsPage() {
                       }`}>
                         {t.is_guest ? "অতিথি" : "নিয়মিত"}
                       </span>
-                      <button
-                        type="button"
-                        className="p-1 text-slate-400 hover:text-slate-700"
-                        aria-label={`Actions for ${t.name}`}
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
+                      <InstructorRowActions id={t.id} name={t.name} />
                     </div>
                   </div>
                   {t.bio && <p className="text-xs text-slate-700 leading-relaxed mt-2">{t.bio}</p>}

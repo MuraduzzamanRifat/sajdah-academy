@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, Mail, BookOpen } from "lucide-react";
+import { createClient } from "../../lib/supabase/server";
+import { initials } from "../../lib/initials";
 
 const title = "Faculty — শিক্ষকমণ্ডলী";
 const description =
@@ -12,52 +14,27 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faculty/" },
 };
 
-const mentors = [
-  {
-    name: "মাওলানা আবদুল্লাহ মাহমুদ",
-    role: "মূল মেন্টর · Aqeedah & Hadith",
-    qualifications: "দাওরায়ে হাদীস (জামিয়া), দারুল উলূম দেওবন্দ",
-    bio: "১৮ বছর ধরে যুবকদের ইসলামী জাগরণে কাজ করছেন। বিশেষজ্ঞতা — আক্বীদা, হাদীস ও ইসলামিক তরবিয়াহ। বহু বইয়ের লেখক।",
-    initial: "আ",
-  },
-  {
-    name: "মুফতি জাকারিয়া হোসাইন",
-    role: "Fiqh & Mu'amalat বিশেষজ্ঞ",
-    qualifications: "ইফতা — দারুল উলূম হাটহাজারী; LLB — ঢাকা বিশ্ববিদ্যালয়",
-    bio: "আধুনিক অর্থনীতি, ব্যাংকিং, ও মুসলিম পরিবার আইনে বিশেষজ্ঞ। হালাল-হারাম ও মু'আমালাত বিষয়ে দেশের অন্যতম রেফারেন্স।",
-    initial: "জ",
-  },
-  {
-    name: "ড. ইমরান হাসান",
-    role: "Tazkiyah & Spiritual Counselling",
-    qualifications: "PhD ইসলামিক স্টাডিজ — Al-Azhar; ক্লিনিক্যাল সাইকোলজি",
-    bio: "নফসের রোগ ও চিকিৎসা — শাস্ত্রীয় তাযকিয়াহ ও আধুনিক মনস্তত্ত্বের সমন্বয়। ব্যক্তিগত কাউন্সেলিং সেশন পরিচালনা করেন।",
-    initial: "ই",
-  },
-  {
-    name: "ক্বারী মুহাম্মদ ইউসুফ",
-    role: "Quran & Tajweed Master",
-    qualifications: "সনদে কুরআন — সিলসিলা মুতাওয়াতিরাহ; হাফেজ ও ক্বারী",
-    bio: "তাজভীদসহ কুরআন তিলাওয়াত, হিফয, ও তাফসীর শিক্ষা। বহু ছাত্রকে বিশ্বমানের ক্বারী হিসেবে গড়ে তুলেছেন।",
-    initial: "ই",
-  },
-  {
-    name: "ব্রাদার ফাহিম রহমান",
-    role: "Lifestyle Coach & Habit Mentor",
-    qualifications: "MBA — IBA, ঢাকা বিশ্ববিদ্যালয়; সার্টিফাইড লাইফ কোচ",
-    bio: "Habit Building, productivity, ও দ্বীনি লাইফস্টাইল ডিজাইন — তরুণদের জন্য বাস্তবসম্মত গাইডেন্স। প্রাক্তন কর্পোরেট লিডার।",
-    initial: "ফ",
-  },
-  {
-    name: "মাওলানা সাইফুল ইসলাম",
-    role: "Seerah & Akhlaq",
-    qualifications: "মাস্টার্স — ইসলামিক স্টাডিজ; দাওরায়ে হাদীস",
-    bio: "সিরাতে রাসূল ﷺ ও সাহাবা রা.-এর জীবনীর গভীর গবেষক। চরিত্র গঠন ও আদর্শ ব্যক্তিত্ব নির্মাণে দীর্ঘ অভিজ্ঞতা।",
-    initial: "স",
-  },
-];
+export const revalidate = 60;
 
-export default function FacultyPage() {
+type InstructorRow = {
+  id: string;
+  name: string;
+  name_bn: string | null;
+  role_label: string | null;
+  bio: string | null;
+  is_guest: boolean;
+};
+
+export default async function FacultyPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("instructors")
+    .select("id, name, name_bn, role_label, bio, is_guest")
+    .order("is_guest", { ascending: true })
+    .order("name", { ascending: true });
+
+  const mentors = (data ?? []) as InstructorRow[];
+
   return (
     <main className="pt-24 pb-24">
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
@@ -77,26 +54,39 @@ export default function FacultyPage() {
       <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-light" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mentors.map((m, i) => (
-              <article key={i} className="glass-light glass-light-hover rounded-3xl p-7">
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-white flex items-center justify-center font-bold text-2xl shrink-0">
-                    {m.initial}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-emerald-950 leading-tight">{m.name}</h3>
-                    <p className="text-sm text-amber-600 font-medium mt-0.5">{m.role}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 mb-4 pb-4 border-b border-slate-200/60">
-                  <GraduationCap className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                  <p className="text-xs text-slate-600 leading-relaxed">{m.qualifications}</p>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{m.bio}</p>
-              </article>
-            ))}
-          </div>
+          {mentors.length === 0 ? (
+            <p className="text-center text-slate-500 py-16">শিক্ষকদের বিস্তারিত শীঘ্রই আসছে।</p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mentors.map((m) => {
+                const display = m.name_bn || m.name;
+                return (
+                  <article key={m.id} className="glass-light glass-light-hover rounded-3xl p-7">
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-900 text-white flex items-center justify-center font-bold text-xl shrink-0">
+                        {initials(display)}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-bold text-emerald-950 leading-tight">{display}</h3>
+                        {m.role_label && <p className="text-sm text-amber-600 font-medium mt-0.5">{m.role_label}</p>}
+                        {m.is_guest && (
+                          <span className="inline-block mt-1 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
+                            অতিথি শিক্ষক
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {m.bio && (
+                      <div className="flex items-start gap-2 pt-4 border-t border-slate-200/60">
+                        <GraduationCap className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                        <p className="text-sm text-slate-700 leading-relaxed">{m.bio}</p>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

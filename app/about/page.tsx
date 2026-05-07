@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, Heart, Compass, Users, Sparkles, ShieldCheck } from "lucide-react";
+import { getSettingsByPrefix, pick } from "../../lib/settings";
 
 const title = "About Sajdah Academy — পরিচিতি";
 const description =
@@ -11,6 +12,8 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: "/about/" },
 };
+
+export const revalidate = 60;
 
 const values = [
   {
@@ -52,18 +55,27 @@ const milestones = [
   { year: "২০২৭", event: "নিজস্ব রিট্রিট সেন্টার (পরিকল্পিত)" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const s = await getSettingsByPrefix("about.");
+  const eyebrow = pick(s, "about.eyebrow", "About · পরিচিতি");
+  const titleBn = pick(s, "about.title_bn", "একটি দ্বীনি জাগরণের নাম");
+  const missionTitle = pick(s, "about.mission_title_bn", "আমাদের মিশন");
+  const missionBody = pick(s, "about.mission_body_bn",
+    "বাংলাদেশের তরুণ প্রজন্মের সামনে এমন এক প্রিমিয়াম দ্বীনি প্রোগ্রাম উপস্থাপন করা — যেখানে তাঁরা কুরআন-সুন্নাহকে জীবনের সাথে মেলাতে শিখবেন।");
+  const visionTitle = pick(s, "about.vision_title_bn", "আমাদের ভিশন");
+  const visionBody = pick(s, "about.vision_body_bn",
+    "২০৩০ সালের মধ্যে ১,০০০+ যুবককে এই ৬ মাসের ট্রান্সফরমেশন কোর্সে অংশগ্রহণ করানো।");
+
   return (
     <main className="pt-24 pb-24">
-      {/* Page hero */}
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <span className="inline-block text-amber-400 font-bold tracking-widest uppercase text-sm mb-4">
-            About · পরিচিতি
+            {eyebrow}
           </span>
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            একটি দ্বীনি জাগরণের নাম
+            {titleBn}
           </h1>
           <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl mx-auto">
             Sajdah Academy কোনো সাধারণ মাদরাসা বা শর্ট কোর্স নয় — এটি একটি ৬ মাসের ফিজিক্যাল
@@ -72,7 +84,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Mission + Vision */}
       <section className="py-20 bg-slate-50 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-light" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid md:grid-cols-2 gap-8">
@@ -80,24 +91,15 @@ export default function AboutPage() {
             <span className="text-amber-600 font-bold tracking-wider uppercase text-xs mb-3 block">
               Our Mission
             </span>
-            <h2 className="text-3xl font-bold text-emerald-950 mb-5">আমাদের মিশন</h2>
-            <p className="text-slate-700 leading-relaxed text-lg">
-              বাংলাদেশের তরুণ প্রজন্মের সামনে এমন এক প্রিমিয়াম দ্বীনি প্রোগ্রাম উপস্থাপন করা
-              যেখানে তাঁরা কুরআন-সুন্নাহকে জীবনের সাথে মেলাতে শিখবেন — শ্রেণীকক্ষে নয়,
-              বাস্তবে। ৬ মাসের নিরিবিলি অবস্থান, প্রিমিয়াম সুবিধা ও মেন্টরদের তত্ত্বাবধানে
-              জীবনের নকশা পুনর্গঠন।
-            </p>
+            <h2 className="text-3xl font-bold text-emerald-950 mb-5">{missionTitle}</h2>
+            <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{missionBody}</p>
           </div>
           <div className="glass-light rounded-3xl p-8 md:p-10">
             <span className="text-amber-600 font-bold tracking-wider uppercase text-xs mb-3 block">
               Our Vision
             </span>
-            <h2 className="text-3xl font-bold text-emerald-950 mb-5">আমাদের ভিশন</h2>
-            <p className="text-slate-700 leading-relaxed text-lg">
-              ২০৩০ সালের মধ্যে ১,০০০+ যুবককে এই ৬ মাসের ট্রান্সফরমেশন কোর্সে অংশগ্রহণ করানো —
-              যাঁরা পরবর্তীতে নিজ নিজ পেশায়, পরিবারে ও সমাজে দ্বীনের আলো বহন করবেন। ইনশাআল্লাহ,
-              এক প্রজন্মে যথেষ্ট পরিবর্তন।
-            </p>
+            <h2 className="text-3xl font-bold text-emerald-950 mb-5">{visionTitle}</h2>
+            <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{visionBody}</p>
           </div>
         </div>
       </section>
