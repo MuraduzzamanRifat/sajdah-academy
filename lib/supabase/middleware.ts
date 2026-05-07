@@ -154,19 +154,23 @@ function makeNonce(): string {
 const NONCE_HEADER = "x-csp-nonce";
 
 function buildCSP(nonce: string, isDev: boolean): string {
-  /* strict-dynamic with a nonce: Next's bootstrap script gets the nonce,
-     anything it loads inherits trust. unsafe-inline is ignored by modern
-     browsers when strict-dynamic is present (it's listed as a fallback
-     for older browsers). Vercel Analytics' inline reporter loads via
-     the trusted bootstrap so it inherits the nonce-derived trust. */
+  /* Pragmatic CSP. We previously used 'strict-dynamic' + nonce but
+     that caused production hydration failures: browsers ignore
+     'unsafe-inline' AND the host-allowlist when strict-dynamic is
+     set, so Vercel Analytics' loader and any third-party inline
+     script that didn't carry our exact request-nonce got blocked
+     mid-hydration → root layout error → global "Application error".
+
+     Now: nonce stamps OUR inline scripts (preloader, JSON-LD), 'self'
+     covers Next chunks, 'unsafe-inline' is the fallback for any
+     framework / analytics inline that we can't nonce-stamp.
+     Less strict than nonce-only but doesn't break the site.
+     Stored XSS is still blocked by DOMPurify on write + read. */
   const scriptSrc = [
     "'self'",
     `'nonce-${nonce}'`,
-    "'strict-dynamic'",
-    /* Fallback for browsers that don't support strict-dynamic. */
     "'unsafe-inline'",
     "https://va.vercel-scripts.com",
-    /* Dev needs eval for HMR; production strips this. */
     isDev ? "'unsafe-eval'" : "",
   ]
     .filter(Boolean)
