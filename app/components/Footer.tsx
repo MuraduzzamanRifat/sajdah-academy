@@ -23,8 +23,13 @@ const DEFAULT_COLUMNS: FooterColumn[] = [
   {
     title: "Resources",
     title_bn: "রিসোর্স",
+    /* "Student Login" links straight to /login — the previous
+       "Student Portal Preview" pointed at /student-dashboard/ which
+       middleware redirects to /login for unauthenticated users
+       anyway. The "Preview" label promised something we don't show
+       (the dashboard now reads real data, no preview mode). */
     links_text:
-      "Blog · Articles|/blog/\nStudent Portal Preview|/student-dashboard/\nSupport Us · Sadaqah|/donate/\nPrivacy Policy|/privacy/",
+      "Blog · Articles|/blog/\nStudent Login|/login/\nSupport Us · Sadaqah|/donate/\nPrivacy Policy|/privacy/",
   },
 ];
 

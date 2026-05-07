@@ -25,8 +25,17 @@ const PRELOADER_CSS = `
   opacity: 1;
   transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity;
+  /* CSS-only safety net. If the inline JS is blocked (CSP mismatch
+     on a subsequent navigation, sessionStorage cleared, etc.), the
+     preloader still fades after 2.5s via this animation so it can
+     never get permanently stuck on any page. JS hide via .__loaded
+     still triggers earlier when it works. */
+  animation: __preloader_autohide 600ms 2500ms forwards;
 }
 #__preloader.__loaded { opacity: 0; pointer-events: none; }
+@keyframes __preloader_autohide {
+  to { opacity: 0; pointer-events: none; visibility: hidden; }
+}
 #__preloader__inner {
   position: relative;
   width: 160px; height: 160px;
