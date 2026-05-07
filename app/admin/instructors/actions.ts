@@ -7,6 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -31,16 +32,21 @@ export async function createInstructor(formData: FormData): Promise<ActionResult
     return { error: "Rating ০-৫ এর মধ্যে হতে হবে।" };
   }
 
-  const { error } = await supabase.from("instructors").insert({
-    name,
-    name_bn: fld(formData, "name_bn") || null,
-    role_label: fld(formData, "role_label") || null,
-    bio: fld(formData, "bio") || null,
-    rating,
-    is_guest: formData.get("is_guest") === "on",
-  });
+  const { data: created, error } = await supabase
+    .from("instructors")
+    .insert({
+      name,
+      name_bn: fld(formData, "name_bn") || null,
+      role_label: fld(formData, "role_label") || null,
+      bio: fld(formData, "bio") || null,
+      rating,
+      is_guest: formData.get("is_guest") === "on",
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (created) await Actions.instructorCreate(created.id, { name });
   revalidateAll();
   redirect("/admin/instructors/");
 }
@@ -69,6 +75,7 @@ export async function updateInstructor(id: string, formData: FormData): Promise<
     .eq("id", id);
 
   if (error) return { error: error.message };
+  await Actions.instructorUpdate(id, { name });
   revalidateAll();
   redirect("/admin/instructors/");
 }
@@ -77,6 +84,7 @@ export async function deleteInstructor(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("instructors").delete().eq("id", id);
   if (error) return { error: error.message };
+  await Actions.instructorDelete(id);
   revalidateAll();
   return { ok: true };
 }

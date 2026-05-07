@@ -132,7 +132,7 @@ export default function AdminShell({
             Live · Secure
           </span>
           <p className="text-emerald-200 leading-snug min-w-0 truncate text-xs hidden md:block">
-            All actions are audit-logged · RLS enforced · Session encrypted
+            All mutations audit-logged · RLS enforced · Session encrypted
           </p>
           <p className="text-emerald-200 text-xs md:hidden truncate">Audit-logged</p>
           <Link

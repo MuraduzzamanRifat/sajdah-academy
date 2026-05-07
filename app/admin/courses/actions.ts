@@ -9,6 +9,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -44,21 +45,26 @@ export async function createCourse(formData: FormData): Promise<ActionResult> {
     return { error: "Phase: Foundation / Understanding / Transformation এর মধ্যে একটি হতে হবে।" };
   }
 
-  const { error } = await supabase.from("courses").insert({
-    slug,
-    title,
-    title_bn: fld(formData, "title_bn") || null,
-    phase,
-    duration: fld(formData, "duration") || null,
-    summary: fld(formData, "summary") || null,
-    learning_outcomes: fldArr(formData, "learning_outcomes"),
-    topics: fldArr(formData, "topics"),
-    module_number: parseInt(fld(formData, "module_number"), 10) || null,
-    display_order: parseInt(fld(formData, "display_order"), 10) || 0,
-    is_published: formData.get("is_published") === "on",
-  });
+  const { data: created, error } = await supabase
+    .from("courses")
+    .insert({
+      slug,
+      title,
+      title_bn: fld(formData, "title_bn") || null,
+      phase,
+      duration: fld(formData, "duration") || null,
+      summary: fld(formData, "summary") || null,
+      learning_outcomes: fldArr(formData, "learning_outcomes"),
+      topics: fldArr(formData, "topics"),
+      module_number: parseInt(fld(formData, "module_number"), 10) || null,
+      display_order: parseInt(fld(formData, "display_order"), 10) || 0,
+      is_published: formData.get("is_published") === "on",
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (created) await Actions.courseCreate(created.id, { slug, title, phase });
   revalidateAll();
   redirect("/admin/courses/");
 }
@@ -90,17 +96,20 @@ export async function updateCourse(id: string, formData: FormData): Promise<Acti
     .eq("id", id);
 
   if (error) return { error: error.message };
+  await Actions.courseUpdate(id, { title, phase });
   revalidateAll();
   redirect("/admin/courses/");
 }
 
 export async function togglePublish(id: string, currentlyPublished: boolean): Promise<ActionResult> {
   const supabase = await createClient();
+  const next = !currentlyPublished;
   const { error } = await supabase
     .from("courses")
-    .update({ is_published: !currentlyPublished })
+    .update({ is_published: next })
     .eq("id", id);
   if (error) return { error: error.message };
+  await Actions.coursePublish(id, next);
   revalidateAll();
   return { ok: true };
 }
@@ -109,6 +118,7 @@ export async function deleteCourse(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("courses").delete().eq("id", id);
   if (error) return { error: error.message };
+  await Actions.courseDelete(id);
   revalidateAll();
   return { ok: true };
 }
@@ -135,8 +145,9 @@ export async function duplicateCourse(id: string): Promise<ActionResult> {
   delete (copy as Record<string, unknown>).created_at;
   delete (copy as Record<string, unknown>).updated_at;
 
-  const { error } = await supabase.from("courses").insert(copy);
+  const { data: dup, error } = await supabase.from("courses").insert(copy).select("id").single();
   if (error) return { error: error.message };
+  if (dup) await Actions.courseDuplicate(id, dup.id);
   revalidateAll();
   return { ok: true };
 }

@@ -7,6 +7,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type SaveResult = { ok: true; saved: number } | { error: string };
 
@@ -66,5 +67,6 @@ export async function saveSettings(
 
   PUBLIC_PATHS_TO_REVALIDATE.forEach((p) => revalidatePath(p));
   revalidatePath("/admin/pages");
+  await Actions.settingsUpdate(rows.map((r) => r.key));
   return { ok: true, saved: rows.length };
 }

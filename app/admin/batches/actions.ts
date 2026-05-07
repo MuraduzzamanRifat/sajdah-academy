@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -29,21 +30,26 @@ export async function createBatch(formData: FormData): Promise<ActionResult> {
   if (!name) return { error: "নাম দিন।" };
   if (!STATUSES.includes(status)) return { error: "Status invalid।" };
 
-  const { error } = await supabase.from("batches").insert({
-    code,
-    name,
-    status,
-    starts_at: fld(formData, "starts_at") || null,
-    ends_at: fld(formData, "ends_at") || null,
-    location: fld(formData, "location") || null,
-    capacity: parseInt(fld(formData, "capacity"), 10) || 40,
-    fee_bdt: parseFloat(fld(formData, "fee_bdt")) || null,
-    installments: parseInt(fld(formData, "installments"), 10) || 4,
-    enrollment_closes_at: fld(formData, "enrollment_closes_at") || null,
-    notes: fld(formData, "notes") || null,
-  });
+  const { data: created, error } = await supabase
+    .from("batches")
+    .insert({
+      code,
+      name,
+      status,
+      starts_at: fld(formData, "starts_at") || null,
+      ends_at: fld(formData, "ends_at") || null,
+      location: fld(formData, "location") || null,
+      capacity: parseInt(fld(formData, "capacity"), 10) || 40,
+      fee_bdt: parseFloat(fld(formData, "fee_bdt")) || null,
+      installments: parseInt(fld(formData, "installments"), 10) || 4,
+      enrollment_closes_at: fld(formData, "enrollment_closes_at") || null,
+      notes: fld(formData, "notes") || null,
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (created) await Actions.batchCreate(created.id, { code, name, status });
   revalidateAll();
   redirect("/admin/batches/");
 }
@@ -73,6 +79,7 @@ export async function updateBatch(id: string, formData: FormData): Promise<Actio
     .eq("id", id);
 
   if (error) return { error: error.message };
+  await Actions.batchUpdate(id, { name, status });
   revalidateAll();
   redirect("/admin/batches/");
 }
@@ -81,6 +88,7 @@ export async function deleteBatch(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("batches").delete().eq("id", id);
   if (error) return { error: error.message };
+  await Actions.batchDelete(id);
   revalidateAll();
   return { ok: true };
 }

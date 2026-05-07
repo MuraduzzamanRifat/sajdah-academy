@@ -7,6 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
+import { Actions } from "../../../lib/audit";
 
 export type ActionResult = { ok: true } | { error: string };
 
@@ -46,19 +47,24 @@ export async function createPost(formData: FormData): Promise<ActionResult> {
   if (!body) return { error: "Body দিন।" };
   if (!slug) return { error: "Slug auto-generate ব্যর্থ হয়েছে — manually লিখুন।" };
 
-  const { error } = await supabase.from("posts").insert({
-    slug,
-    title,
-    excerpt: fld(formData, "excerpt") || null,
-    body,
-    category: fld(formData, "category") || null,
-    author: fld(formData, "author") || null,
-    reading_minutes: parseInt(fld(formData, "reading_minutes"), 10) || estimateReadingMinutes(body),
-    published_at: fld(formData, "published_at") || new Date().toISOString().slice(0, 10),
-    is_published: formData.get("is_published") === "on",
-  });
+  const { data: created, error } = await supabase
+    .from("posts")
+    .insert({
+      slug,
+      title,
+      excerpt: fld(formData, "excerpt") || null,
+      body,
+      category: fld(formData, "category") || null,
+      author: fld(formData, "author") || null,
+      reading_minutes: parseInt(fld(formData, "reading_minutes"), 10) || estimateReadingMinutes(body),
+      published_at: fld(formData, "published_at") || new Date().toISOString().slice(0, 10),
+      is_published: formData.get("is_published") === "on",
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (created) await Actions.postCreate(created.id, { slug, title });
   revalidateAll();
   redirect("/admin/blog/");
 }
@@ -85,14 +91,17 @@ export async function updatePost(id: string, formData: FormData): Promise<Action
     .eq("id", id);
 
   if (error) return { error: error.message };
+  await Actions.postUpdate(id, { title });
   revalidateAll();
   redirect("/admin/blog/");
 }
 
 export async function togglePublish(id: string, currentlyPublished: boolean): Promise<ActionResult> {
   const supabase = await createClient();
-  const { error } = await supabase.from("posts").update({ is_published: !currentlyPublished }).eq("id", id);
+  const next = !currentlyPublished;
+  const { error } = await supabase.from("posts").update({ is_published: next }).eq("id", id);
   if (error) return { error: error.message };
+  await Actions.postPublish(id, next);
   revalidateAll();
   return { ok: true };
 }
@@ -101,6 +110,7 @@ export async function deletePost(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("posts").delete().eq("id", id);
   if (error) return { error: error.message };
+  await Actions.postDelete(id);
   revalidateAll();
   return { ok: true };
 }
