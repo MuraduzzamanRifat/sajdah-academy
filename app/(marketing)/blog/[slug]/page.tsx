@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "../../../../lib/supabase/server";
 
 export const revalidate = 60;
@@ -45,6 +46,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
+const ESCAPE_MAP: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => ESCAPE_MAP[c]);
+}
+
 export default async function PostPage({ params }: Params) {
   const { slug } = await params;
   const supabase = await createClient();
@@ -69,7 +81,30 @@ export default async function PostPage({ params }: Params) {
   const post = p as PostDetail;
   const related = (relatedRaw ?? []) as Pick<PostDetail, "slug" | "title" | "category" | "excerpt">[];
 
-  const paragraphs = post.body.split(/\n\n+/);
+  /* Body is HTML from the rich-text editor (Tiptap). Legacy posts may
+     still be plain text with \n\n paragraph breaks — detect and convert.
+     Sanitize either way before injecting into the DOM. */
+  const isHtml = /<\/?[a-z][\s\S]*?>/i.test(post.body);
+  const rawHtml = isHtml
+    ? post.body
+    : post.body
+        .split(/\n\n+/)
+        .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
+        .join("");
+
+  const sanitizedBody = DOMPurify.sanitize(rawHtml, {
+    ADD_TAGS: ["iframe"],
+    ADD_ATTR: [
+      "allow",
+      "allowfullscreen",
+      "frameborder",
+      "scrolling",
+      "target",
+      "rel",
+    ],
+    ALLOWED_URI_REGEXP:
+      /^(?:(?:https?|mailto|ftp|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+  });
 
   return (
     <main className="pt-24 pb-24">
@@ -114,18 +149,16 @@ export default async function PostPage({ params }: Params) {
 
       <article className="py-16 bg-slate-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="prose-content space-y-6">
-            {post.excerpt && (
-              <p className="text-xl text-emerald-900 leading-relaxed font-medium border-l-4 border-amber-500 pl-5 italic">
-                {post.excerpt}
-              </p>
-            )}
-            {paragraphs.map((para, i) => (
-              <p key={i} className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">
-                {para}
-              </p>
-            ))}
-          </div>
+          {post.excerpt && (
+            <p className="text-xl text-emerald-900 leading-relaxed font-medium border-l-4 border-amber-500 pl-5 italic mb-8">
+              {post.excerpt}
+            </p>
+          )}
+          <div
+            className="blog-prose"
+            // Sanitized via DOMPurify above — safe to inject.
+            dangerouslySetInnerHTML={{ __html: sanitizedBody }}
+          />
         </div>
       </article>
 

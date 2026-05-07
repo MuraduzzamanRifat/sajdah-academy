@@ -31,6 +31,10 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
+  /* isomorphic-dompurify pulls in jsdom which is a heavy CommonJS module.
+     Marking it external prevents Next from trying to bundle it for the
+     Edge runtime + keeps static-generation happy on /404 and /blog/[slug]. */
+  serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
 };
 
 export default nextConfig;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AlertCircle, Save } from "lucide-react";
 import { createPost, updatePost, type ActionResult } from "../actions";
+import RichTextEditor from "../../_components/RichTextEditor";
 
 export type PostInitial = {
   id?: string;
@@ -31,9 +32,9 @@ export default function PostForm({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [bodyValue, setBodyValue] = useState(initial.body ?? "");
+  const [bodyText, setBodyText] = useState(stripHtml(initial.body ?? ""));
 
-  const wordCount = bodyValue.split(/\s+/).filter(Boolean).length;
+  const wordCount = bodyText.split(/\s+/).filter(Boolean).length;
   const estReading = Math.max(1, Math.round(wordCount / 220));
 
   async function onSubmit(formData: FormData) {
@@ -105,16 +106,13 @@ export default function PostForm({
 
       <div>
         <Label>
-          Body — paragraph-by-paragraph, blank line separates paragraphs · {wordCount} words · ~{estReading} min read
+          Body — rich editor (heading, list, image, table, YouTube, source HTML) · {wordCount} words · ~{estReading} min read
         </Label>
-        <textarea
+        <RichTextEditor
           name="body"
-          value={bodyValue}
-          onChange={(e) => setBodyValue(e.target.value)}
-          required
-          rows={20}
-          placeholder={"প্রথম প্যারাগ্রাফ লিখুন।\n\nএকটি ফাঁকা লাইন → নতুন প্যারাগ্রাফ।\n\nMarkdown সাপোর্ট পরবর্তী রিলিজে। আপাতত plain text + paragraph breaks।"}
-          className={`${inputBase} font-sans leading-relaxed resize-y`}
+          defaultValue={initial.body ?? ""}
+          onTextChange={setBodyText}
+          placeholder="প্রথম প্যারাগ্রাফ লিখুন। উপরে toolbar থেকে heading/list/link/image যোগ করুন।"
         />
       </div>
 
@@ -124,6 +122,8 @@ export default function PostForm({
           <input
             type="date"
             name="published_at"
+            title="Published date"
+            aria-label="Published date"
             defaultValue={initial.published_at ?? new Date().toISOString().slice(0, 10)}
             className={inputBase}
           />
@@ -178,4 +178,10 @@ export default function PostForm({
 
 function Label({ children }: { children: React.ReactNode }) {
   return <label className="block text-xs font-medium text-slate-700 mb-1.5">{children}</label>;
+}
+
+/* Editor stores HTML; word count needs plain text. Cheap regex strip
+   is fine — runs on every keystroke, so DOMParser would be wasteful. */
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
