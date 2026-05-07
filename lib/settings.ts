@@ -50,12 +50,34 @@ export const getSettingsByPrefix = cache(async (prefix: string): Promise<Record<
   return out;
 });
 
-/* Convenience: read a value from a pre-fetched bag with a fallback. */
+/* Convenience: read a value from a pre-fetched bag with a fallback.
+   Type-checks the stored value against the fallback's runtime type.
+   Without this, a CMS round-trip that stored `{}` or `[]` where a
+   string was expected would surface as "Objects are not valid as a
+   React child" 500s on whichever public page rendered the field
+   (about, privacy, press all hit this). The blind `as T` cast was
+   the original sin; the runtime check is the fix. */
 export function pick<T extends SettingValue>(
   bag: Record<string, SettingValue>,
   key: string,
   fallback: T
 ): T {
   const v = bag[key];
-  return (v === undefined || v === null) ? fallback : (v as T);
+  if (v === undefined || v === null) return fallback;
+  // String/number/boolean fallback → require matching primitive.
+  if (typeof fallback === "string" && typeof v !== "string") return fallback;
+  if (typeof fallback === "number" && typeof v !== "number") return fallback;
+  if (typeof fallback === "boolean" && typeof v !== "boolean") return fallback;
+  // Array fallback → require array.
+  if (Array.isArray(fallback) && !Array.isArray(v)) return fallback;
+  // Object fallback (non-array, non-null) → require plain object.
+  if (
+    !Array.isArray(fallback) &&
+    typeof fallback === "object" &&
+    fallback !== null &&
+    (typeof v !== "object" || v === null || Array.isArray(v))
+  ) {
+    return fallback;
+  }
+  return v as T;
 }
