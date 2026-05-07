@@ -6,14 +6,23 @@ import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 /* Defense in depth — settings written via the admin CMS are sanitized
    on save, but a future migration / direct DB edit could bypass that.
-   Re-purifying at render guarantees no <script>/onerror/iframe leaks. */
+   Re-purifying at render guarantees no <script>/onerror/iframe leaks.
+   Coerces non-string inputs (an empty CMS field can land as `{}`/`[]`
+   after a save round-trip; that used to blow up DOMPurify.sanitize and
+   500 the entire page). */
 const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
   ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
   FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
   FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
 };
-const purify = (html: string): string =>
-  html ? String(DOMPurify.sanitize(html, RENDER_PURIFY)) : "";
+const purify = (html: unknown): string => {
+  if (typeof html !== "string" || html.length === 0) return "";
+  try {
+    return String(DOMPurify.sanitize(html, RENDER_PURIFY));
+  } catch {
+    return "";
+  }
+};
 
 const title = "About Sajdah Academy — পরিচিতি";
 const description =
@@ -192,17 +201,22 @@ export default async function AboutPage() {
    data may still be plain text from the previous schema. Detect HTML;
    render directly (it was sanitized at write-time in actions.ts).
    Fallback wraps plain text in a <p> so the prose styling still applies. */
-function RichOrText({ html }: { html: string }) {
-  const looksLikeHtml = /<\/?[a-z][\s\S]*?>/i.test(html);
+function RichOrText({ html }: { html: unknown }) {
+  /* Defensive coerce — if CMS round-trip stored `{}`/`[]`/null where a
+     string was expected, rendering an object as a React child throws
+     "Objects are not valid as a React child" and 500s the page. */
+  const text = typeof html === "string" ? html : "";
+  if (!text) return null;
+  const looksLikeHtml = /<\/?[a-z][\s\S]*?>/i.test(text);
   if (looksLikeHtml) {
     return (
       <div
         className="blog-prose text-lg"
-        dangerouslySetInnerHTML={{ __html: purify(html) }}
+        dangerouslySetInnerHTML={{ __html: purify(text) }}
       />
     );
   }
   return (
-    <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{html}</p>
+    <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{text}</p>
   );
 }

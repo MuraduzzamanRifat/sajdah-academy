@@ -8,8 +8,16 @@ const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
   FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
   FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
 };
-const purify = (html: string): string =>
-  html ? String(DOMPurify.sanitize(html, RENDER_PURIFY)) : "";
+/* Coerces non-string inputs (an empty CMS field can land as `{}`/`[]`
+   after a save round-trip; that used to blow up DOMPurify.sanitize). */
+const purify = (html: unknown): string => {
+  if (typeof html !== "string" || html.length === 0) return "";
+  try {
+    return String(DOMPurify.sanitize(html, RENDER_PURIFY));
+  } catch {
+    return "";
+  }
+};
 
 const title = "Press & Media — সংবাদমাধ্যম";
 const description =
