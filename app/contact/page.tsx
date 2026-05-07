@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Phone, Mail, MapPin, MessageCircle, Clock } from "lucide-react";
 import ContactForm from "../components/ContactForm";
+import { getSettingsByPrefix, pick } from "../../lib/settings";
 
 const title = "Contact — যোগাযোগ";
 const description =
@@ -12,34 +13,23 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact/" },
 };
 
-const channels = [
-  {
-    icon: Phone,
-    label: "Phone",
-    labelBn: "ফোন",
-    primary: "+880 180 55 65 444",
-    href: "tel:+880180556544",
-    hint: "শনি-বৃহঃ · ১০:০০ - ১৮:০০",
-  },
-  {
-    icon: MessageCircle,
-    label: "WhatsApp",
-    labelBn: "হোয়াটসঅ্যাপ",
-    primary: "+880 180 55 65 444",
-    href: "https://wa.me/880180556544",
-    hint: "২৪ ঘণ্টার মধ্যে উত্তর",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    labelBn: "ইমেইল",
-    primary: "sijdah.academybd@gmail.com",
-    href: "mailto:sijdah.academybd@gmail.com",
-    hint: "সাধারণ অনুসন্ধানের জন্য",
-  },
-];
+export const revalidate = 60;
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const s = await getSettingsByPrefix("contact.");
+  const phone = pick(s, "contact.phone", "+880 180 55 65 444");
+  const whatsapp = pick(s, "contact.whatsapp", "+880 180 55 65 444");
+  const email = pick(s, "contact.email_main", "info@sijdahacademy.com");
+  const hours = pick(s, "contact.hours_bn", "শনি-বৃহঃ · ১০:০০ - ১৮:০০");
+  const address = pick(s, "contact.address_bn", "Sajdah Academy, ঢাকা, বাংলাদেশ");
+
+  const waNumber = whatsapp.replace(/[^0-9]/g, "");
+
+  const channels = [
+    { icon: Phone, label: "Phone", labelBn: "ফোন", primary: phone, href: `tel:${phone.replace(/\s/g, "")}`, hint: hours },
+    { icon: MessageCircle, label: "WhatsApp", labelBn: "হোয়াটসঅ্যাপ", primary: whatsapp, href: `https://wa.me/${waNumber}`, hint: "২৪ ঘণ্টার মধ্যে উত্তর" },
+    { icon: Mail, label: "Email", labelBn: "ইমেইল", primary: email, href: `mailto:${email}`, hint: "সাধারণ অনুসন্ধানের জন্য" },
+  ];
   return (
     <main className="pt-24 pb-24">
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
@@ -103,26 +93,15 @@ export default function ContactPage() {
             <div className="glass-light rounded-2xl p-7">
               <MapPin className="w-7 h-7 text-amber-600 mb-3" />
               <h3 className="text-lg font-bold text-emerald-950 mb-2">Office · অফিস</h3>
-              <p className="text-slate-700 leading-relaxed text-sm">
-                Sajdah Academy<br />
-                ঢাকা, বাংলাদেশ<br />
-                <span className="text-slate-500">(সাক্ষাৎ পূর্বানুমতি সাপেক্ষে)</span>
+              <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-line">
+                {address}
               </p>
             </div>
 
             <div className="glass-light rounded-2xl p-7">
               <Clock className="w-7 h-7 text-amber-600 mb-3" />
               <h3 className="text-lg font-bold text-emerald-950 mb-2">Office Hours</h3>
-              <dl className="text-sm text-slate-700 space-y-2">
-                <div className="flex justify-between">
-                  <dt>শনি – বৃহস্পতিবার</dt>
-                  <dd className="font-medium">১০:০০ – ১৮:০০</dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt>শুক্রবার</dt>
-                  <dd className="font-medium text-emerald-700">বন্ধ (জুমু'আহ)</dd>
-                </div>
-              </dl>
+              <p className="text-sm text-slate-700">{hours}</p>
             </div>
 
             <div className="bg-emerald-700 text-white rounded-2xl p-7">
@@ -131,7 +110,7 @@ export default function ContactPage() {
                 ভর্তি সংক্রান্ত জরুরি প্রশ্ন? আমাদের ১৫ মিনিটের ফ্রি কাউন্সেলিং কল বুক করুন।
               </p>
               <a
-                href="https://wa.me/880180556544"
+                href={`https://wa.me/${waNumber}`}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-lg transition-all duration-200 active:scale-[0.98] text-sm"
               >
                 <MessageCircle className="w-4 h-4" />

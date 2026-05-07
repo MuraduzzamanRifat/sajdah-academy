@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle } from "lucide-react";
+import { getSetting } from "../../lib/settings";
 
 const title = "FAQ — সাধারণ জিজ্ঞাসা";
 const description =
@@ -12,58 +13,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faq/" },
 };
 
-const faqs = [
-  {
-    q: "এই কোর্সে কারা ভর্তি হতে পারবেন?",
-    a: "প্রাপ্তবয়স্ক যেকোনো মুসলিম ভাই (১৮+) যিনি দ্বীনের ব্যাপারে আন্তরিক, ৬ মাস সময় দিতে প্রস্তুত, এবং নিজেকে পরিবর্তন করতে চান। কোনো পূর্ব ইসলামী শিক্ষা বাধ্যতামূলক নয়।",
-  },
-  {
-    q: "কোর্স ফি কত? কী কী অন্তর্ভুক্ত?",
-    a: "Basic Course-1: ৳২,৫০০ (এক সপ্তাহান্ত)। Foundation Program: ৳৪৫,০০০ (২ মাস)। Full 6-Month Program: ৳১,৫০,০০০। সব ফিতে রিসোর্টে থাকা, হালাল গুরমেট খাবার, ক্লাস উপকরণ ও সার্টিফিকেট অন্তর্ভুক্ত। যাতায়াত খরচ অংশগ্রহণকারীর নিজস্ব।",
-  },
-  {
-    q: "ভেন্যু কোথায়?",
-    a: "ব্যাচ অনুযায়ী বিভিন্ন প্রিমিয়াম রিসোর্টে অনুষ্ঠিত হয় — গাজীপুর, সিলেট, কক্সবাজার। প্রতিটি ভেন্যু শীতাতপ নিয়ন্ত্রিত, ফাইভ-স্টার সমতুল্য সুবিধা সম্পন্ন এবং দ্বীনি পরিবেশের জন্য সুনির্বাচিত।",
-  },
-  {
-    q: "ক্লাসের সময়সূচী কেমন?",
-    a: "প্রতি সপ্তাহান্তে (বৃহস্পতিবার মাগরিব → শুক্রবার এশা) — ১৬+ ঘণ্টা। তাহাজ্জুদ, ফজর, ক্লাস, প্রকৃতিতে হাঁটা, কাউন্সেলিং, খেলাধুলা, ব্যক্তিগত আমল — সব মিলিয়ে একটি সম্পূর্ণ ২৪ ঘণ্টা। বিস্তারিত রুটিন পেইজে দেখুন।",
-  },
-  {
-    q: "প্রতিদিন উপস্থিতি কি বাধ্যতামূলক?",
-    a: "Full Program-এর প্রতিটি সপ্তাহান্ত আবশ্যক। তিনটি অনুপস্থিতির বেশি হলে সার্টিফিকেট প্রদান করা হবে না। জরুরি কারণে অনুপস্থিতির জন্য পূর্বে অনুমোদন প্রয়োজন।",
-  },
-  {
-    q: "কী কী আনতে হবে?",
-    a: "ব্যক্তিগত প্রসাধন, ২ সেট ইহরাম-পরিচ্ছদ (সাদা থব/পাঞ্জাবি), একটি জায়নামাজ, ব্যক্তিগত মুসহাফ ও নোটবুক। ওযুদানি ও বিছানাপত্র রিসোর্ট থেকে সরবরাহ। ল্যাপটপ/ফোন থাকতে পারে কিন্তু ক্লাসরুমে ব্যবহার নিষিদ্ধ।",
-  },
-  {
-    q: "মোবাইল ফোন কি ব্যবহার করতে দেওয়া হবে?",
-    a: "ক্লাস চলাকালীন ও তাহাজ্জুদ-পূর্ব রাতের সময় সম্পূর্ণ নিষিদ্ধ। শুধু লাঞ্চ ও ব্যক্তিগত সময়ে অনুমোদিত। আমরা ফোন-মুক্ত পরিবেশের গুরুত্ব বুঝি — এটি কোর্সের অপরিহার্য অংশ।",
-  },
-  {
-    q: "নারীরা কি অংশগ্রহণ করতে পারবেন?",
-    a: "বর্তমানে শুধুমাত্র পুরুষদের জন্য ব্যাচ চালু আছে। নারীদের জন্য পৃথক ব্যাচ পরিকল্পনাধীন — ২০২৭ সালের মধ্যে ইনশাআল্লাহ চালু হবে। আগ্রহীরা ওয়েটলিস্টে নাম লেখাতে পারেন।",
-  },
-  {
-    q: "রিফান্ড পলিসি কী?",
-    a: "ব্যাচ শুরুর ৩০ দিন পূর্বে বাতিলে — ৮০% রিফান্ড। ১৫ দিন পূর্বে — ৫০%। ৭ দিন পূর্বে — ২৫%। তার পর কোনো রিফান্ড নেই। তবে অসুস্থতা বা পারিবারিক জরুরির ক্ষেত্রে পরবর্তী ব্যাচে স্থানান্তর সম্ভব।",
-  },
-  {
-    q: "পেমেন্ট কীভাবে করব?",
-    a: "bKash, Nagad, ব্যাংক ট্রান্সফার, বা ডেবিট/ক্রেডিট কার্ড। Full Program-এ ৩ কিস্তিতে পেমেন্টের সুবিধা — ভর্তির সময় ৪০%, প্রথম মাসে ৩০%, তৃতীয় মাসে ৩০%।",
-  },
-  {
-    q: "কোর্সের পরে কী?",
-    a: "Sajdah Alumni Network-এ আজীবন সদস্যপদ। নিয়মিত মিট-আপ, রিইউনিয়ন রিট্রিট, একটি প্রাইভেট কমিউনিটি গ্রুপ, ও সিনিয়র মেন্টরদের সাথে কাউন্সেলিং। অনেকেই Sajdah-এর দাওয়াহ টিমে যুক্ত হয়েছেন।",
-  },
-  {
-    q: "কোর্সের ভাষা কোনটি?",
-    a: "মূল ভাষা বাংলা। কুরআন-হাদীসের মূল আরবি, ক্লাসিক্যাল রেফারেন্স এবং কিছু আধুনিক টার্ম ইংরেজিতে। অংশগ্রহণকারীদের জন্য বিশেষ ব্যবস্থা নেই — সবাই সমানভাবে পরিচালিত হন।",
-  },
+export const revalidate = 60;
+
+type FaqItem = { q_bn: string; a_bn: string };
+
+const FALLBACK_FAQS: FaqItem[] = [
+  { q_bn: "কোর্স কি অনলাইনে?", a_bn: "না — Sajdah Academy ১০০% ফিজিক্যাল প্রোগ্রাম।" },
+  { q_bn: "ভর্তির যোগ্যতা কী?", a_bn: "১৮+ মুসলিম, যেকোনো পেশা/পটভূমি।" },
 ];
 
-export default function FAQPage() {
+export default async function FAQPage() {
+  const faqs = await getSetting<FaqItem[]>("faq.items", FALLBACK_FAQS);
+
   return (
     <main className="pt-24 pb-24">
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
@@ -91,7 +52,7 @@ export default function FAQPage() {
               className="group glass-light rounded-2xl p-6 transition-all duration-200 open:shadow-lg [&>summary::-webkit-details-marker]:hidden"
             >
               <summary className="flex justify-between items-start gap-4 cursor-pointer list-none">
-                <h3 className="text-lg font-bold text-emerald-950 leading-tight pr-4">{f.q}</h3>
+                <h3 className="text-lg font-bold text-emerald-950 leading-tight pr-4">{f.q_bn}</h3>
                 <span
                   aria-hidden
                   className="shrink-0 w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold transition-transform group-open:rotate-45"
@@ -100,7 +61,7 @@ export default function FAQPage() {
                 </span>
               </summary>
               <p className="text-slate-700 leading-relaxed mt-4 pt-4 border-t border-slate-200/60">
-                {f.a}
+                {f.a_bn}
               </p>
             </details>
           ))}

@@ -3,18 +3,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, ArrowLeft, ArrowRight, User, GraduationCap, Calendar, FileCheck } from "lucide-react";
+import { submitEnrollment } from "../enroll/actions";
 
 /* Multi-step enrollment.
-   Step 1: Personal info
-   Step 2: Background
-   Step 3: Batch / Program selection
-   Step 4: Review & submit
-   On submit: POST to NEXT_PUBLIC_ENROLL_ENDPOINT (Formspree-compatible).
-   If endpoint is empty (first deploy), fall back to mailto: with the
-   payload as the body — never blocks the user, never shows "submission failed". */
-
-const ENDPOINT = process.env.NEXT_PUBLIC_ENROLL_ENDPOINT || "";
-const FALLBACK_EMAIL = "sijdah.academybd@gmail.com";
+   On submit: posts the application to Supabase via the submitEnrollment
+   server action, which inserts into the `enrollments` table. The admin
+   panel at /admin/enrollments/ shows the new row immediately. */
 
 type FormState = {
   fullName: string;
@@ -85,33 +79,18 @@ export default function EnrollmentForm() {
   const next = () => setStep((s) => Math.min(4, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const submit = async () => {
     setSubmitting(true);
-    const ref = `SA-${Date.now().toString(36).toUpperCase()}`;
-    setReference(ref);
-    const payload = { ...form, reference: ref, submittedAt: new Date().toISOString() };
-
-    if (ENDPOINT) {
-      try {
-        await fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch {
-        /* still show success — they have ref number; we'll reconcile manually */
-      }
-    } else {
-      // Fallback: open mail client with full application as body
-      const body = Object.entries(payload)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join("\n");
-      window.location.href = `mailto:${FALLBACK_EMAIL}?subject=${encodeURIComponent(
-        `Sajdah Academy enrollment — ${form.fullName} [${ref}]`
-      )}&body=${encodeURIComponent(body)}`;
-    }
-
+    setSubmitError(null);
+    const result = await submitEnrollment(form);
     setSubmitting(false);
+    if ("error" in result) {
+      setSubmitError(result.error);
+      return;
+    }
+    setReference(result.reference);
     setSubmitted(true);
   };
 
@@ -385,15 +364,22 @@ export default function EnrollmentForm() {
             </button>
           )}
           {step === 4 && (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!form.agree || submitting}
-              className="ml-auto px-8 py-3 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-lg flex items-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? "জমা দেওয়া হচ্ছে..." : "আবেদন জমা দিন"}
-              {!submitting && <CheckCircle className="w-4 h-4" />}
-            </button>
+            <div className="ml-auto flex flex-col items-end gap-2">
+              {submitError && (
+                <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded px-3 py-1.5">
+                  {submitError}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={submit}
+                disabled={!form.agree || submitting}
+                className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-lg flex items-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? "জমা দেওয়া হচ্ছে..." : "আবেদন জমা দিন"}
+                {!submitting && <CheckCircle className="w-4 h-4" />}
+              </button>
+            </div>
           )}
         </div>
       </div>
