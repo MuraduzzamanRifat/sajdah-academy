@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Edit3, FileText } from "lucide-react";
+import { ExternalLink, Edit3, FileText, Zap } from "lucide-react";
 import { PAGE_DEFS } from "./schema";
+import CacheRefreshButton from "./_components/CacheRefreshButton";
 
 export const metadata: Metadata = {
   title: "Admin · Pages",
@@ -14,9 +15,24 @@ export default function AdminPagesIndex() {
     <div className="space-y-4">
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <h2 className="text-lg font-bold text-emerald-950">Pages CMS</h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          ওয়েবসাইটের সব মার্কেটিং কপি এখান থেকে এডিট করুন। সংরক্ষণের পর পাবলিক পেজ সাথে সাথে আপডেট হবে।
+        <p className="text-xs text-slate-500 mt-0.5 mb-4">
+          ওয়েবসাইটের সব মার্কেটিং কপি এখান থেকে এডিট করুন। সংরক্ষণের পর পাবলিক পেজ স্বয়ংক্রিয়ভাবে আপডেট হবে — সংশ্লিষ্ট পেজগুলোর ক্যাশ মুছে যায়।
         </p>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-200 text-amber-800 flex items-center justify-center shrink-0">
+            <Zap className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-amber-900 leading-tight mb-1">
+              যদি কোনো পরিবর্তন লাইভ পেজে দেখা না যায়
+            </p>
+            <p className="text-[11px] text-amber-800 leading-relaxed mb-2">
+              নিচের বাটনে ক্লিক করে পুরো ওয়েবসাইটের ক্যাশ মুছে দিন। সাধারণত ক্যাশ স্বয়ংক্রিয়ভাবে পরিষ্কার হয়, তবে একই সময়ে অনেক ভিজিটর থাকলে কখনো কখনো ম্যানুয়ালি পরিষ্কার করতে হয়।
+            </p>
+            <CacheRefreshButton />
+          </div>
+        </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
