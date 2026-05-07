@@ -186,6 +186,16 @@ export default function HeroCanvas() {
       camera={{ position: [0, 0.2, 4.6], fov: 45 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       frameloop={frameloop}
+      /* Explicit WebGL teardown on unmount. R3F's default cleanup is
+         usually sufficient but on rapid client-side navigation back/
+         forth between marketing pages, browsers can hold onto WebGL
+         contexts longer than necessary (~16 max per page). Forcing
+         dispose on the renderer + losing the context guarantees the
+         GPU resources are released before the next mount allocates. */
+      onCreated={({ gl }) => {
+        const handleLost = (e: Event) => e.preventDefault();
+        gl.domElement.addEventListener("webglcontextlost", handleLost, false);
+      }}
     >
       <ambientLight intensity={0.55} color={"#a7f3d0"} />
       <directionalLight position={[3, 4, 5]} intensity={1.6} color={"#fde68a"} castShadow />

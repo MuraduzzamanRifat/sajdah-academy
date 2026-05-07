@@ -19,13 +19,22 @@ export default function LenisProvider() {
   useEffect(() => {
     if (reduced) return;
 
+    /* Singleton guard — under React Strict Mode, HMR, or any race
+       where the effect runs twice, we'd otherwise create two Lenis
+       instances both binding wheel listeners and competing for scroll
+       control. Stash the live instance on window so the second mount
+       sees it and bails. */
+    type LenisWindow = Window & { __sajdahLenis?: Lenis };
+    const w = window as LenisWindow;
+    if (w.__sajdahLenis) return;
+
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
-      /* iOS native momentum > anything we synthesize on touch. */
       syncTouch: false,
       wheelMultiplier: 1.0,
     });
+    w.__sajdahLenis = lenis;
 
     let rafId: number | null = null;
 
@@ -59,6 +68,7 @@ export default function LenisProvider() {
       window.removeEventListener("touchstart", wake);
       window.removeEventListener("keydown", wake);
       lenis.destroy();
+      if (w.__sajdahLenis === lenis) delete w.__sajdahLenis;
     };
   }, [reduced]);
 
