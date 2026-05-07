@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
 import BatchCountdown from "../../components/BatchCountdown";
 import { createClient } from "../../../lib/supabase/server";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "Batches — ব্যাচসমূহ";
 const description =
@@ -46,14 +47,20 @@ const statusBadge: Record<string, { cls: string; label: string }> = {
 
 export default async function BatchesPage() {
   const supabase = await createClient();
-  const [{ data: batchesRaw }, { data: enrolled }] = await Promise.all([
+  const [{ data: batchesRaw }, { data: enrolled }, settings] = await Promise.all([
     supabase
       .from("batches")
       .select("id, code, name, status, starts_at, ends_at, location, capacity, fee_bdt, notes")
       .in("status", ["open", "running"])
       .order("starts_at", { ascending: true }),
     supabase.from("profiles").select("batch_id").eq("role", "student"),
+    getSettingsByPrefix("batches."),
   ]);
+
+  const eyebrow = pick(settings, "batches.eyebrow", "Batches · ব্যাচসমূহ");
+  const titleBn = pick(settings, "batches.title_bn", "পরবর্তী ব্যাচ শুরু হবে");
+  const subtitleBn = pick(settings, "batches.subtitle_bn", "");
+  const emptyText = pick(settings, "batches.empty_text_bn", "নতুন ব্যাচ ঘোষণার জন্য অপেক্ষা করুন।");
 
   const batches = (batchesRaw ?? []) as BatchRow[];
   const enrolledByBatch = (enrolled ?? []).reduce<Record<string, number>>(
@@ -76,9 +83,10 @@ export default async function BatchesPage() {
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <span className="inline-block text-amber-400 font-bold tracking-widest uppercase text-sm mb-4">
-            Batches · ব্যাচসমূহ
+            {eyebrow}
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 leading-tight">পরবর্তী ব্যাচ শুরু হবে</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 leading-tight">{titleBn}</h1>
+          {subtitleBn && <p className="text-emerald-100 text-lg max-w-2xl mx-auto mb-6">{subtitleBn}</p>}
           {next?.starts_at ? (
             <>
               <p className="text-emerald-100 text-lg mb-8">
@@ -89,7 +97,7 @@ export default async function BatchesPage() {
               </div>
             </>
           ) : (
-            <p className="text-emerald-100 text-lg mb-8">নতুন ব্যাচ ঘোষণার জন্য অপেক্ষা করুন।</p>
+            <p className="text-emerald-100 text-lg mb-8">{emptyText}</p>
           )}
           <Link
             href="/enroll/"

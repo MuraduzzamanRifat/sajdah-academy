@@ -336,6 +336,323 @@ export const PAGE_DEFS: PageDef[] = [
     ],
   },
   {
+    slug: "courses",
+    label: "কোর্স পেজ",
+    labelEn: "Courses page",
+    publicPath: "/courses",
+    description:
+      "/courses পেজের চরম, প্রাইসিং tiers ও সেকশন শিরোনাম। মডিউল কার্ডসমূহ courses table থেকে আসে — /dashboard/courses/ দেখুন।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "courses.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "courses.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "courses.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+        ],
+      },
+      {
+        title: "Pricing tiers (৩টি প্রোগ্রাম)",
+        fields: [
+          { key: "courses.tiers_eyebrow", label: "সেকশন Eyebrow", kind: "string" },
+          { key: "courses.tiers_title_bn", label: "সেকশন শিরোনাম", kind: "string" },
+          {
+            key: "courses.tiers",
+            label: "Tier cards",
+            kind: "list",
+            itemLabel: "Tier",
+            itemFields: [
+              { key: "name", label: "Name (English)", kind: "string", placeholder: "Foundation Program" },
+              { key: "name_bn", label: "Name (Bangla)", kind: "string" },
+              { key: "duration", label: "Duration", kind: "string", placeholder: "৬ মাস" },
+              { key: "price", label: "Price", kind: "string", placeholder: "৳ ১,৫০,০০০" },
+              { key: "desc", label: "এক লাইনের বর্ণনা", kind: "string" },
+              { key: "features_text", label: "Features (প্রতি লাইনে একটি)", kind: "text", rows: 6 },
+              { key: "highlight", label: "Most Popular highlight?", kind: "boolean" },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Module grid heading",
+        fields: [
+          { key: "courses.modules_eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "courses.modules_title_bn", label: "শিরোনাম", kind: "string" },
+        ],
+      },
+      {
+        title: "Certification সেকশন",
+        fields: [
+          { key: "courses.cert_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "courses.cert_body_bn", label: "টেক্সট", kind: "text", rows: 3 },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "donate",
+    label: "Donate পেজ",
+    labelEn: "Donate page",
+    publicPath: "/donate",
+    description: "Sadaqah পেজ — impact tiers ও পেমেন্ট চ্যানেল।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "donate.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "donate.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "donate.subtitle_bn", label: "সাবটাইটেল / কোটেশন", kind: "text", rows: 4 },
+        ],
+      },
+      {
+        title: "Impact tiers (যেভাবে সদকা কাজে লাগে)",
+        fields: [
+          { key: "donate.tiers_eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "donate.tiers_title_bn", label: "শিরোনাম", kind: "string" },
+          {
+            key: "donate.tiers",
+            label: "Tier items",
+            kind: "list",
+            itemLabel: "Tier",
+            itemFields: [
+              { key: "amount", label: "পরিমাণ (টাকা)", kind: "string", placeholder: "৫,০০০" },
+              { key: "label", label: "Label", kind: "string", placeholder: "Module Sponsor" },
+              { key: "desc", label: "বর্ণনা", kind: "text", rows: 2 },
+              { key: "icon", label: "Icon (heart / book / users / gift)", kind: "string", placeholder: "heart" },
+            ],
+          },
+        ],
+      },
+      {
+        title: "পেমেন্ট চ্যানেল",
+        fields: [
+          { key: "donate.channels_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "donate.channels_subtitle_bn", label: "সাবটাইটেল", kind: "string" },
+          {
+            key: "donate.channels",
+            label: "Channels",
+            kind: "list",
+            itemLabel: "Channel",
+            itemFields: [
+              { key: "name", label: "Name (bKash / Nagad / Bank ...)", kind: "string" },
+              { key: "label", label: "Sub-label", kind: "string", placeholder: "Mobile Banking" },
+              { key: "type", label: "Type", kind: "string", placeholder: "Personal" },
+              { key: "number", label: "Number / A/C", kind: "string" },
+              { key: "hint", label: "Hint টেক্সট", kind: "text", rows: 2 },
+            ],
+          },
+          { key: "donate.channels_footer_bn", label: "নিচের টেক্সট", kind: "text", rows: 2 },
+        ],
+      },
+      {
+        title: "Recurring sponsorship CTA",
+        fields: [
+          { key: "donate.cta_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "donate.cta_body_bn", label: "বডি", kind: "text", rows: 3 },
+          { key: "donate.cta_button_bn", label: "বাটন", kind: "string" },
+          { key: "donate.cta_href", label: "বাটন লিংক", kind: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "gallery",
+    label: "Gallery পেজ",
+    labelEn: "Gallery page",
+    publicPath: "/gallery",
+    description: "ব্যাচের ছবি ও মুহূর্ত।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "gallery.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "gallery.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "gallery.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+        ],
+      },
+      {
+        title: "ছবিসমূহ",
+        fields: [
+          {
+            key: "gallery.photos",
+            label: "ছবি গ্রিড",
+            kind: "list",
+            itemLabel: "ছবি",
+            itemFields: [
+              { key: "image", label: "ছবি", kind: "image" },
+              { key: "alt", label: "Alt টেক্সট (accessibility)", kind: "string" },
+              { key: "caption", label: "ক্যাপশন", kind: "string", placeholder: "ব্যাচ-৩ · গাজীপুর" },
+            ],
+          },
+        ],
+      },
+      {
+        title: "নিচের CTA",
+        fields: [
+          { key: "gallery.cta_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "gallery.cta_body_bn", label: "বডি", kind: "text", rows: 2 },
+          { key: "gallery.cta_button_bn", label: "বাটন", kind: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "press",
+    label: "Press / Media",
+    labelEn: "Press",
+    publicPath: "/press",
+    description: "Press kit — fact sheet, brand assets, প্রেস রিলিজ।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "press.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "press.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "press.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 3 },
+        ],
+      },
+      {
+        title: "Boilerplate (About box)",
+        fields: [
+          { key: "press.about_title", label: "শিরোনাম", kind: "string" },
+          { key: "press.about_body", label: "Boilerplate", kind: "rich" },
+        ],
+      },
+      {
+        title: "Quick facts",
+        fields: [
+          {
+            key: "press.facts",
+            label: "Facts",
+            kind: "list",
+            itemLabel: "Fact",
+            itemFields: [
+              { key: "label", label: "Label", kind: "string", placeholder: "Founded" },
+              { key: "value", label: "Value", kind: "string", placeholder: "২০২৪" },
+            ],
+          },
+        ],
+      },
+      {
+        title: "প্রেস রিলিজসমূহ",
+        fields: [
+          {
+            key: "press.releases",
+            label: "Releases",
+            kind: "list",
+            itemLabel: "Release",
+            itemFields: [
+              { key: "date", label: "তারিখ", kind: "string", placeholder: "এপ্রিল ২০২৬" },
+              { key: "title", label: "শিরোনাম", kind: "string" },
+              { key: "summary", label: "সারাংশ", kind: "text", rows: 3 },
+            ],
+          },
+        ],
+      },
+      {
+        title: "Press contact",
+        fields: [
+          { key: "press.contact_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "press.contact_body_bn", label: "বডি", kind: "text", rows: 2 },
+          { key: "press.contact_email", label: "ইমেইল", kind: "string" },
+          { key: "press.contact_phone", label: "ফোন", kind: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "privacy",
+    label: "Privacy & Terms",
+    labelEn: "Privacy",
+    publicPath: "/privacy",
+    description:
+      "Privacy Policy ও Terms — সম্পূর্ণ rich-text এডিটর ব্যবহার করুন। পরিবর্তনের পর last-updated তারিখও আপডেট করুন।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "privacy.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "privacy.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "privacy.last_updated_bn", label: "Last updated টেক্সট", kind: "string", hint: "যেমন: সর্বশেষ আপডেট: মে ২০২৬" },
+        ],
+      },
+      {
+        title: "Privacy section",
+        fields: [
+          { key: "privacy.privacy_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "privacy.privacy_body", label: "বডি (rich)", kind: "rich" },
+        ],
+      },
+      {
+        title: "Terms section",
+        fields: [
+          { key: "privacy.terms_title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "privacy.terms_body", label: "বডি (rich)", kind: "rich" },
+        ],
+      },
+      {
+        title: "Footer note",
+        fields: [
+          { key: "privacy.footer_email", label: "যোগাযোগ ইমেইল", kind: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "routine",
+    label: "Routine পেজ",
+    labelEn: "Routine",
+    publicPath: "/routine",
+    description: "Routine পেজের শিরোনাম। বিস্তারিত schedule grid Routine component-এ আছে।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "routine.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "routine.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "routine.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "batches_list",
+    label: "Batches list পেজ",
+    labelEn: "Batches list",
+    publicPath: "/batches",
+    description:
+      "/batches পেজের header. ব্যাচগুলো batches table থেকে আসে — /dashboard/batches/ দেখুন।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "batches.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "batches.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "batches.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+          { key: "batches.empty_text_bn", label: "কোনো ব্যাচ না থাকলে যে টেক্সট দেখাবে", kind: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "blog_list",
+    label: "Blog list পেজ",
+    labelEn: "Blog list",
+    publicPath: "/blog",
+    description:
+      "/blog list পেজের header. পোস্টসমূহ posts table থেকে আসে — /dashboard/blog/ দেখুন।",
+    groups: [
+      {
+        title: "Header",
+        fields: [
+          { key: "blog.eyebrow", label: "Eyebrow", kind: "string" },
+          { key: "blog.title_bn", label: "শিরোনাম", kind: "string" },
+          { key: "blog.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
+        ],
+      },
+    ],
+  },
+  {
     slug: "admission",
     label: "ভর্তি ও মূল্য",
     labelEn: "Admission",

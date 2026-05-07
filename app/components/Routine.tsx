@@ -121,7 +121,13 @@ const Timeline = ({ data }: { data: TimelineItem[] }) => (
   </div>
 );
 
-export default function Routine() {
+export default function Routine({
+  titleBn = "Effective Routine",
+  subtitleBn = "বৃহস্পতিবার মাগরিব থেকে শুক্রবার এশা পর্যন্ত আমাদের একটি পূর্ণাঙ্গ দিনের রুটিন।",
+}: {
+  titleBn?: string;
+  subtitleBn?: string;
+} = {}) {
   const [activeTab, setActiveTab] = useState("thursday");
 
   const tabs = [
@@ -163,10 +169,8 @@ export default function Routine() {
             <CalendarDays className="w-5 h-5 text-amber-400" />
             <span className="text-emerald-100 font-medium">Basic Course-1</span>
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Effective Routine</h1>
-          <p className="text-xl text-emerald-200 max-w-2xl mx-auto">
-            বৃহস্পতিবার মাগরিব থেকে শুক্রবার এশা পর্যন্ত আমাদের একটি পূর্ণাঙ্গ দিনের রুটিন।
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">{titleBn}</h1>
+          <p className="text-xl text-emerald-200 max-w-2xl mx-auto">{subtitleBn}</p>
         </div>
       </div>
 

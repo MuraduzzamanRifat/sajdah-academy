@@ -18,6 +18,17 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
+
+type Tier = {
+  name?: string;
+  name_bn?: string;
+  duration?: string;
+  price?: string;
+  desc?: string;
+  features_text?: string;
+  highlight?: boolean;
+};
 
 /* ISR: cached 60s. Admin server actions call revalidatePath("/courses")
    so edits appear immediately rather than waiting on the cache. */
@@ -48,55 +59,45 @@ export const metadata: Metadata = {
   alternates: { canonical: "/courses/" },
 };
 
-const tiers = [
+const DEFAULT_TIERS: Tier[] = [
   {
     name: "Basic Course-1",
-    nameBn: "মৌলিক কোর্স",
+    name_bn: "মৌলিক কোর্স",
     duration: "১ সপ্তাহান্ত",
     price: "৳ ২,৫০০",
     desc: "প্রথমবারের জন্য — দ্বীনের প্রাথমিক স্বাদ",
-    features: [
-      "১৬.৩০ ঘণ্টা ট্রেনিং",
-      "৫ টি ক্লাস",
-      "১ রাত প্রিমিয়াম রিসোর্টে থাকা",
-      "সম্পূর্ণ হালাল গুরমেট খাবার",
-      "ক্লাস-নোটস ও সার্টিফিকেট",
-    ],
+    features_text:
+      "১৬.৩০ ঘণ্টা ট্রেনিং\n৫ টি ক্লাস\n১ রাত প্রিমিয়াম রিসোর্টে থাকা\nসম্পূর্ণ হালাল গুরমেট খাবার\nক্লাস-নোটস ও সার্টিফিকেট",
     highlight: false,
   },
   {
     name: "Foundation Program",
-    nameBn: "ফাউন্ডেশন প্রোগ্রাম",
+    name_bn: "ফাউন্ডেশন প্রোগ্রাম",
     duration: "২ মাস",
     price: "৳ ৪৫,০০০",
     desc: "ফেইজ-১: ঈমান, আকীদা ও বেসিক আমল",
-    features: [
-      "Phase 1 — সম্পূর্ণ পাঠ্যক্রম",
-      "৪ সপ্তাহান্ত রিসোর্টে অবস্থান",
-      "ব্যক্তিগত মেন্টর",
-      "মাসিক প্রগ্রেস রিভিউ",
-      "অনলাইন কমিউনিটি অ্যাকসেস",
-    ],
+    features_text:
+      "Phase 1 — সম্পূর্ণ পাঠ্যক্রম\n৪ সপ্তাহান্ত রিসোর্টে অবস্থান\nব্যক্তিগত মেন্টর\nমাসিক প্রগ্রেস রিভিউ\nঅনলাইন কমিউনিটি অ্যাকসেস",
     highlight: false,
   },
   {
     name: "Full 6-Month Program",
-    nameBn: "পূর্ণাঙ্গ ৬ মাসের প্রোগ্রাম",
+    name_bn: "পূর্ণাঙ্গ ৬ মাসের প্রোগ্রাম",
     duration: "৬ মাস",
     price: "৳ ১,৫০,০০০",
     desc: "তিন ফেইজ — সম্পূর্ণ ট্রান্সফরমেশন",
-    features: [
-      "Phase 1 + 2 + 3 — সব মডিউল",
-      "১২ সপ্তাহান্ত রিসোর্টে অবস্থান",
-      "১২ মডিউল × ৪ অধ্যায়",
-      "নির্ধারিত মেন্টর + কাউন্সেলিং",
-      "অভ্যাস ট্র্যাকিং সিস্টেম",
-      "Lifetime কমিউনিটি অ্যাকসেস",
-      "সিজদাহ Alumni নেটওয়ার্ক",
-    ],
+    features_text:
+      "Phase 1 + 2 + 3 — সব মডিউল\n১২ সপ্তাহান্ত রিসোর্টে অবস্থান\n১২ মডিউল × ৪ অধ্যায়\nনির্ধারিত মেন্টর + কাউন্সেলিং\nঅভ্যাস ট্র্যাকিং সিস্টেম\nLifetime কমিউনিটি অ্যাকসেস\nসিজদাহ Alumni নেটওয়ার্ক",
     highlight: true,
   },
 ];
+
+function parseFeatures(text: string | undefined): string[] {
+  return (text ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
 
 const phases = ["Foundation", "Understanding", "Transformation"] as const;
 
@@ -112,12 +113,34 @@ type CourseRow = {
 
 export default async function CoursesPage() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("courses")
-    .select("id, slug, title, title_bn, phase, module_number, display_order")
-    .eq("is_published", true)
-    .order("display_order", { ascending: true });
+  const [{ data }, settings] = await Promise.all([
+    supabase
+      .from("courses")
+      .select("id, slug, title, title_bn, phase, module_number, display_order")
+      .eq("is_published", true)
+      .order("display_order", { ascending: true }),
+    getSettingsByPrefix("courses."),
+  ]);
   const allModules = (data ?? []) as CourseRow[];
+
+  const eyebrow = pick(settings, "courses.eyebrow", "Courses · কোর্সসমূহ");
+  const titleBn = pick(settings, "courses.title_bn", "যে কোর্স আপনার জীবন বদলাবে");
+  const subtitleBn = pick(
+    settings,
+    "courses.subtitle_bn",
+    "তিনটি স্তরের প্রোগ্রাম — শুরু করুন যেখান থেকে আপনি প্রস্তুত। ১২টি মডিউল, ৪৮+ অধ্যায়, ৬ মাস ব্যাপী একটি পূর্ণাঙ্গ লাইফস্টাইল রূপান্তর।"
+  );
+  const tiersEyebrow = pick(settings, "courses.tiers_eyebrow", "Programs · প্রোগ্রামসমূহ");
+  const tiersTitle = pick(settings, "courses.tiers_title_bn", "আপনার যাত্রা বেছে নিন");
+  const tiers = pick<Tier[]>(settings, "courses.tiers", DEFAULT_TIERS).filter((t) => t.name);
+  const modulesEyebrow = pick(settings, "courses.modules_eyebrow", "Curriculum · পাঠ্যক্রম");
+  const modulesTitle = pick(settings, "courses.modules_title_bn", "১২ মডিউল · ৩ ফেইজ");
+  const certTitle = pick(settings, "courses.cert_title_bn", "সিজদাহ Certificate");
+  const certBody = pick(
+    settings,
+    "courses.cert_body_bn",
+    "সফল অংশগ্রহণ ও মূল্যায়ন পরীক্ষায় উত্তীর্ণ হলে Sajdah Academy থেকে সার্টিফিকেট প্রদান করা হবে। এর সাথে থাকছে Alumni Network-এ আজীবন সদস্যপদ।"
+  );
 
   return (
     <main className="pt-24 pb-24">
@@ -126,15 +149,10 @@ export default async function CoursesPage() {
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <span className="inline-block text-amber-400 font-bold tracking-widest uppercase text-sm mb-4">
-            Courses · কোর্সসমূহ
+            {eyebrow}
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            যে কোর্স আপনার জীবন বদলাবে
-          </h1>
-          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl mx-auto">
-            তিনটি স্তরের প্রোগ্রাম — শুরু করুন যেখান থেকে আপনি প্রস্তুত। ১২টি মডিউল,
-            ৪৮+ অধ্যায়, ৬ মাস ব্যাপী একটি পূর্ণাঙ্গ লাইফস্টাইল রূপান্তর।
-          </p>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">{titleBn}</h1>
+          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl mx-auto">{subtitleBn}</p>
         </div>
       </section>
 
@@ -144,63 +162,77 @@ export default async function CoursesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-14">
             <span className="text-amber-600 font-bold tracking-wider uppercase text-sm mb-3 block">
-              Programs · প্রোগ্রামসমূহ
+              {tiersEyebrow}
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
-              আপনার যাত্রা বেছে নিন
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">{tiersTitle}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {tiers.map((t, i) => (
-              <div
-                key={i}
-                className={`relative rounded-3xl p-8 ${
-                  t.highlight
-                    ? "bg-emerald-900 text-white shadow-2xl shadow-emerald-900/30 scale-105 lg:scale-110 z-10"
-                    : "glass-light glass-light-hover"
-                }`}
-              >
-                {t.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-emerald-950 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider whitespace-nowrap">
-                    Most Popular · সবচেয়ে জনপ্রিয়
-                  </span>
-                )}
-                <div className="mb-6">
-                  <h3 className={`text-2xl font-bold mb-1 ${t.highlight ? "text-white" : "text-emerald-950"}`}>
-                    {t.name}
-                  </h3>
-                  <p className={`text-sm ${t.highlight ? "text-emerald-300" : "text-slate-500"}`}>
-                    {t.nameBn}
-                  </p>
-                </div>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className={`text-4xl font-extrabold ${t.highlight ? "text-amber-400" : "text-emerald-700"}`}>
-                    {t.price}
-                  </span>
-                </div>
-                <p className={`text-sm mb-6 ${t.highlight ? "text-emerald-200" : "text-slate-500"}`}>
-                  <Clock className="inline w-4 h-4 mr-1" /> {t.duration} · {t.desc}
-                </p>
-                <ul className="space-y-3 mb-8">
-                  {t.features.map((f, fi) => (
-                    <li key={fi} className={`flex items-start gap-2 ${t.highlight ? "text-emerald-100" : "text-slate-700"}`}>
-                      <CheckCircle2 className={`w-5 h-5 shrink-0 mt-0.5 ${t.highlight ? "text-amber-400" : "text-emerald-600"}`} />
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/enroll/"
-                  className={`block text-center px-6 py-3 rounded-lg font-bold transition-all duration-200 active:scale-[0.98] ${
+            {tiers.map((t, i) => {
+              const features = parseFeatures(t.features_text);
+              return (
+                <div
+                  key={i}
+                  className={`relative rounded-3xl p-8 ${
                     t.highlight
-                      ? "bg-amber-500 hover:bg-amber-400 text-emerald-950"
-                      : "bg-emerald-700 hover:bg-emerald-800 text-white"
+                      ? "bg-emerald-900 text-white shadow-2xl shadow-emerald-900/30 scale-105 lg:scale-110 z-10"
+                      : "glass-light glass-light-hover"
                   }`}
                 >
-                  Enroll →
-                </Link>
-              </div>
-            ))}
+                  {t.highlight && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-emerald-950 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                      Most Popular · সবচেয়ে জনপ্রিয়
+                    </span>
+                  )}
+                  <div className="mb-6">
+                    <h3 className={`text-2xl font-bold mb-1 ${t.highlight ? "text-white" : "text-emerald-950"}`}>
+                      {t.name}
+                    </h3>
+                    {t.name_bn && (
+                      <p className={`text-sm ${t.highlight ? "text-emerald-300" : "text-slate-500"}`}>
+                        {t.name_bn}
+                      </p>
+                    )}
+                  </div>
+                  {t.price && (
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className={`text-4xl font-extrabold ${t.highlight ? "text-amber-400" : "text-emerald-700"}`}>
+                        {t.price}
+                      </span>
+                    </div>
+                  )}
+                  {(t.duration || t.desc) && (
+                    <p className={`text-sm mb-6 ${t.highlight ? "text-emerald-200" : "text-slate-500"}`}>
+                      <Clock className="inline w-4 h-4 mr-1" /> {t.duration}
+                      {t.duration && t.desc && " · "}
+                      {t.desc}
+                    </p>
+                  )}
+                  <ul className="space-y-3 mb-8">
+                    {features.map((f, fi) => (
+                      <li
+                        key={fi}
+                        className={`flex items-start gap-2 ${t.highlight ? "text-emerald-100" : "text-slate-700"}`}
+                      >
+                        <CheckCircle2
+                          className={`w-5 h-5 shrink-0 mt-0.5 ${t.highlight ? "text-amber-400" : "text-emerald-600"}`}
+                        />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href="/enroll/"
+                    className={`block text-center px-6 py-3 rounded-lg font-bold transition-all duration-200 active:scale-[0.98] ${
+                      t.highlight
+                        ? "bg-amber-500 hover:bg-amber-400 text-emerald-950"
+                        : "bg-emerald-700 hover:bg-emerald-800 text-white"
+                    }`}
+                  >
+                    Enroll →
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -211,11 +243,9 @@ export default async function CoursesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-14">
             <span className="text-amber-600 font-bold tracking-wider uppercase text-sm mb-3 block">
-              Curriculum · পাঠ্যক্রম
+              {modulesEyebrow}
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
-              ১২ মডিউল · ৩ ফেইজ
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">{modulesTitle}</h2>
           </div>
           {phases.map((phase, pi) => (
             <div key={phase} className="mb-12 last:mb-0">
@@ -261,10 +291,9 @@ export default async function CoursesPage() {
       <section className="py-16 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Award className="w-16 h-16 text-amber-500 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-emerald-950 mb-4">সিজদাহ Certificate</h2>
-          <p className="text-slate-600 leading-relaxed text-lg max-w-2xl mx-auto">
-            সফল অংশগ্রহণ ও মূল্যায়ন পরীক্ষায় উত্তীর্ণ হলে Sajdah Academy থেকে সার্টিফিকেট প্রদান করা হবে।
-            এর সাথে থাকছে Alumni Network-এ আজীবন সদস্যপদ।
+          <h2 className="text-3xl font-bold text-emerald-950 mb-4">{certTitle}</h2>
+          <p className="text-slate-600 leading-relaxed text-lg max-w-2xl mx-auto whitespace-pre-line">
+            {certBody}
           </p>
         </div>
       </section>

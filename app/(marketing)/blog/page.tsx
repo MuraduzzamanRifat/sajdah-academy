@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar, Clock, ArrowRight, BookOpen } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "Blog — আর্টিকেল";
 const description =
@@ -31,14 +32,25 @@ const formatDate = (iso: string) =>
 
 export default async function BlogIndex() {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("posts")
-    .select("id, slug, title, excerpt, category, author, reading_minutes, published_at")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false, nullsFirst: false });
+  const [{ data }, settings] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("id, slug, title, excerpt, category, author, reading_minutes, published_at")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false, nullsFirst: false }),
+    getSettingsByPrefix("blog."),
+  ]);
 
   const posts = (data ?? []) as PostRow[];
   const [featured, ...rest] = posts;
+
+  const eyebrow = pick(settings, "blog.eyebrow", "Blog · আর্টিকেল");
+  const titleBn = pick(settings, "blog.title_bn", "দ্বীনি জ্ঞান ও অনুপ্রেরণা");
+  const subtitleBn = pick(
+    settings,
+    "blog.subtitle_bn",
+    "অভ্যাস গঠন, আত্মার পথ, প্রাক্তন অংশগ্রহণকারীদের গল্প — Sajdah Academy থেকে।"
+  );
 
   return (
     <main className="pt-24 pb-24">
@@ -46,12 +58,10 @@ export default async function BlogIndex() {
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <span className="inline-block text-amber-400 font-bold tracking-widest uppercase text-sm mb-4">
-            Blog · আর্টিকেল
+            {eyebrow}
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">দ্বীনি জ্ঞান ও অনুপ্রেরণা</h1>
-          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl mx-auto">
-            অভ্যাস গঠন, আত্মার পথ, প্রাক্তন অংশগ্রহণকারীদের গল্প — Sajdah Academy থেকে।
-          </p>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">{titleBn}</h1>
+          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl mx-auto">{subtitleBn}</p>
         </div>
       </section>
 

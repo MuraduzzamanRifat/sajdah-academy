@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Mail, Download, Image as ImageIcon, FileText, Phone } from "lucide-react";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "Press & Media — সংবাদমাধ্যম";
 const description =
@@ -11,7 +12,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/press/" },
 };
 
-const facts = [
+export const revalidate = 60;
+
+type Fact = { label?: string; value?: string };
+type Release = { date?: string; title?: string; summary?: string };
+
+const DEFAULT_FACTS: Fact[] = [
   { label: "Founded", value: "২০২৪" },
   { label: "Headquarters", value: "ঢাকা, বাংলাদেশ" },
   { label: "Format", value: "৬-মাসের ফিজিক্যাল রিসোর্ট প্রোগ্রাম" },
@@ -20,73 +26,76 @@ const facts = [
   { label: "Students Trained", value: "১৬০+" },
 ];
 
-const releases = [
+const DEFAULT_RELEASES: Release[] = [
   {
     date: "এপ্রিল ২০২৬",
     title: "চতুর্থ ব্যাচ সফলভাবে সমাপ্ত",
     summary: "৪০ জন অংশগ্রহণকারীর ৬ মাসের প্রোগ্রাম সম্পন্ন। গাজীপুর রিসোর্টে অনুষ্ঠিত সমাপনী।",
   },
-  {
-    date: "জানুয়ারি ২০২৬",
-    title: "Sajdah Alumni Network চালু",
-    summary: "প্রাক্তন অংশগ্রহণকারীদের জন্য আজীবন কমিউনিটি প্ল্যাটফর্ম শুরু।",
-  },
-  {
-    date: "অক্টোবর ২০২৫",
-    title: "প্রথম পাইলট ব্যাচ",
-    summary: "৩৮ জনের পাইলট ব্যাচ সফলভাবে সম্পন্ন — গাজীপুর প্রিমিয়াম রিসোর্টে।",
-  },
 ];
 
-export default function PressPage() {
+const DEFAULT_BOILERPLATE = `<p>Sajdah Academy বাংলাদেশের প্রথম প্রিমিয়াম রিসোর্ট-ভিত্তিক ফিজিক্যাল ইসলামিক ট্রেনিং প্রোগ্রাম। ৬ মাসব্যাপী এই কোর্সে অংশগ্রহণকারীরা দেশের সম্মানিত আলেম, পেশাদার ও মেন্টরদের তত্ত্বাবধানে কুরআন, হাদীস, ফিকহ, ও তাযকিয়াহ বিষয়ে গভীর প্রশিক্ষণ গ্রহণ করেন।</p>`;
+
+export default async function PressPage() {
+  const s = await getSettingsByPrefix("press.");
+  const eyebrow = pick(s, "press.eyebrow", "Press · মিডিয়া");
+  const titleBn = pick(s, "press.title_bn", "Press & Media Kit");
+  const subtitleBn = pick(
+    s,
+    "press.subtitle_bn",
+    "সাংবাদিক, ব্লগার, কনটেন্ট ক্রিয়েটরদের জন্য — Sajdah Academy সম্পর্কে অফিসিয়াল তথ্য, লোগো, ছবি ও যোগাযোগ।"
+  );
+  const aboutTitle = pick(s, "press.about_title", "About Sajdah Academy");
+  const aboutBody = pick(s, "press.about_body", DEFAULT_BOILERPLATE);
+  const facts = pick<Fact[]>(s, "press.facts", DEFAULT_FACTS).filter((f) => f.label || f.value);
+  const releases = pick<Release[]>(s, "press.releases", DEFAULT_RELEASES).filter((r) => r.title);
+  const contactTitle = pick(s, "press.contact_title_bn", "Press Contact");
+  const contactBody = pick(
+    s,
+    "press.contact_body_bn",
+    "ইন্টারভিউ, কভারেজ, বা কোনো নির্দিষ্ট প্রশ্নের জন্য সরাসরি যোগাযোগ করুন।"
+  );
+  const contactEmail = pick(s, "press.contact_email", "sijdah.academybd@gmail.com");
+  const contactPhone = pick(s, "press.contact_phone", "+880 180 55 65 444");
+
   return (
     <main className="pt-24 pb-24">
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto relative z-10">
           <span className="inline-block text-amber-400 font-bold tracking-widest uppercase text-sm mb-4">
-            Press · মিডিয়া
+            {eyebrow}
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-5 leading-tight">Press & Media Kit</h1>
-          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl">
-            সাংবাদিক, ব্লগার, কনটেন্ট ক্রিয়েটরদের জন্য — Sajdah Academy সম্পর্কে অফিসিয়াল তথ্য,
-            লোগো, ছবি ও যোগাযোগ।
-          </p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-5 leading-tight">{titleBn}</h1>
+          <p className="text-xl text-emerald-100 leading-relaxed max-w-3xl">{subtitleBn}</p>
         </div>
       </section>
 
-      {/* Boilerplate */}
       <section className="py-16 bg-slate-50 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-light" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="glass-light rounded-3xl p-8 md:p-10 mb-10">
-            <h2 className="text-2xl font-bold text-emerald-950 mb-4">About Sajdah Academy</h2>
-            <p className="text-slate-700 leading-relaxed mb-4">
-              Sajdah Academy বাংলাদেশের প্রথম প্রিমিয়াম রিসোর্ট-ভিত্তিক ফিজিক্যাল ইসলামিক ট্রেনিং
-              প্রোগ্রাম। ৬ মাসব্যাপী এই কোর্সে অংশগ্রহণকারীরা দেশের সম্মানিত আলেম, পেশাদার ও
-              মেন্টরদের তত্ত্বাবধানে কুরআন, হাদীস, ফিকহ, ও তাযকিয়াহ বিষয়ে গভীর প্রশিক্ষণ গ্রহণ করেন।
-            </p>
-            <p className="text-slate-700 leading-relaxed">
-              ৪০ জনের সীমিত ব্যাচে গাজীপুর, সিলেট ও কক্সবাজারের প্রিমিয়াম রিসোর্টে ক্লাস অনুষ্ঠিত হয়।
-              ২০২৪ সালে প্রতিষ্ঠিত এই একাডেমি ২০২৬ পর্যন্ত ১৬০+ অংশগ্রহণকারীকে প্রশিক্ষণ দিয়েছে।
-            </p>
+            <h2 className="text-2xl font-bold text-emerald-950 mb-4">{aboutTitle}</h2>
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: aboutBody }} />
           </div>
 
-          {/* Quick facts */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
-            {facts.map((f) => (
-              <div key={f.label} className="glass-light rounded-xl p-4">
-                <p className="text-xs text-amber-600 uppercase font-bold tracking-wider mb-1">
-                  {f.label}
-                </p>
-                <p className="text-emerald-950 font-bold">{f.value}</p>
-              </div>
-            ))}
-          </div>
+          {facts.length > 0 && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-10">
+              {facts.map((f, i) => (
+                <div key={i} className="glass-light rounded-xl p-4">
+                  {f.label && (
+                    <p className="text-xs text-amber-600 uppercase font-bold tracking-wider mb-1">
+                      {f.label}
+                    </p>
+                  )}
+                  {f.value && <p className="text-emerald-950 font-bold">{f.value}</p>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Brand assets */}
       <section className="py-16 bg-emerald-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl md:text-3xl font-bold text-emerald-950 mb-2 text-center">Brand Assets</h2>
@@ -131,54 +140,49 @@ export default function PressPage() {
               </span>
             </a>
           </div>
-
-          <div className="mt-8 bg-emerald-100/60 border border-emerald-200 rounded-xl p-5 text-sm text-emerald-900">
-            <strong>Color palette:</strong> Emerald-950 (#022c22) · Amber-500 (#f59e0b) ·
-            Slate-50 (#f8fafc) · Hind Siliguri / Inter typography.
-          </div>
         </div>
       </section>
 
-      {/* Press releases */}
-      <section className="py-16 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-emerald-950 mb-8 text-center">
-            Press Releases · প্রেস রিলিজ
-          </h2>
-          <div className="space-y-4">
-            {releases.map((r) => (
-              <article key={r.title} className="glass-light rounded-2xl p-6">
-                <p className="text-xs text-amber-600 font-bold uppercase tracking-wider mb-2">{r.date}</p>
-                <h3 className="text-lg font-bold text-emerald-950 mb-2">{r.title}</h3>
-                <p className="text-slate-700 leading-relaxed">{r.summary}</p>
-              </article>
-            ))}
+      {releases.length > 0 && (
+        <section className="py-16 bg-slate-50">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-950 mb-8 text-center">
+              Press Releases · প্রেস রিলিজ
+            </h2>
+            <div className="space-y-4">
+              {releases.map((r, i) => (
+                <article key={i} className="glass-light rounded-2xl p-6">
+                  {r.date && (
+                    <p className="text-xs text-amber-600 font-bold uppercase tracking-wider mb-2">{r.date}</p>
+                  )}
+                  {r.title && <h3 className="text-lg font-bold text-emerald-950 mb-2">{r.title}</h3>}
+                  {r.summary && <p className="text-slate-700 leading-relaxed">{r.summary}</p>}
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Press contact */}
       <section className="py-16 bg-emerald-900 text-white relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4">Press Contact</h2>
-          <p className="text-emerald-100 mb-7 text-lg">
-            ইন্টারভিউ, কভারেজ, বা কোনো নির্দিষ্ট প্রশ্নের জন্য সরাসরি যোগাযোগ করুন।
-          </p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">{contactTitle}</h2>
+          <p className="text-emerald-100 mb-7 text-lg">{contactBody}</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href="mailto:sijdah.academybd@gmail.com?subject=Press%20enquiry"
+              href={`mailto:${contactEmail}?subject=Press%20enquiry`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold rounded-lg active:scale-[0.98]"
             >
               <Mail className="w-5 h-5" />
-              press@sajdah.org
+              {contactEmail}
             </a>
             <a
-              href="tel:+880180556544"
+              href={`tel:${contactPhone.replace(/[^0-9+]/g, "")}`}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-amber-400 text-amber-300 hover:bg-amber-400 hover:text-emerald-950 font-bold rounded-lg transition-colors"
             >
               <Phone className="w-5 h-5" />
-              +880 180 55 65 444
+              {contactPhone}
             </a>
           </div>
         </div>
