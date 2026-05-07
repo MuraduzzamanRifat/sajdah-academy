@@ -112,7 +112,7 @@ export default function AdminShell({
   const title = TITLES[pathname ?? "/admin/"] ?? "Admin";
 
   return (
-    <main className="pt-20 pb-12 bg-slate-100 min-h-screen">
+    <main className="pt-6 pb-12 bg-slate-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
         <div className="bg-emerald-950 text-white rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
           <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />

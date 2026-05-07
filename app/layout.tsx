@@ -196,7 +196,16 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { headers } from "next/headers";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  /* The admin host (api.sijdahacademy.com) gets a clean chrome-free shell —
+     no public Navbar/Footer/StickyCTA, no marketing JSON-LD, no Preloader.
+     The AdminShell component renders its own sidebar + topbar instead. */
+  const h = await headers();
+  const host = h.get("host") ?? "";
+  const isAdminHost = /^api\./i.test(host);
+
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
       <head>
@@ -205,17 +214,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
       </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
-        {/* Preloader: must be FIRST in body so it paints before anything else */}
-        <Preloader />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <ScrollProgress />
-        <Navbar />
+        {!isAdminHost && (
+          <>
+            <Preloader />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <ScrollProgress />
+            <Navbar />
+          </>
+        )}
         {children}
-        <Footer />
-        <StickyMobileCTA />
+        {!isAdminHost && (
+          <>
+            <Footer />
+            <StickyMobileCTA />
+          </>
+        )}
       </body>
     </html>
   );
