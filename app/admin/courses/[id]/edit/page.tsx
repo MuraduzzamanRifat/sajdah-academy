@@ -30,7 +30,7 @@ export default async function EditCoursePage({ params }: Params) {
     <div className="space-y-4 max-w-4xl">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <Link
-          href="/admin/courses/"
+          href="/dashboard/courses/"
           className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-emerald-700"
         >
           <ArrowLeft className="w-3 h-3" /> সব কোর্স

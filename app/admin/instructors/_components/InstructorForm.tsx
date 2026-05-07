@@ -88,7 +88,7 @@ export default function InstructorForm({
 
       <div className="flex items-center justify-end gap-2 pt-2">
         <a
-          href="/admin/instructors/"
+          href="/dashboard/instructors/"
           className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold"
         >
           বাতিল

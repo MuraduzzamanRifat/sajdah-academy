@@ -100,7 +100,7 @@ export default function BatchForm({
 
       <div className="flex items-center justify-end gap-2 pt-2">
         <a
-          href="/admin/batches/"
+          href="/dashboard/batches/"
           className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold"
         >
           বাতিল

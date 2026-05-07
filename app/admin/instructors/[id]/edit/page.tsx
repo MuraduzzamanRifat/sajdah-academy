@@ -29,7 +29,7 @@ export default async function EditInstructorPage({ params }: Params) {
   return (
     <div className="space-y-4 max-w-3xl">
       <Link
-        href="/admin/instructors/"
+        href="/dashboard/instructors/"
         className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-emerald-700"
       >
         <ArrowLeft className="w-3 h-3" /> সব শিক্ষক

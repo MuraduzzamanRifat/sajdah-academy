@@ -20,7 +20,7 @@ export default function BatchRowActions({ id, name }: { id: string; name: string
   return (
     <div className="flex gap-2">
       <a
-        href={`/admin/batches/${id}/edit/`}
+        href={`/dashboard/batches/${id}/edit/`}
         className="text-xs font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1"
       >
         <Edit3 className="w-3 h-3" /> এডিট

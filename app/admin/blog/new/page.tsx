@@ -13,7 +13,7 @@ export default function NewPostPage() {
   return (
     <div className="space-y-4 max-w-4xl">
       <Link
-        href="/admin/blog/"
+        href="/dashboard/blog/"
         className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-emerald-700"
       >
         <ArrowLeft className="w-3 h-3" /> সব পোস্ট

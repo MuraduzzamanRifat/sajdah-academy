@@ -37,7 +37,7 @@ export default async function LoginPage({
       .select("role")
       .eq("id", user.id)
       .single();
-    redirect(isAdminRole(profile?.role) ? "/admin/" : "/student-dashboard/");
+    redirect(isAdminRole(profile?.role) ? "/dashboard/" : "/student-dashboard/");
   }
 
   // On the admin host, render the same restricted-access panel that

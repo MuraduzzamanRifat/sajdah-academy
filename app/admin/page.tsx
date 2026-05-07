@@ -232,7 +232,7 @@ export default async function AdminOverviewPage() {
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950">কোর্স ফেইজ</h3>
-            <Link href="/admin/courses/" className="text-xs text-emerald-700 font-bold hover:text-emerald-900">
+            <Link href="/dashboard/courses/" className="text-xs text-emerald-700 font-bold hover:text-emerald-900">
               সব
             </Link>
           </div>
@@ -261,7 +261,7 @@ export default async function AdminOverviewPage() {
         <div className="p-5 pb-3 flex items-center justify-between">
           <h3 className="font-bold text-emerald-950">সাম্প্রতিক ছাত্র</h3>
           <Link
-            href="/admin/students/"
+            href="/dashboard/students/"
             className="text-xs font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1"
           >
             সব দেখুন <ArrowUpRight className="w-3 h-3" />

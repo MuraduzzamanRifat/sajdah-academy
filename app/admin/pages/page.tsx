@@ -51,7 +51,7 @@ export default function AdminPagesIndex() {
                     <ExternalLink className="w-3.5 h-3.5" />
                   </Link>
                   <Link
-                    href={`/admin/pages/${p.slug}/`}
+                    href={`/dashboard/pages/${p.slug}/`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold"
                   >
                     <Edit3 className="w-3 h-3" /> এডিট

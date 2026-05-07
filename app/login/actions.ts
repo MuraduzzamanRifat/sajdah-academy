@@ -37,7 +37,7 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
     .select("role")
     .eq("id", data.user.id)
     .single();
-  redirect(isAdminRole(profile?.role) ? "/admin/" : "/student-dashboard/");
+  redirect(isAdminRole(profile?.role) ? "/dashboard/" : "/student-dashboard/");
 }
 
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {

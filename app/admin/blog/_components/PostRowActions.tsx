@@ -48,7 +48,7 @@ export default function PostRowActions({
         <Eye className="w-3.5 h-3.5" />
       </a>
       <a
-        href={`/admin/blog/${id}/edit/`}
+        href={`/dashboard/blog/${id}/edit/`}
         className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded"
         aria-label={`সম্পাদনা: ${title}`}
         title="Edit"

@@ -56,7 +56,7 @@ export default function RowActions({
         <Eye className="w-3.5 h-3.5" />
       </a>
       <a
-        href={`/admin/courses/${id}/edit/`}
+        href={`/dashboard/courses/${id}/edit/`}
         className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded"
         aria-label={`সম্পাদনা: ${title}`}
         title="সম্পাদনা"

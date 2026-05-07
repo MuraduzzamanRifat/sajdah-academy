@@ -46,50 +46,50 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: "Overview",
     items: [
-      { href: "/admin/", label: "ড্যাশবোর্ড", labelEn: "Dashboard", icon: LayoutDashboard },
+      { href: "/dashboard/", label: "ড্যাশবোর্ড", labelEn: "Dashboard", icon: LayoutDashboard },
     ],
   },
   {
     group: "People",
     items: [
-      { href: "/admin/students/", label: "ছাত্র", labelEn: "Students", icon: Users, badge: "৪২" },
-      { href: "/admin/enrollments/", label: "ভর্তি আবেদন", labelEn: "Enrollments", icon: UserPlus, badge: "৯" },
-      { href: "/admin/instructors/", label: "শিক্ষক", labelEn: "Instructors", icon: GraduationCap },
+      { href: "/dashboard/students/", label: "ছাত্র", labelEn: "Students", icon: Users, badge: "৪২" },
+      { href: "/dashboard/enrollments/", label: "ভর্তি আবেদন", labelEn: "Enrollments", icon: UserPlus, badge: "৯" },
+      { href: "/dashboard/instructors/", label: "শিক্ষক", labelEn: "Instructors", icon: GraduationCap },
     ],
   },
   {
     group: "Academic",
     items: [
-      { href: "/admin/courses/", label: "কোর্স", labelEn: "Courses", icon: BookOpen },
-      { href: "/admin/batches/", label: "ব্যাচ", labelEn: "Batches", icon: Layers },
-      { href: "/admin/assignments/", label: "অ্যাসাইনমেন্ট", labelEn: "Assignments", icon: ClipboardCheck },
-      { href: "/admin/grades/", label: "মূল্যায়ন", labelEn: "Grades", icon: Award },
-      { href: "/admin/schedule/", label: "রুটিন", labelEn: "Schedule", icon: Calendar },
-      { href: "/admin/attendance/", label: "উপস্থিতি", labelEn: "Attendance", icon: CheckSquare },
+      { href: "/dashboard/courses/", label: "কোর্স", labelEn: "Courses", icon: BookOpen },
+      { href: "/dashboard/batches/", label: "ব্যাচ", labelEn: "Batches", icon: Layers },
+      { href: "/dashboard/assignments/", label: "অ্যাসাইনমেন্ট", labelEn: "Assignments", icon: ClipboardCheck },
+      { href: "/dashboard/grades/", label: "মূল্যায়ন", labelEn: "Grades", icon: Award },
+      { href: "/dashboard/schedule/", label: "রুটিন", labelEn: "Schedule", icon: Calendar },
+      { href: "/dashboard/attendance/", label: "উপস্থিতি", labelEn: "Attendance", icon: CheckSquare },
     ],
   },
   {
     group: "Operations",
     items: [
-      { href: "/admin/payments/", label: "পেমেন্ট", labelEn: "Payments", icon: CreditCard, badge: "₹" },
-      { href: "/admin/certificates/", label: "সার্টিফিকেট", labelEn: "Certificates", icon: FileBadge },
-      { href: "/admin/announcements/", label: "ঘোষণা", labelEn: "Announcements", icon: Megaphone },
-      { href: "/admin/messages/", label: "বার্তা", labelEn: "Messages", icon: MessageSquare, badge: "৭" },
-      { href: "/admin/library/", label: "রিসোর্স", labelEn: "Library", icon: Library },
+      { href: "/dashboard/payments/", label: "পেমেন্ট", labelEn: "Payments", icon: CreditCard, badge: "₹" },
+      { href: "/dashboard/certificates/", label: "সার্টিফিকেট", labelEn: "Certificates", icon: FileBadge },
+      { href: "/dashboard/announcements/", label: "ঘোষণা", labelEn: "Announcements", icon: Megaphone },
+      { href: "/dashboard/messages/", label: "বার্তা", labelEn: "Messages", icon: MessageSquare, badge: "৭" },
+      { href: "/dashboard/library/", label: "রিসোর্স", labelEn: "Library", icon: Library },
     ],
   },
   {
     group: "Content (CMS)",
     items: [
-      { href: "/admin/blog/", label: "ব্লগ", labelEn: "Blog", icon: PenSquare },
-      { href: "/admin/pages/", label: "পেজ", labelEn: "Pages", icon: FileText },
-      { href: "/admin/gallery/", label: "গ্যালারি", labelEn: "Gallery", icon: ImageIcon },
+      { href: "/dashboard/blog/", label: "ব্লগ", labelEn: "Blog", icon: PenSquare },
+      { href: "/dashboard/pages/", label: "পেজ", labelEn: "Pages", icon: FileText },
+      { href: "/dashboard/gallery/", label: "গ্যালারি", labelEn: "Gallery", icon: ImageIcon },
     ],
   },
   {
     group: "System",
     items: [
-      { href: "/admin/settings/", label: "সেটিংস", labelEn: "Settings", icon: Settings },
+      { href: "/dashboard/settings/", label: "সেটিংস", labelEn: "Settings", icon: Settings },
     ],
   },
 ];
@@ -109,7 +109,7 @@ export default function AdminShell({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const title = TITLES[pathname ?? "/admin/"] ?? "Admin";
+  const title = TITLES[pathname ?? "/dashboard/"] ?? "Admin";
 
   return (
     <main className="pt-6 pb-12 bg-slate-100 min-h-screen">

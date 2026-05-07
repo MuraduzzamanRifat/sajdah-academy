@@ -26,7 +26,7 @@ export default function InstructorRowActions({
   return (
     <div className="flex gap-1">
       <a
-        href={`/admin/instructors/${id}/edit/`}
+        href={`/dashboard/instructors/${id}/edit/`}
         className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded"
         aria-label={`Edit ${name}`}
         title="Edit"

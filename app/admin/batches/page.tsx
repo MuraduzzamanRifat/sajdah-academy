@@ -79,7 +79,7 @@ export default async function AdminBatchesPage() {
           </p>
         </div>
         <Link
-          href="/admin/batches/new/"
+          href="/dashboard/batches/new/"
           className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold"
         >
           <Plus className="w-3.5 h-3.5" /> নতুন ব্যাচ

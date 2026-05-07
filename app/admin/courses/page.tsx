@@ -51,7 +51,7 @@ export default async function AdminCoursesPage() {
         </div>
         <div className="flex gap-2">
           <Link
-            href="/admin/courses/new/"
+            href="/dashboard/courses/new/"
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold"
           >
             <Plus className="w-3.5 h-3.5" /> নতুন মডিউল
@@ -91,7 +91,7 @@ export default async function AdminCoursesPage() {
                 <span className="text-xs text-slate-500">{phaseModules.length} মডিউল</span>
               </div>
               <Link
-                href={`/admin/courses/new/?phase=${encodeURIComponent(phase)}`}
+                href={`/dashboard/courses/new/?phase=${encodeURIComponent(phase)}`}
                 className="text-xs font-bold text-emerald-700 hover:text-emerald-900"
               >
                 + এই ফেইজে মডিউল

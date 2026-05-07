@@ -37,28 +37,62 @@ function planRouting(request: NextRequest): Plan {
   const host = request.headers.get("host") ?? "";
   const isAdminHost = ADMIN_HOST_RE.test(host);
 
+  /* URL CONTRACT (admin host = api.sijdahacademy.com)
+       /                 → admin login (unauth) or dashboard (auth)
+       /dashboard/       → admin overview (canonical)
+       /dashboard/foo    → admin sub-page (e.g. /dashboard/students/)
+       /admin/foo        → still works (legacy aliases /admin → /dashboard
+                            for any internal link or bookmark)
+     File system stays /admin/* — middleware rewrites the user-facing
+     /dashboard/* URLs onto those files. */
   if (isAdminHost) {
+    // Student dashboard belongs on the main domain.
     if (path.startsWith("/student-dashboard")) {
       const target = new URL(url.toString());
       target.host = host.replace(/^api\./i, "");
       return { kind: "redirect", target };
     }
-    const passThrough =
-      path.startsWith("/admin") ||
+
+    // Auth-flow URLs and Next internals pass through untouched.
+    if (
       path.startsWith("/login") ||
       path.startsWith("/auth") ||
       path.startsWith("/_next") ||
-      path.startsWith("/api/");
-    if (passThrough) return { kind: "pass" };
+      path.startsWith("/api/")
+    ) {
+      return { kind: "pass" };
+    }
+
+    // /dashboard/foo  →  internally serve /admin/foo
+    if (path === "/dashboard" || path === "/dashboard/") {
+      const target = url.clone();
+      target.pathname = "/admin/";
+      return { kind: "rewrite", target, logicalPath: "/admin/" };
+    }
+    if (path.startsWith("/dashboard/")) {
+      const target = url.clone();
+      target.pathname = "/admin/" + path.slice("/dashboard/".length);
+      return { kind: "rewrite", target, logicalPath: target.pathname };
+    }
+
+    // /admin/foo passes through (legacy bookmarks + revalidatePath internals).
+    if (path.startsWith("/admin")) return { kind: "pass" };
+
+    // Anything else (incl. root "/") → admin overview.
     const target = url.clone();
     target.pathname = path === "/" ? "/admin/" : `/admin${path}`;
     return { kind: "rewrite", target, logicalPath: target.pathname };
   }
 
+  // On the public host: /admin/* should never serve content; bounce to
+  // the equivalent /dashboard/* on the api host so admins follow the
+  // canonical URL.
   if (path.startsWith("/admin")) {
     const target = new URL(url.toString());
     target.host = host.replace(/^(www\.)?/, "api.");
-    target.pathname = path.replace(/^\/admin/, "") || "/";
+    target.pathname = path === "/admin" || path === "/admin/"
+      ? "/dashboard/"
+      : "/dashboard" + path.slice("/admin".length);
     return { kind: "redirect", target };
   }
 
