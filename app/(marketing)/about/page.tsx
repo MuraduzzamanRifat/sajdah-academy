@@ -92,14 +92,14 @@ export default async function AboutPage() {
               Our Mission
             </span>
             <h2 className="text-3xl font-bold text-emerald-950 mb-5">{missionTitle}</h2>
-            <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{missionBody}</p>
+            <RichOrText html={missionBody} />
           </div>
           <div className="glass-light rounded-3xl p-8 md:p-10">
             <span className="text-amber-600 font-bold tracking-wider uppercase text-xs mb-3 block">
               Our Vision
             </span>
             <h2 className="text-3xl font-bold text-emerald-950 mb-5">{visionTitle}</h2>
-            <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{visionBody}</p>
+            <RichOrText html={visionBody} />
           </div>
         </div>
       </section>
@@ -173,5 +173,24 @@ export default async function AboutPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+/* Mission/vision are now rich-HTML fields in the Pages CMS, but legacy
+   data may still be plain text from the previous schema. Detect HTML;
+   render directly (it was sanitized at write-time in actions.ts).
+   Fallback wraps plain text in a <p> so the prose styling still applies. */
+function RichOrText({ html }: { html: string }) {
+  const looksLikeHtml = /<\/?[a-z][\s\S]*?>/i.test(html);
+  if (looksLikeHtml) {
+    return (
+      <div
+        className="blog-prose text-lg"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  }
+  return (
+    <p className="text-slate-700 leading-relaxed text-lg whitespace-pre-line">{html}</p>
   );
 }

@@ -171,7 +171,7 @@ export const PAGE_DEFS: PageDef[] = [
         fields: [
           { key: "about.mission_title_bn", label: "মিশন শিরোনাম", kind: "string" },
           {
-            key: "about.mission_body",
+            key: "about.mission_body_bn",
             label: "মিশন টেক্সট",
             kind: "rich",
             hint: "Rich editor — heading, list, quote ব্যবহার করুন।",
@@ -182,17 +182,18 @@ export const PAGE_DEFS: PageDef[] = [
         title: "Vision",
         fields: [
           { key: "about.vision_title_bn", label: "ভিশন শিরোনাম", kind: "string" },
-          { key: "about.vision_body", label: "ভিশন টেক্সট", kind: "rich" },
+          { key: "about.vision_body_bn", label: "ভিশন টেক্সট", kind: "rich" },
         ],
       },
     ],
   },
   {
     slug: "faculty",
-    label: "শিক্ষকমণ্ডলী",
-    labelEn: "Faculty",
+    label: "শিক্ষকমণ্ডলী (পেজ টেক্সট)",
+    labelEn: "Faculty (page text)",
     publicPath: "/faculty",
-    description: "শিক্ষকদের তালিকা ও পরিচয়। ক্রম পরিবর্তন করতে drag/up-down ব্যবহার করুন।",
+    description:
+      "Faculty পেজের শিরোনাম, সাবটাইটেল ও CTA টেক্সট। শিক্ষকদের প্রকৃত তালিকা ও বায়ো /dashboard/instructors/ থেকে যোগ/সম্পাদনা করুন।",
     groups: [
       {
         title: "Header",
@@ -203,22 +204,11 @@ export const PAGE_DEFS: PageDef[] = [
         ],
       },
       {
-        title: "শিক্ষকগণ",
+        title: "CTA নিচের সেকশন",
         fields: [
-          {
-            key: "faculty.members",
-            label: "শিক্ষকদের তালিকা",
-            kind: "list",
-            itemLabel: "শিক্ষক",
-            itemFields: [
-              { key: "name_bn", label: "নাম (Bangla)", kind: "string" },
-              { key: "name_en", label: "নাম (English)", kind: "string" },
-              { key: "title_bn", label: "পদবী", kind: "string", placeholder: "প্রধান শিক্ষক" },
-              { key: "specialty_bn", label: "বিশেষত্ব", kind: "string" },
-              { key: "bio_bn", label: "সংক্ষিপ্ত পরিচয়", kind: "text", rows: 4 },
-              { key: "photo", label: "ছবি", kind: "image", placeholder: "1:1 square" },
-            ],
-          },
+          { key: "faculty.cta_title_bn", label: "CTA শিরোনাম", kind: "string" },
+          { key: "faculty.cta_body_bn", label: "CTA টেক্সট", kind: "text", rows: 2 },
+          { key: "faculty.cta_button_bn", label: "বাটন লেবেল", kind: "string" },
         ],
       },
     ],
