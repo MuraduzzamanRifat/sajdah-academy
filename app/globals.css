@@ -254,6 +254,62 @@ html, body {
 }
 
 /* ============================================================
+   Below-the-fold render skip.
+   ============================================================
+   `content-visibility: auto` lets the browser skip rendering for any
+   subtree that is currently out of the viewport — saves layout, paint,
+   and (for animated descendants) composite work. Browser brings it back
+   automatically as it approaches the viewport during scroll.
+
+   `contain-intrinsic-size` reserves space so scroll position doesn't
+   jump when the section "materializes" — value is a reasonable estimate;
+   exact size doesn't matter once the section actually renders.
+
+   Applied via `.cv-section` class on each homepage band below the hero.
+   Hero stays exempt so first paint is unaffected. */
+.cv-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+
+/* Mobile-friendly scroll defaults — only apply when the user has not
+   opted into reduced-motion (smooth-scroll for anchor jumps is a
+   delight on desktop, motion-sickness trigger for some users). */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Better touch scrolling on iOS Safari. -webkit-overflow-scrolling
+   has been the default since iOS 13 but webkit-* is still cheap to
+   include for stragglers. overscroll-behavior keeps modal scrolls
+   from bleeding into the document scroll. */
+body {
+  overscroll-behavior-y: none;
+}
+
+/* ============================================================
+   Scroll progress bar — compositor-thread scroll animation.
+   Used by app/components/ScrollProgress.tsx. The class is only
+   applied when CSS.supports("animation-timeline: scroll()") so
+   browsers without support get the framer-motion fallback. */
+@keyframes scroll-progress-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.scroll-progress-css {
+  animation-name: scroll-progress-grow;
+  animation-duration: 1ms;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  /* Scroll-timeline runs the animation tied to root scroll position
+     instead of wall-clock time. Compositor thread, zero JS work. */
+  animation-timeline: scroll(root);
+  animation-range: 0 100%;
+}
+
+/* ============================================================
    Rich-text editor — Tiptap content + public blog rendering
    ============================================================
    .rte-content      — inside the editor (admin authoring)

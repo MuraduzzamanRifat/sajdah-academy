@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { Calendar, MapPin, ShieldCheck, type LucideIcon } from "lucide-react";
@@ -26,10 +26,40 @@ export type HeroTexts = {
   cta_secondary_href: string;
 };
 
+/* Detect touch / small-screen devices client-side. The 7 useTransform
+   hooks below run on every scroll frame — on mobile that's a frame-rate
+   killer with no visual benefit (parallax is barely visible at small
+   sizes and feels janky on touch). Disable wholesale below md (768px)
+   or on coarse-pointer devices (tablets in landscape, etc.). */
+function useIsLowMotion(): boolean {
+  const [low, setLow] = useState(true); // SSR-safe default: assume mobile
+  useEffect(() => {
+    const check = () => {
+      const mq = window.matchMedia("(min-width: 768px) and (hover: hover) and (pointer: fine)");
+      setLow(!mq.matches);
+    };
+    check();
+    const onChange = () => check();
+    window.addEventListener("resize", onChange, { passive: true });
+    return () => window.removeEventListener("resize", onChange);
+  }, []);
+  return low;
+}
+
 export default function Hero({ texts }: { texts: HeroTexts }) {
-  const reduce = useReducedMotion();
+  const reducedMotion = useReducedMotion();
+  const lowMotion = useIsLowMotion();
+  /* Single boolean: skip ALL parallax + scroll-driven transforms when
+     reduced-motion preferred OR device is touch/small. */
+  const flat = reducedMotion || lowMotion;
+
   const heroRef = useRef<HTMLElement>(null);
 
+  /* These hooks are still called unconditionally (Rules of Hooks) but
+     when `flat` is true we ignore their values and skip the per-frame
+     style updates. framer-motion's useScroll listener is still attached,
+     but a single passive scroll listener is cheap; the cost is the 7
+     useTransform-driven style updates per frame, which we now skip. */
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
@@ -49,7 +79,7 @@ export default function Hero({ texts }: { texts: HeroTexts }) {
     >
       <motion.div
         className="absolute inset-0"
-        style={reduce ? undefined : { scale: canvasScale, opacity: canvasOpacity }}
+        style={flat ? undefined : { scale: canvasScale, opacity: canvasOpacity }}
       >
         <HeroBackdrop />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-emerald-950/70 via-emerald-900/30 to-emerald-950/90" />
@@ -59,12 +89,12 @@ export default function Hero({ texts }: { texts: HeroTexts }) {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
-        style={reduce ? { opacity: 0.4 } : { scale: medallionScale, opacity: medallionOpacity }}
+        style={flat ? { opacity: 0.4 } : { scale: medallionScale, opacity: medallionOpacity }}
       >
         <motion.div
           className="relative w-[88vw] max-w-[720px] aspect-square"
-          animate={reduce ? undefined : { scale: [1, 1.025, 1] }}
-          transition={reduce ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
+          animate={flat ? undefined : { scale: [1, 1.025, 1] }}
+          transition={flat ? undefined : { duration: 11, repeat: Infinity, ease: "easeInOut" }}
         >
           <Image
             src={asset("/hero-medallion-cutout.webp")}
@@ -79,10 +109,10 @@ export default function Hero({ texts }: { texts: HeroTexts }) {
 
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 24 }}
+          initial={flat ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduce ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
-          style={reduce ? undefined : { y: contentY, opacity: contentOpacity }}
+          transition={{ duration: flat ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
+          style={flat ? undefined : { y: contentY, opacity: contentOpacity }}
           className="text-center max-w-4xl mx-auto"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-300 mb-8 backdrop-blur-sm">
@@ -133,16 +163,19 @@ export default function Hero({ texts }: { texts: HeroTexts }) {
         </motion.div>
       </div>
 
-      <motion.div
-        aria-hidden
-        style={reduce ? undefined : { opacity: cueOpacity }}
-        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-emerald-200/70 text-xs tracking-[0.3em] uppercase"
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span>Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-amber-400/60 to-transparent" />
-        </div>
-      </motion.div>
+      {/* Scroll cue — hide entirely on touch devices (irrelevant on mobile). */}
+      {!flat && (
+        <motion.div
+          aria-hidden
+          style={{ opacity: cueOpacity }}
+          className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-emerald-200/70 text-xs tracking-[0.3em] uppercase"
+        >
+          <div className="flex flex-col items-center gap-2">
+            <span>Scroll</span>
+            <div className="w-px h-8 bg-gradient-to-b from-amber-400/60 to-transparent" />
+          </div>
+        </motion.div>
+      )}
     </section>
   );
 }

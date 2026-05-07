@@ -69,24 +69,36 @@ export default async function Home() {
     "আপনার সিট বুকিং করতে নিচের ফর্মটি পূরণ করুন এবং পেমেন্ট সম্পন্ন করুন।"
   );
 
+  /* Wrap each below-the-fold band in a `cv-section` div so the browser
+     skips rendering work for sections that are off-screen. Hero stays
+     bare so first paint is unaffected. The class is defined in
+     globals.css as content-visibility: auto + contain-intrinsic-size. */
   return (
     <main>
       <Hero texts={heroTexts} />
-      <SectionBlend from="emerald-950" to="emerald-950" />
-      <PremiumExperience />
-      <HomeAbout
-        eyebrow={aboutEyebrow}
-        title={aboutTitle}
-        bodyHtml={aboutBody}
-        imageUrl={aboutImage || undefined}
-      />
-      <SectionBlend from="emerald-950" to="slate-50" />
-      <Curriculum titleBn={curriculumTitle} subtitleBn={curriculumSubtitle} />
-      <SectionBlend from="slate-50" to="emerald-50" />
-      <CourseOutline />
-      <HomeTestimonials title={testimonialsTitle} items={testimonialItems} />
-      <SectionBlend from="emerald-50" to="emerald-900" />
-      <Registration title={regTitle} subtitle={regSubtitle} />
+      <div className="cv-section">
+        <SectionBlend from="emerald-950" to="emerald-950" />
+        <PremiumExperience />
+        <HomeAbout
+          eyebrow={aboutEyebrow}
+          title={aboutTitle}
+          bodyHtml={aboutBody}
+          imageUrl={aboutImage || undefined}
+        />
+      </div>
+      <div className="cv-section">
+        <SectionBlend from="emerald-950" to="slate-50" />
+        <Curriculum titleBn={curriculumTitle} subtitleBn={curriculumSubtitle} />
+      </div>
+      <div className="cv-section">
+        <SectionBlend from="slate-50" to="emerald-50" />
+        <CourseOutline />
+        <HomeTestimonials title={testimonialsTitle} items={testimonialItems} />
+      </div>
+      <div className="cv-section">
+        <SectionBlend from="emerald-50" to="emerald-900" />
+        <Registration title={regTitle} subtitle={regSubtitle} />
+      </div>
     </main>
   );
 }
