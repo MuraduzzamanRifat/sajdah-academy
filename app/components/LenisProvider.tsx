@@ -1,23 +1,31 @@
 "use client";
 
-/* Lenis smooth-scroll integration with idle-pause.
+/* Lenis smooth-scroll integration with idle-pause + route gating.
 
-   The naive `requestAnimationFrame(raf); ...` recursion runs at 60Hz
-   forever even when the page is idle, preventing the browser from
-   parking the tab. We instead drive the rAF loop only while Lenis is
-   actively scrolling — wheel/touch/key events wake the loop, the loop
-   stops itself when `lenis.isScrolling` is false. Saves ~60 wakeups
-   per second on idle desktops. */
+   Only instantiates on routes where smooth scroll adds visible value
+   (currently: homepage). Text-heavy routes like /about, /privacy,
+   /press don't have parallax or scroll-driven motion and the user
+   ends up paying for Lenis's wheel-event hijack + per-frame state
+   maintenance with zero perceived benefit. After several navigations
+   that overhead compounds and contributes to "feels slow over time".
+
+   The rAF loop also self-pauses when lenis.isScrolling is false,
+   so even on the homepage the loop is idle 99% of the time. */
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
 import Lenis from "lenis";
 
+const ROUTES_WITH_SMOOTH_SCROLL = new Set(["/"]);
+
 export default function LenisProvider() {
   const reduced = useReducedMotion();
+  const pathname = usePathname();
+  const enabled = ROUTES_WITH_SMOOTH_SCROLL.has(pathname);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || !enabled) return;
 
     /* Singleton guard — under React Strict Mode, HMR, or any race
        where the effect runs twice, we'd otherwise create two Lenis
@@ -70,7 +78,7 @@ export default function LenisProvider() {
       lenis.destroy();
       if (w.__sajdahLenis === lenis) delete w.__sajdahLenis;
     };
-  }, [reduced]);
+  }, [reduced, enabled]);
 
   return null;
 }

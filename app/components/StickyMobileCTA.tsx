@@ -1,33 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
-/* Mobile-only sticky bottom CTA. Appears after the user scrolls
-   past the hero and hides once the registration form is in view
-   (so we don't show two registration CTAs at once). */
+/* Mobile-only sticky bottom CTA. Appears after the user scrolls past
+   the hero on the homepage and hides once the registration section
+   is in view. Pinned to "/" — on every other route this used to
+   keep a scroll + resize listener attached running geometry on every
+   tick despite #register never existing there, contributing to the
+   "feels slow after a few navigations" report. */
+
 export default function StickyMobileCTA() {
+  const pathname = usePathname();
+  const onHome = pathname === "/";
   const [show, setShow] = useState(false);
   const reduce = useReducedMotion();
 
   useEffect(() => {
+    if (!onHome) {
+      setShow(false);
+      return;
+    }
     let ticking = false;
     const update = () => {
       const y = window.scrollY;
       const vh = window.innerHeight;
       const pastHero = y > vh * 0.6;
-
-      // Hide if registration section is visible in viewport
       const reg = document.getElementById("register");
       let regInView = false;
       if (reg) {
         const r = reg.getBoundingClientRect();
         regInView = r.top < vh * 0.85 && r.bottom > 0;
       }
-
-      // Hide on routine page (no #register on that route)
-      const onHomePage = !!reg;
-      setShow(onHomePage && pastHero && !regInView);
+      setShow(!!reg && pastHero && !regInView);
       ticking = false;
     };
     const onScroll = () => {
@@ -43,7 +49,7 @@ export default function StickyMobileCTA() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [onHome]);
 
   return (
     <AnimatePresence>
