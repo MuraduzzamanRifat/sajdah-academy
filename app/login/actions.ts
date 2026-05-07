@@ -26,7 +26,9 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   revalidatePath("/", "layout");
 
   // Honor explicit ?next= if provided (e.g. middleware redirected here);
-  // otherwise route by role so admins don't land on the student dashboard.
+  // otherwise route by role. Admins on the api host stay on /admin
+  // (which is also the login URL); students go to /student-dashboard
+  // on whichever host they're on.
   if (next) {
     redirect(safeNext(next));
   }

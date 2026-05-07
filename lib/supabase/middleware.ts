@@ -127,7 +127,13 @@ export async function updateSession(request: NextRequest) {
   const isAdmin = logicalPath.startsWith("/admin");
   const isStudent = logicalPath.startsWith("/student-dashboard");
 
-  if ((isAdmin || isStudent) && !user) {
+  /* Unauthenticated access to a protected route:
+     - /admin/* → don't redirect; let the layout render the inline
+       AdminLoginPanel at the same URL (so the URL stays /admin... and
+       feels like the admin's home rather than a separate /login page).
+     - /student-dashboard/* → redirect to the public /login with `next`
+       so the student returns to the page they wanted. */
+  if (isStudent && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", logicalPath);
