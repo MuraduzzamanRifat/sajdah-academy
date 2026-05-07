@@ -1,7 +1,23 @@
 /* Preloader — inline HTML + CSS + JS that renders before React hydrates.
-   Shows the medallion brand mark with a slow amber breathing animation
-   while fonts, images, and JS load. Fades out on window.load and removes
-   itself from the DOM. Only shows on the first navigation per session. */
+   Shows the medallion brand mark with a slow amber breathing animation.
+
+   Two bugs fixed in this revision:
+
+   1) The new per-request CSP (set in middleware) drops 'unsafe-inline'
+      from script-src whenever a nonce is present. The inline <script>
+      below MUST carry the same nonce or it's silently blocked — which
+      previously left the preloader sitting until the 4-second hard cap.
+
+   2) The previous hide trigger was `window.load`, which waits for EVERY
+      image, font, and JS chunk to finish. With WebGL hero + Three.js
+      bundles that's easily 3-5 seconds. We now fade as soon as the
+      first paint completes (DOMContentLoaded + a microtask), and cap
+      at 1.5s instead of 4s.
+
+   The component is a server component so it can read x-csp-nonce from
+   request headers() and pass it down to both <style> and <script>. */
+
+import { headers } from "next/headers";
 import { asset } from "../lib/asset";
 
 const PRELOADER_CSS = `
@@ -16,7 +32,7 @@ const PRELOADER_CSS = `
   background-image:
     radial-gradient(circle at 50% 42%, rgba(245,158,11,0.18) 0%, rgba(16,185,129,0.06) 30%, transparent 60%);
   opacity: 1;
-  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity;
 }
 #__preloader.__loaded {
@@ -60,42 +76,55 @@ const PRELOADER_CSS = `
 }
 `;
 
-/* Inline script — runs immediately at parse time. Hides preloader once
-   all critical resources have loaded, then removes it from the DOM. */
+/* Inline script — runs at parse time. Hides preloader as soon as the
+   document is interactive + first paint has happened. Does NOT wait
+   for window.load (that gates on every image/JS chunk and is the
+   reason the preloader felt slow). Hard cap reduced from 4s → 1.5s. */
 const PRELOADER_JS = `
 (function() {
   var el = document.getElementById('__preloader');
   if (!el) return;
-  // Skip if user already saw the preloader this session
   try {
     if (sessionStorage.getItem('__preloader_seen')) {
       el.parentNode && el.parentNode.removeChild(el);
       return;
     }
   } catch(_) {}
+  var hidden = false;
   var hide = function() {
+    if (hidden) return;
+    hidden = true;
     el.classList.add('__loaded');
     setTimeout(function() {
       el.parentNode && el.parentNode.removeChild(el);
       try { sessionStorage.setItem('__preloader_seen', '1'); } catch(_) {}
-    }, 600);
+    }, 360);
   };
-  // Fire on full window load (fonts, images, JS all ready)
-  if (document.readyState === 'complete') {
-    setTimeout(hide, 200);
+  /* Fire on first paint after DOMContentLoaded — meaningful chrome is
+     visible, hero may still be hydrating but that's fine. */
+  var onReady = function() {
+    if ('requestAnimationFrame' in window) {
+      requestAnimationFrame(function() { requestAnimationFrame(hide); });
+    } else {
+      setTimeout(hide, 50);
+    }
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady, { once: true });
   } else {
-    window.addEventListener('load', function() { setTimeout(hide, 200); });
+    onReady();
   }
-  // Hard cap: never block interaction longer than 4 seconds
-  setTimeout(hide, 4000);
+  /* Hard cap — never sit longer than 1.5s regardless of state. */
+  setTimeout(hide, 1500);
 })();
 `;
 
-export default function Preloader() {
+export default async function Preloader() {
   const medallion = asset("/medallion-128.webp");
+  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: PRELOADER_CSS }} />
+      <style nonce={nonce} dangerouslySetInnerHTML={{ __html: PRELOADER_CSS }} />
       <div id="__preloader" aria-hidden="true">
         <div id="__preloader__inner">
           <div id="__preloader__ring" />
@@ -103,7 +132,7 @@ export default function Preloader() {
           <img src={medallion} alt="" width={110} height={110} />
         </div>
       </div>
-      <script dangerouslySetInnerHTML={{ __html: PRELOADER_JS }} />
+      <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PRELOADER_JS }} />
     </>
   );
 }
