@@ -24,30 +24,45 @@ export type SettingValue =
   | SettingValue[]
   | { [k: string]: SettingValue };
 
+/* Both readers swallow ALL exceptions and return the fallback / empty
+   bag on failure. Public layouts call these in render — a Supabase
+   timeout, a DNS hiccup, or a missing env var would otherwise throw
+   inside (marketing)/layout.tsx and 500 every public page. CMS values
+   are non-load-bearing (every site page has hard-coded defaults via
+   pick()), so a missing settings bag degrades to "default copy"
+   instead of "site-wide outage". */
 export const getSetting = cache(async <T extends SettingValue>(
   key: string,
   fallback: T
 ): Promise<T> => {
-  const supabase = await createClient();
-  const { data } = await supabase.from("site_settings").select("value").eq("key", key).maybeSingle();
-  if (data?.value === undefined || data?.value === null) return fallback;
-  return data.value as T;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("site_settings").select("value").eq("key", key).maybeSingle();
+    if (data?.value === undefined || data?.value === null) return fallback;
+    return data.value as T;
+  } catch {
+    return fallback;
+  }
 });
 
 /* Batch-fetch every setting whose key starts with a prefix.
    Returns a flat object keyed by full key (so caller can do
    `s["home.hero.title_bn"]`). Memoized per-prefix per-request. */
 export const getSettingsByPrefix = cache(async (prefix: string): Promise<Record<string, SettingValue>> => {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("site_settings")
-    .select("key, value")
-    .like("key", `${prefix}%`);
-  const out: Record<string, SettingValue> = {};
-  (data ?? []).forEach((row) => {
-    out[row.key as string] = row.value as SettingValue;
-  });
-  return out;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("site_settings")
+      .select("key, value")
+      .like("key", `${prefix}%`);
+    const out: Record<string, SettingValue> = {};
+    (data ?? []).forEach((row) => {
+      out[row.key as string] = row.value as SettingValue;
+    });
+    return out;
+  } catch {
+    return {};
+  }
 });
 
 /* Convenience: read a value from a pre-fetched bag with a fallback.
