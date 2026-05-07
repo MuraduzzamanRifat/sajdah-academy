@@ -1,64 +1,66 @@
 "use client";
 
-/* Lenis smooth-scroll integration.
+/* Lenis smooth-scroll integration with idle-pause.
 
-   Why: native browser wheel-scroll on Chrome/Firefox is fast but
-   choppy on long pages with parallax + intersection observers.
-   Lenis interpolates the scroll position with a lerp curve, so the
-   page settles toward the target position over a few frames instead
-   of jumping in discrete wheel ticks. Result: scroll feels like
-   inertial momentum on macOS/iOS even on Windows + a regular mouse.
-
-   Plays well with our existing scroll-aware code:
-   - framer-motion's `useScroll` reads window.scrollY which Lenis
-     keeps in sync — Hero parallax (desktop) still works
-   - CSS `animation-timeline: scroll(root)` (ScrollProgress.tsx)
-     also reads document scroll position — also works
-   - IntersectionObserver fires correctly because Lenis triggers
-     a real scroll event each frame
-
-   Disabled when:
-   - prefers-reduced-motion is set (a11y)
-   - touch devices (smoothTouch: false) — native iOS momentum is
-     better than anything Lenis could synthesize on touch */
+   The naive `requestAnimationFrame(raf); ...` recursion runs at 60Hz
+   forever even when the page is idle, preventing the browser from
+   parking the tab. We instead drive the rAF loop only while Lenis is
+   actively scrolling — wheel/touch/key events wake the loop, the loop
+   stops itself when `lenis.isScrolling` is false. Saves ~60 wakeups
+   per second on idle desktops. */
 
 import { useEffect } from "react";
+import { useReducedMotion } from "framer-motion";
 import Lenis from "lenis";
 
 export default function LenisProvider() {
+  const reduced = useReducedMotion();
+
   useEffect(() => {
-    /* Respect reduced-motion preference — return without instantiating
-       Lenis so the user gets the browser's native scroll behavior. */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reduced) return;
 
     const lenis = new Lenis({
-      /* lerp: lower = slower glide; 0.1 is the standard "premium feel"
-         Apple-style coefficient. Higher (e.g. 0.18) makes it more
-         responsive. 0.1 strikes the right balance for content sites. */
       lerp: 0.1,
       smoothWheel: true,
-      /* Do NOT smooth-scroll touch — iOS Safari's native momentum is
-         better than anything we can synthesize, and Android Chrome's
-         is good enough. Lenis on touch generally feels worse. */
+      /* iOS native momentum > anything we synthesize on touch. */
       syncTouch: false,
-      /* Mouse wheel multiplier — 1.0 keeps the OS-default scroll
-         distance per tick. Bumping above 1 makes it scroll-jump faster
-         per tick which fights the smoothness; below 1 feels sluggish. */
       wheelMultiplier: 1.0,
     });
 
-    let rafId = 0;
-    function raf(time: number) {
+    let rafId: number | null = null;
+
+    function step(time: number) {
       lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
+      if (lenis.isScrolling) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        rafId = null;
+      }
     }
-    rafId = requestAnimationFrame(raf);
+
+    function wake() {
+      if (rafId === null) {
+        rafId = requestAnimationFrame(step);
+      }
+    }
+
+    /* Initial pump — handles the case where the user already started
+       scrolling before this component mounted. */
+    wake();
+
+    /* Passive listeners; we only use them as a wake signal. */
+    window.addEventListener("wheel", wake, { passive: true });
+    window.addEventListener("touchstart", wake, { passive: true });
+    window.addEventListener("keydown", wake);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("wheel", wake);
+      window.removeEventListener("touchstart", wake);
+      window.removeEventListener("keydown", wake);
       lenis.destroy();
     };
-  }, []);
+  }, [reduced]);
 
   return null;
 }

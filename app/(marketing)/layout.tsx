@@ -92,7 +92,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
 
   return (
     <>
-      <Preloader />
+      <Preloader nonce={nonce} />
       <LenisProvider />
       <script
         type="application/ld+json"

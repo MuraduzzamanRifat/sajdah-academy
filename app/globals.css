@@ -253,23 +253,15 @@ html, body {
   border-radius: var(--radius-md);
 }
 
-/* ============================================================
-   Below-the-fold render skip.
-   ============================================================
-   `content-visibility: auto` lets the browser skip rendering for any
-   subtree that is currently out of the viewport — saves layout, paint,
-   and (for animated descendants) composite work. Browser brings it back
-   automatically as it approaches the viewport during scroll.
-
-   `contain-intrinsic-size` reserves space so scroll position doesn't
-   jump when the section "materializes" — value is a reasonable estimate;
-   exact size doesn't matter once the section actually renders.
-
-   Applied via `.cv-section` class on each homepage band below the hero.
-   Hero stays exempt so first paint is unaffected. */
+/* Below-the-fold render skip — Hero exempt so first paint isn't affected. */
 .cv-section {
   content-visibility: auto;
-  contain-intrinsic-size: 1px 800px;
+  /* `auto 800px` lets browsers (Chrome 116+) cache the last measured
+     size and reuse it — eliminates the scroll-jump that the fixed
+     800px placeholder caused when taller sections (Curriculum,
+     CourseOutline) materialized below the viewport. Older browsers
+     ignore the `auto` keyword and use the 800px fallback. */
+  contain-intrinsic-size: auto 800px;
 }
 
 /* Smooth wheel scroll is now handled by Lenis (app/components/

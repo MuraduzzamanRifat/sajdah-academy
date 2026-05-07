@@ -1,23 +1,14 @@
 /* Preloader — inline HTML + CSS + JS that renders before React hydrates.
-   Shows the medallion brand mark with a slow amber breathing animation.
 
-   Two bugs fixed in this revision:
+   The marketing layout already reads `headers()` to build the JSON-LD
+   nonce; passing the same nonce as a prop here avoids forcing this
+   component to be async and dragging the rest of the marketing surface
+   into dynamic rendering for one header read.
 
-   1) The new per-request CSP (set in middleware) drops 'unsafe-inline'
-      from script-src whenever a nonce is present. The inline <script>
-      below MUST carry the same nonce or it's silently blocked — which
-      previously left the preloader sitting until the 4-second hard cap.
+   Hide trigger fires on first paint after DOMContentLoaded (double rAF)
+   instead of window.load, so it doesn't wait for every image / JS
+   chunk. Hard cap 1.5s. */
 
-   2) The previous hide trigger was `window.load`, which waits for EVERY
-      image, font, and JS chunk to finish. With WebGL hero + Three.js
-      bundles that's easily 3-5 seconds. We now fade as soon as the
-      first paint completes (DOMContentLoaded + a microtask), and cap
-      at 1.5s instead of 4s.
-
-   The component is a server component so it can read x-csp-nonce from
-   request headers() and pass it down to both <style> and <script>. */
-
-import { headers } from "next/headers";
 import { asset } from "../lib/asset";
 
 const PRELOADER_CSS = `
@@ -35,36 +26,26 @@ const PRELOADER_CSS = `
   transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity;
 }
-#__preloader.__loaded {
-  opacity: 0;
-  pointer-events: none;
-}
+#__preloader.__loaded { opacity: 0; pointer-events: none; }
 #__preloader__inner {
   position: relative;
-  width: 160px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
 }
 #__preloader__inner img {
-  width: 110px;
-  height: 110px;
+  width: 110px; height: 110px;
   object-fit: contain;
   animation: __preloader_breathe 2.4s ease-in-out infinite;
   filter: drop-shadow(0 0 24px rgba(245, 158, 11, 0.45));
 }
 #__preloader__ring {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   border-radius: 50%;
   border: 2px solid rgba(251, 191, 36, 0.15);
   border-top-color: #fbbf24;
   animation: __preloader_spin 1.1s linear infinite;
 }
-@keyframes __preloader_spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes __preloader_spin { to { transform: rotate(360deg); } }
 @keyframes __preloader_breathe {
   0%, 100% { transform: scale(1); opacity: 0.85; }
   50%      { transform: scale(1.06); opacity: 1; }
@@ -76,10 +57,6 @@ const PRELOADER_CSS = `
 }
 `;
 
-/* Inline script — runs at parse time. Hides preloader as soon as the
-   document is interactive + first paint has happened. Does NOT wait
-   for window.load (that gates on every image/JS chunk and is the
-   reason the preloader felt slow). Hard cap reduced from 4s → 1.5s. */
 const PRELOADER_JS = `
 (function() {
   var el = document.getElementById('__preloader');
@@ -100,8 +77,6 @@ const PRELOADER_JS = `
       try { sessionStorage.setItem('__preloader_seen', '1'); } catch(_) {}
     }, 360);
   };
-  /* Fire on first paint after DOMContentLoaded — meaningful chrome is
-     visible, hero may still be hydrating but that's fine. */
   var onReady = function() {
     if ('requestAnimationFrame' in window) {
       requestAnimationFrame(function() { requestAnimationFrame(hide); });
@@ -114,14 +89,12 @@ const PRELOADER_JS = `
   } else {
     onReady();
   }
-  /* Hard cap — never sit longer than 1.5s regardless of state. */
   setTimeout(hide, 1500);
 })();
 `;
 
-export default async function Preloader() {
+export default function Preloader({ nonce }: { nonce?: string }) {
   const medallion = asset("/medallion-128.webp");
-  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
   return (
     <>
       <style nonce={nonce} dangerouslySetInnerHTML={{ __html: PRELOADER_CSS }} />
