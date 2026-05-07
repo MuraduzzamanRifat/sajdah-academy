@@ -25,18 +25,25 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
 
   if (error) return { error: error.message };
 
-  // Role-aware host gate: the api subdomain is admin-only. If a student
-  // submits the admin login form there, sign them out immediately and
-  // show a clear error — never leave a non-admin session on the api host
-  // (would cause a cross-host redirect loop via /student-dashboard).
   const h = await headers();
   const onAdminHost = isAdminHost(h.get("host"));
 
+  /* Profile must exist for the session to be valid. If the row is
+     missing (trigger missed, manual deletion), sign out and surface
+     a clear error rather than letting the user into a broken state. */
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", data.user.id)
-    .single();
+    .maybeSingle();
+
+  if (!profile) {
+    await supabase.auth.signOut();
+    return {
+      error:
+        "অ্যাকাউন্টের প্রোফাইল রেকর্ড পাওয়া যায়নি। সাপোর্টে যোগাযোগ করুন।",
+    };
+  }
 
   if (onAdminHost && !isAdminRole(profile?.role)) {
     await supabase.auth.signOut();
@@ -59,19 +66,41 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const fullName = String(formData.get("full_name") ?? "").trim().slice(0, 100);
 
   if (!email || !password) return { error: "ইমেইল ও পাসওয়ার্ড দিন।" };
   if (password.length < 8) return { error: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে।" };
+  if (fullName && fullName.length < 2) return { error: "নাম খুব ছোট।" };
+
+  /* The admin host (api.sijdahacademy.com) is for admin sign-IN only.
+     Self-registration on the api host is denied — admins are minted
+     server-side, not via public signup. */
+  const h = await headers();
+  if (isAdminHost(h.get("host"))) {
+    return {
+      error: "এডমিন প্যানেলে নতুন অ্যাকাউন্ট তৈরি করা যাবে না। ছাত্র সাইনআপ → sijdahacademy.com",
+    };
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { full_name: fullName } },
   });
 
   if (error) return { error: error.message };
+
+  /* Supabase returns success with `data.user.identities = []` when the
+     email is already registered — its email-enumeration protection.
+     Translate that into an explicit "already registered" message so the
+     user doesn't see a green success block and wonder why no email arrived. */
+  if (data.user && (!data.user.identities || data.user.identities.length === 0)) {
+    return {
+      error:
+        "এই ইমেইল ইতিমধ্যে রেজিস্টার্ড। সাইন ইন করুন বা পাসওয়ার্ড রিসেট করুন।",
+    };
+  }
 
   return { ok: true };
 }

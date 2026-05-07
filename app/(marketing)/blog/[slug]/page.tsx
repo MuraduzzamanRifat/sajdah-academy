@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     .from("posts")
     .select("title, excerpt")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
   if (!p) return { title: "Post not found" };
   return {
     title: p.title,
@@ -67,7 +67,7 @@ export default async function PostPage({ params }: Params) {
       .select("id, slug, title, excerpt, body, category, author, reading_minutes, published_at")
       .eq("slug", slug)
       .eq("is_published", true)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("posts")
       .select("slug, title, category, excerpt")

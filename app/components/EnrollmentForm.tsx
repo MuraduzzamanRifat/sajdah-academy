@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, ArrowLeft, ArrowRight, User, GraduationCap, Calendar, FileCheck } from "lucide-react";
 import { submitEnrollment } from "../(marketing)/enroll/actions";
 
+/* WhatsApp number is threaded down from the server-rendered enroll page
+   so the success-screen "WhatsApp এ যোগাযোগ" button reflects whatever
+   admin entered in the CMS — not a hardcoded (and previously truncated)
+   number that drifts from contact.whatsapp setting. */
+type EnrollmentFormProps = {
+  whatsappNumber?: string;
+};
+
 /* Multi-step enrollment.
    On submit: posts the application to Supabase via the submitEnrollment
    server action, which inserts into the `enrollments` table. The admin
@@ -69,7 +77,8 @@ const batches = [
 const inputBase =
   "w-full px-4 py-3 rounded-lg border border-slate-200 bg-white/80 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all";
 
-export default function EnrollmentForm() {
+export default function EnrollmentForm({ whatsappNumber }: EnrollmentFormProps = {}) {
+  const waNumber = (whatsappNumber ?? "+880 180 55 65 444").replace(/[^0-9]/g, "");
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(empty);
   const [submitting, setSubmitting] = useState(false);
@@ -120,7 +129,7 @@ export default function EnrollmentForm() {
         </div>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
-            href="https://wa.me/880180556544"
+            href={`https://wa.me/${waNumber}`}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg active:scale-[0.98]"
           >
             WhatsApp এ যোগাযোগ

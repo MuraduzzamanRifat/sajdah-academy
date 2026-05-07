@@ -175,30 +175,54 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  /* getUser() throws on stale tokens (user_not_found, invalid_token).
+     Catch + signOut so the dead JWT cookie doesn't keep firing on
+     every request. */
+  let user: { id: string; email?: string | null } | null = null;
+  try {
+    const { data, error: getUserErr } = await supabase.auth.getUser();
+    if (getUserErr) {
+      const msg = getUserErr.message?.toLowerCase() ?? "";
+      if (msg.includes("user_not_found") || msg.includes("invalid")) {
+        await supabase.auth.signOut().catch(() => {});
+      }
+      user = null;
+    } else {
+      user = data.user;
+    }
+  } catch {
+    user = null;
+  }
 
   const isAdmin = logicalPath.startsWith("/admin");
   const isStudent = logicalPath.startsWith("/student-dashboard");
 
-  /* Single profile fetch — covers both the role gate AND the identity
-     headers downstream code needs. Save 1 round-trip vs the previous
-     "middleware fetches role, layout fetches name+email+role again"
-     pattern. */
+  /* Profile fetch covers both the role gate AND identity headers.
+     If the user has a session but NO profiles row (trigger missed,
+     row deleted, etc.), we treat the session as invalid: sign out
+     and let the unauth code path render the login panel. Defaulting
+     to "student" used to silently fabricate access. */
   let identity: { id: string; email: string; name: string; role: string } | null = null;
+  let profileMissing = false;
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("full_name, email, role")
       .eq("id", user.id)
-      .single();
-    identity = {
-      id: user.id,
-      email: profile?.email ?? user.email ?? "",
-      name: profile?.full_name ?? user.email ?? "User",
-      role: profile?.role ?? "student",
-    };
+      .maybeSingle();
+
+    if (!profile) {
+      profileMissing = true;
+      await supabase.auth.signOut().catch(() => {});
+      user = null;
+    } else {
+      identity = {
+        id: user.id,
+        email: profile.email ?? user.email ?? "",
+        name: profile.full_name ?? user.email ?? "User",
+        role: profile.role,
+      };
+    }
   }
 
   // Student-dashboard auth gate: redirect to /login if not signed in.
@@ -206,6 +230,9 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", logicalPath);
+    if (profileMissing) {
+      loginUrl.searchParams.set("error", "profile_missing");
+    }
     const r = NextResponse.redirect(loginUrl);
     copyCookies(cookieResponse, r);
     return r;

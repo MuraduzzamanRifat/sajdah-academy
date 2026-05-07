@@ -3,7 +3,12 @@
 /* Repeating list field. Each item is a small object with sub-fields
    declared in schema.ts (itemFields). UI: card per item with up/down
    reorder + delete + "add new". State serialized as JSON into a hidden
-   input — server action parses and stores in site_settings as jsonb. */
+   input — server action parses and stores in site_settings as jsonb.
+
+   Stable keys: each item carries a `_id` (UUID) generated at hydration
+   or when added. Without it React reused DOM by index — reorder/delete
+   would leak field state (and image previews) into the wrong card. The
+   _id is stripped before serialization so it never reaches the DB. */
 
 import { useState } from "react";
 import {
@@ -17,10 +22,28 @@ import type { ListItemFieldDef } from "../schema";
 import ImageField from "./ImageField";
 
 type ItemValue = string | number | boolean;
-type Item = Record<string, ItemValue>;
+type Item = Record<string, ItemValue> & { _id: string };
 
 const inputBase =
   "w-full px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm";
+
+function makeId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function withId(item: Record<string, ItemValue>): Item {
+  return { ...item, _id: makeId() };
+}
+
+function stripIds(items: Item[]): Record<string, ItemValue>[] {
+  return items.map(({ _id: _drop, ...rest }) => {
+    void _drop;
+    return rest;
+  });
+}
 
 export default function ListField({
   name,
@@ -35,12 +58,15 @@ export default function ListField({
   itemLabel?: string;
   hint?: string;
 }) {
-  const initial = Array.isArray(defaultValue) ? (defaultValue as Item[]) : [];
+  const initial: Item[] = Array.isArray(defaultValue)
+    ? (defaultValue as Record<string, ItemValue>[]).map(withId)
+    : [];
   const [items, setItems] = useState<Item[]>(initial);
 
-  const blank: Item = Object.fromEntries(
-    itemFields.map((f) => [f.key, defaultForKind(f.kind)])
-  );
+  const blank = (): Item => ({
+    ...Object.fromEntries(itemFields.map((f) => [f.key, defaultForKind(f.kind)])),
+    _id: makeId(),
+  } as Item);
 
   function update(idx: number, key: string, val: ItemValue) {
     setItems((prev) =>
@@ -60,12 +86,12 @@ export default function ListField({
     });
   }
   function add() {
-    setItems((prev) => [...prev, { ...blank }]);
+    setItems((prev) => [...prev, blank()]);
   }
 
   return (
     <div className="space-y-3">
-      <input type="hidden" name={name} value={JSON.stringify(items)} />
+      <input type="hidden" name={name} value={JSON.stringify(stripIds(items))} />
 
       {items.length === 0 ? (
         <div className="text-xs text-slate-500 italic px-3 py-4 border border-dashed border-slate-200 rounded-lg text-center">
@@ -75,7 +101,7 @@ export default function ListField({
         <div className="space-y-2">
           {items.map((item, idx) => (
             <div
-              key={idx}
+              key={item._id}
               className="border border-slate-200 rounded-lg bg-slate-50/50 overflow-hidden"
             >
               <div className="flex items-center justify-between px-3 py-2 bg-slate-100 border-b border-slate-200">

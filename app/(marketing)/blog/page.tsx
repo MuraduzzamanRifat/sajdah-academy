@@ -146,19 +146,28 @@ export default async function BlogIndex() {
         </div>
       </section>
 
-      <section className="py-12 bg-emerald-50">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <BookOpen className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-emerald-950 mb-3">নতুন আর্টিকেলের আপডেট পান</h2>
-          <p className="text-slate-600 mb-6">আমাদের WhatsApp ব্রডকাস্টে যুক্ত হোন।</p>
-          <a
-            href="https://wa.me/880180556544"
-            className="inline-block px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg active:scale-[0.98]"
-          >
-            Join Updates
-          </a>
-        </div>
-      </section>
+      <BlogJoinUpdatesCTA />
     </main>
+  );
+}
+
+async function BlogJoinUpdatesCTA() {
+  const contact = await getSettingsByPrefix("contact.");
+  const whatsapp = pick(contact, "contact.whatsapp", "+880 180 55 65 444");
+  const waNumber = whatsapp.replace(/[^0-9]/g, "");
+  return (
+    <section className="py-12 bg-emerald-50">
+      <div className="max-w-3xl mx-auto px-4 text-center">
+        <BookOpen className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-emerald-950 mb-3">নতুন আর্টিকেলের আপডেট পান</h2>
+        <p className="text-slate-600 mb-6">আমাদের WhatsApp ব্রডকাস্টে যুক্ত হোন।</p>
+        <a
+          href={`https://wa.me/${waNumber}`}
+          className="inline-block px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg active:scale-[0.98]"
+        >
+          Join Updates
+        </a>
+      </div>
+    </section>
   );
 }

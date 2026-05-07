@@ -38,19 +38,37 @@ export default function ImageField(props: Props) {
   const [error, setError] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  /* Race-condition guard. If the user picks file A then file B before
+     A finishes, A's setUrl() must NOT overwrite B's preview. We tag
+     each upload with an incrementing seq and only commit results from
+     the latest one. */
+  const uploadSeq = useRef(0);
 
   const { aspect, hint } = props;
 
+  /* Block server-script-capable image types at the client. Storage RLS
+     also restricts who can upload, but defense in depth — SVG can carry
+     <script> and would be served from *.supabase.co, which our CSP
+     img-src allows. PNG/JPEG/WebP/AVIF/GIF only. */
+  const ALLOWED_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/avif",
+    "image/gif",
+  ]);
+
   async function uploadFile(file: File) {
     setError(null);
-    if (!file.type.startsWith("image/")) {
-      setError("শুধু ইমেজ ফাইল আপলোড করুন।");
+    if (!ALLOWED_TYPES.has(file.type)) {
+      setError("শুধু PNG / JPEG / WebP / AVIF / GIF ইমেজ আপলোড করুন।");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       setError("ইমেজ ৫MB এর কম হতে হবে।");
       return;
     }
+    const mySeq = ++uploadSeq.current;
     setUploading(true);
     try {
       const supabase = createClient();
@@ -62,12 +80,19 @@ export default function ImageField(props: Props) {
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      setUrl(pub.publicUrl);
+      /* Only commit if no newer upload has started since we began. */
+      if (uploadSeq.current === mySeq) {
+        setUrl(pub.publicUrl);
+      }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Unknown error";
-      setError(`আপলোড ব্যর্থ: ${msg}`);
+      if (uploadSeq.current === mySeq) {
+        const msg = e instanceof Error ? e.message : "Unknown error";
+        setError(`আপলোড ব্যর্থ: ${msg}`);
+      }
     } finally {
-      setUploading(false);
+      if (uploadSeq.current === mySeq) {
+        setUploading(false);
+      }
     }
   }
 

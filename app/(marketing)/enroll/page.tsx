@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
 import EnrollmentForm from "../../components/EnrollmentForm";
+import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
 const title = "Enroll — ভর্তি";
 const description =
@@ -13,7 +14,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/enroll/" },
 };
 
-export default function EnrollPage() {
+export const revalidate = 60;
+
+export default async function EnrollPage() {
+  const contact = await getSettingsByPrefix("contact.");
+  const whatsapp = pick(contact, "contact.whatsapp", "+880 180 55 65 444");
   return (
     <main className="pt-24 pb-24">
       <section className="bg-emerald-900 text-white py-20 px-4 relative overflow-hidden">
@@ -41,7 +46,7 @@ export default function EnrollPage() {
       <section className="py-16 bg-slate-50 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-light" />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <EnrollmentForm />
+          <EnrollmentForm whatsappNumber={whatsapp} />
         </div>
       </section>
     </main>

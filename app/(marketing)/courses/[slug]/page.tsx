@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     .from("courses")
     .select("title, title_bn, summary")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
   if (!m) return { title: "Module not found" };
   return {
     title: `${m.title}${m.title_bn ? ` — ${m.title_bn}` : ""}`,
@@ -56,7 +56,7 @@ export default async function ModulePage({ params }: Params) {
       .select("id, slug, title, title_bn, phase, duration, summary, learning_outcomes, topics, module_number, display_order")
       .eq("slug", slug)
       .eq("is_published", true)
-      .single(),
+      .maybeSingle(),
     supabase
       .from("courses")
       .select("slug, title, title_bn, display_order")
