@@ -1,0 +1,61 @@
+name: CI
+
+# Catches the build failures we hit live (missing deps, type errors,
+# broken imports) BEFORE Vercel attempts the deploy.  3 deploys failed
+# during early Supabase setup because @supabase/ssr was missing from
+# package.json — this workflow would have caught it in 60 seconds.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# One run per ref; cancel previous runs on rapid pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    env:
+      # Placeholder values so `next build` can resolve env reads at
+      # build time. Real Supabase calls don't run during build (every
+      # data-fetching page is `force-dynamic` or revalidate-based).
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: placeholder-service-key
+      NEXT_PUBLIC_SITE_URL: https://sijdahacademy.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke-check critical files exist
+        run: |
+          test -f .next/BUILD_ID
+          test -d .next/server/app
+          test -f middleware.ts
+          test -f supabase/migrations/0001_initial_schema.sql
+          test -f supabase/migrations/0002_seed_data.sql
+          test -f supabase/migrations/0003_default_settings.sql
+          echo "✓ All build artifacts present"
