@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "../../lib/supabase/server";
 import { safeNext } from "../../lib/safe-redirect";
 import { isAdminRole } from "../../lib/roles";
+import { isAdminHost } from "../../lib/site-url";
 
 /* Server actions return AuthState only on FAILURE — success paths
    throw NEXT_REDIRECT via redirect(). useActionState handles the
@@ -23,20 +25,34 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
 
   if (error) return { error: error.message };
 
-  revalidatePath("/", "layout");
+  // Role-aware host gate: the api subdomain is admin-only. If a student
+  // submits the admin login form there, sign them out immediately and
+  // show a clear error — never leave a non-admin session on the api host
+  // (would cause a cross-host redirect loop via /student-dashboard).
+  const h = await headers();
+  const onAdminHost = isAdminHost(h.get("host"));
 
-  // Honor explicit ?next= if provided (e.g. middleware redirected here);
-  // otherwise route by role. Admins on the api host stay on /admin
-  // (which is also the login URL); students go to /student-dashboard
-  // on whichever host they're on.
-  if (next) {
-    redirect(safeNext(next));
-  }
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", data.user.id)
     .single();
+
+  if (onAdminHost && !isAdminRole(profile?.role)) {
+    await supabase.auth.signOut();
+    return {
+      error: "এই অ্যাকাউন্টের অ্যাডমিন অ্যাক্সেস নেই। ছাত্র লগইন → sijdahacademy.com/login",
+    };
+  }
+
+  revalidatePath("/", "layout");
+
+  // Honor explicit ?next= if provided (e.g. middleware redirected here);
+  // otherwise route by role. Admins on the api host stay on /dashboard;
+  // students on the main host go to /student-dashboard.
+  if (next) {
+    redirect(safeNext(next));
+  }
   redirect(isAdminRole(profile?.role) ? "/dashboard/" : "/student-dashboard/");
 }
 

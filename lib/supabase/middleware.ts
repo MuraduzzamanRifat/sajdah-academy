@@ -211,13 +211,18 @@ export async function updateSession(request: NextRequest) {
     return r;
   }
 
-  // Admin role gate: signed-in non-admins on /admin/* go to student dashboard.
+  // Admin role gate: a non-admin session on the admin host is illegitimate
+  // (admin host = api.sijdahacademy.com). Don't cross-host redirect to
+  // /student-dashboard — Supabase cookies are subdomain-scoped, so the
+  // browser would land on the main host's /login with no session and see
+  // the LIGHT student panel ("api root takes me to student login" bug).
+  // Instead: strip the identity so the layout renders AdminLoginPanel,
+  // and clear stale auth cookies on the api host so the panel starts
+  // from a clean state. Students can sign in legitimately on the main
+  // host at sijdahacademy.com/login.
   if (isAdmin && user && !isAdminRole(identity?.role)) {
-    const u = request.nextUrl.clone();
-    u.pathname = "/student-dashboard";
-    const r = NextResponse.redirect(u);
-    copyCookies(cookieResponse, r);
-    return r;
+    await supabase.auth.signOut();
+    identity = null;
   }
 
   // Auth passed (or unauth on /admin where layout renders inline panel).
