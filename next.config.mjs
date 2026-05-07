@@ -51,15 +51,37 @@ const nextConfig = {
      Edge runtime + keeps static-generation happy on /404 and /blog/[slug]. */
   serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
 
-  /* Browser cache strategy:
+  /* Browser cache + security headers.
+
      - /_next/static/*  →  immutable for a year (Next hashes the filename)
      - /_next/image     →  short cache; the upstream Supabase URL is what
                             actually changes when admins re-upload
      - /fonts/*, /sajdah-academy/*  →  long cache for static brand assets
-     Public HTML (the route documents themselves) intentionally NOT
-     overridden — Next.js + Vercel pick the right value based on
-     revalidate/dynamic. */
+     - everything else  →  baseline security headers (HSTS, X-Frame, etc.)
+
+     CSP itself is set in middleware so we can mint a per-request nonce.
+     This block sets the *static* security headers that don't need a nonce. */
   async headers() {
+    const SECURITY_HEADERS = [
+      /* HSTS — force HTTPS for 2 years, include subdomains, preload-eligible.
+         Vercel already redirects http→https, but HSTS gates the redirect at
+         the browser so a network attacker can't strip TLS on first hit. */
+      { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+      /* Defense in depth alongside CSP frame-ancestors. */
+      { key: "X-Frame-Options", value: "DENY" },
+      /* Defense in depth alongside CSP. */
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      /* Modern referrer policy — mirror what app/layout.tsx sets via meta. */
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      /* Locks down powerful APIs (camera/mic/etc.) at the HTTP layer
+         so a CSP regression doesn't open them. */
+      {
+        key: "Permissions-Policy",
+        value:
+          "camera=(), microphone=(), geolocation=(), gyroscope=(), accelerometer=(), magnetometer=(), payment=(), usb=(), interest-cohort=()",
+      },
+    ];
+
     return [
       {
         source: "/_next/static/:path*",
@@ -78,6 +100,13 @@ const nextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" },
         ],
+      },
+      /* Apply security headers to every other route. The catch-all matcher
+         is last so per-path Cache-Control headers above take precedence on
+         /_next/* paths. */
+      {
+        source: "/:path*",
+        headers: SECURITY_HEADERS,
       },
     ];
   },

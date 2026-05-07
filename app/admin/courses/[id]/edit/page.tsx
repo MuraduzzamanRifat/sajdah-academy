@@ -38,7 +38,7 @@ export default async function EditCoursePage({ params }: Params) {
         <Link
           href={`/courses/${course.slug}/`}
           target="_blank"
-          rel="noopener"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-900"
         >
           লাইভ পেজ দেখুন <ExternalLink className="w-3 h-3" />

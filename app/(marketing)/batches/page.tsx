@@ -47,24 +47,36 @@ const statusBadge: Record<string, { cls: string; label: string }> = {
 
 export default async function BatchesPage() {
   const supabase = await createClient();
-  const [{ data: batchesRaw }, { data: enrolledStudents }, { data: pendingEnrollments }, settings] =
+  /* Two queries instead of three. The batch_seat_counts view (migration
+     0005) computes taken/remaining inside Postgres so we no longer
+     need to fetch all profiles + all enrollments and reduce in JS. If
+     the view isn't deployed yet, fall back to the previous N+1 pattern
+     so the page keeps working until migration 0005 is applied. */
+  const [{ data: batchesRaw }, { data: counts, error: countsError }, settings] =
     await Promise.all([
       supabase
         .from("batches")
         .select("id, code, name, status, starts_at, ends_at, location, capacity, fee_bdt, notes")
         .in("status", ["open", "running"])
         .order("starts_at", { ascending: true }),
-      /* Enrolled students (already converted into profiles). */
+      supabase.from("batch_seat_counts").select("batch_id, taken"),
+      getSettingsByPrefix("batches."),
+    ]);
+
+  let enrolledStudents: { batch_id: string | null }[] | null = null;
+  let pendingEnrollments: { target_batch_id: string | null }[] | null = null;
+  if (countsError) {
+    /* Fallback to the legacy N+1 path. */
+    const [{ data: e1 }, { data: e2 }] = await Promise.all([
       supabase.from("profiles").select("batch_id").eq("role", "student"),
-      /* Pending enrollment applications that still hold a seat —
-         submitted/reviewing/accepted/waitlisted. Only "rejected" frees
-         a seat. Without this the seat-count view oversells. */
       supabase
         .from("enrollments")
         .select("target_batch_id")
         .in("status", ["submitted", "reviewing", "accepted", "waitlisted"]),
-      getSettingsByPrefix("batches."),
     ]);
+    enrolledStudents = e1 ?? null;
+    pendingEnrollments = e2 ?? null;
+  }
 
   const eyebrow = pick(settings, "batches.eyebrow", "Batches · ব্যাচসমূহ");
   const titleBn = pick(settings, "batches.title_bn", "পরবর্তী ব্যাচ শুরু হবে");
@@ -72,22 +84,23 @@ export default async function BatchesPage() {
   const emptyText = pick(settings, "batches.empty_text_bn", "নতুন ব্যাচ ঘোষণার জন্য অপেক্ষা করুন।");
 
   const batches = (batchesRaw ?? []) as BatchRow[];
-  /* Seat count = converted students + pending applications that still
-     hold a seat. Was previously only counting profiles.role='student',
-     letting the displayed capacity bar lag while submissions piled up
-     and silently overselling. */
-  const enrolledByBatch = (enrolledStudents ?? []).reduce<Record<string, number>>(
-    (acc, p: { batch_id: string | null }) => {
-      if (p.batch_id) acc[p.batch_id] = (acc[p.batch_id] ?? 0) + 1;
-      return acc;
-    },
-    {}
-  );
-  (pendingEnrollments ?? []).forEach((e: { target_batch_id: string | null }) => {
-    if (e.target_batch_id) {
-      enrolledByBatch[e.target_batch_id] = (enrolledByBatch[e.target_batch_id] ?? 0) + 1;
-    }
-  });
+  /* Seat count: prefer the view (single query, computed in Postgres).
+     Fallback to the legacy reducer if the view isn't deployed. */
+  const enrolledByBatch: Record<string, number> = {};
+  if (counts) {
+    counts.forEach((c: { batch_id: string; taken: number }) => {
+      enrolledByBatch[c.batch_id] = c.taken;
+    });
+  } else {
+    (enrolledStudents ?? []).forEach((p) => {
+      if (p.batch_id) enrolledByBatch[p.batch_id] = (enrolledByBatch[p.batch_id] ?? 0) + 1;
+    });
+    (pendingEnrollments ?? []).forEach((e) => {
+      if (e.target_batch_id) {
+        enrolledByBatch[e.target_batch_id] = (enrolledByBatch[e.target_batch_id] ?? 0) + 1;
+      }
+    });
+  }
 
   const upcoming = batches.filter((b) => b.starts_at && new Date(b.starts_at) > new Date());
   const next =

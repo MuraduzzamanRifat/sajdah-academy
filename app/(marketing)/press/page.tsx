@@ -139,7 +139,7 @@ export default async function PressPage() {
             <a
               href="/opengraph-image"
               target="_blank"
-              rel="noopener"
+              rel="noopener noreferrer"
               className="glass-light glass-light-hover rounded-2xl p-6 block text-center group"
             >
               <FileText className="w-10 h-10 text-emerald-700 mx-auto mb-3" />

@@ -40,7 +40,7 @@ export default function PostRowActions({
       <a
         href={`/blog/${slug}/`}
         target="_blank"
-        rel="noopener"
+        rel="noopener noreferrer"
         className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded"
         aria-label={`Live দেখুন: ${title}`}
         title="Live"

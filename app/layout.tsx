@@ -95,40 +95,15 @@ export const metadata: Metadata = {
   referrer: "strict-origin-when-cross-origin",
 };
 
-/* CSP must allow:
-   - Supabase Storage hosts (images uploaded via the Pages CMS — testimonials,
-     gallery, hero bg, logo, blog post images). Wildcard *.supabase.co
-     covers any Supabase project.
-   - Vercel Analytics + Speed Insights (vitals.vercel-insights.com,
-     va.vercel-scripts.com).
-   - YouTube (frame-src) for embedded videos via Tiptap.
-   - Unsplash for default gallery placeholders. */
-const CSP = [
-  "default-src 'self'",
-  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
-  "font-src 'self' data:",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
-  "connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com",
-  "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
-  "worker-src 'self' blob:",
-  "form-action 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "upgrade-insecure-requests",
-].join("; ");
-
-const PERMISSIONS = [
-  "camera=()",
-  "microphone=()",
-  "geolocation=()",
-  "gyroscope=()",
-  "accelerometer=()",
-  "magnetometer=()",
-  "payment=()",
-  "usb=()",
-  "interest-cohort=()",
-].join(", ");
+/* CSP, HSTS, Permissions-Policy, X-Content-Type-Options, Referrer-Policy
+   are now set as HTTP headers — CSP per request from middleware (with a
+   nonce so script-src can use 'strict-dynamic' instead of 'unsafe-inline'),
+   the rest as static headers in next.config.mjs. The previous meta-CSP
+   block was removed because:
+   - Header-delivered CSP supports frame-ancestors (meta cannot)
+   - Per-request nonce requires a Set-Cookie-style header anyway
+   - meta-CSP is parsed AFTER the document HEAD starts, so resources
+     referenced in <head> bypass it. */
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -143,11 +118,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
-      <head>
-        <meta httpEquiv="Content-Security-Policy" content={CSP} />
-        <meta httpEquiv="Permissions-Policy" content={PERMISSIONS} />
-        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
-      </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
         {children}
         <Analytics />

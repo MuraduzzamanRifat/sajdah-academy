@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { LayoutDashboard } from "lucide-react";
 import EnrollmentForm from "../../components/EnrollmentForm";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
 
@@ -61,13 +59,6 @@ export default async function EnrollPage() {
               </span>
             )}
           </div>
-          <Link
-            href="/student-dashboard/"
-            className="inline-flex items-center gap-2 mt-6 text-amber-300 hover:text-amber-200 text-sm font-medium underline-offset-4 hover:underline"
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            ভর্তির পর আপনার পোর্টাল কেমন দেখাবে — দেখুন
-          </Link>
         </div>
       </section>
 

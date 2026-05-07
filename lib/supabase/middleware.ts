@@ -117,7 +117,11 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 /* Build the request-header bag that gets handed to downstream code.
    Always sanitise — we MUST overwrite any client-supplied x-sajdah-*
    header so a malicious request can't impersonate by sending
-   "x-sajdah-user-role: super_admin" from the browser. */
+   "x-sajdah-user-role: super_admin" from the browser. The same logic
+   is applied UNCONDITIONALLY at the top of updateSession() so even
+   short-circuit paths (static-asset 304s, fast pass-through) get
+   sanitised — closes the audit's "matcher excludes some path → headers
+   trusted" trust-boundary class. */
 function buildIdentityHeaders(
   request: NextRequest,
   identity: { id: string; email: string; name: string; role: string } | null
@@ -133,11 +137,77 @@ function buildIdentityHeaders(
   return out;
 }
 
+/* CSP nonce — minted per request so we can drop 'unsafe-inline' from
+   script-src. The nonce-aware scripts (Next's runtime, Vercel
+   Analytics, our JSON-LD <script>) read it via x-csp-nonce request
+   header and emit `<script nonce="...">`.
+
+   Edge runtime has crypto.getRandomValues + btoa but NOT Node's
+   Buffer reliably, so we hand-encode the random bytes to base64. */
+function makeNonce(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+const NONCE_HEADER = "x-csp-nonce";
+
+function buildCSP(nonce: string, isDev: boolean): string {
+  /* strict-dynamic with a nonce: Next's bootstrap script gets the nonce,
+     anything it loads inherits trust. unsafe-inline is ignored by modern
+     browsers when strict-dynamic is present (it's listed as a fallback
+     for older browsers). Vercel Analytics' inline reporter loads via
+     the trusted bootstrap so it inherits the nonce-derived trust. */
+  const scriptSrc = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    /* Fallback for browsers that don't support strict-dynamic. */
+    "'unsafe-inline'",
+    "https://va.vercel-scripts.com",
+    /* Dev needs eval for HMR; production strips this. */
+    isDev ? "'unsafe-eval'" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return [
+    "default-src 'self'",
+    "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
+    "font-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    `script-src ${scriptSrc}`,
+    "connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
+    "frame-ancestors 'none'",
+    "worker-src 'self' blob:",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+/* Apply per-request CSP + nonce to the outgoing response. The nonce
+   is also written onto the request so server components can read it
+   via headers().get("x-csp-nonce") and pass it to <Script> / inline
+   <script> tags. */
+function applyCsp(response: NextResponse, nonce: string): NextResponse {
+  const isDev = process.env.NODE_ENV === "development";
+  response.headers.set("Content-Security-Policy", buildCSP(nonce, isDev));
+  return response;
+}
+
 export async function updateSession(request: NextRequest) {
+  /* Mint a CSP nonce for this request and stamp it onto the request
+     headers so server components / next/script can read it. */
+  const nonce = makeNonce();
+
   const plan = planRouting(request);
 
   if (plan.kind === "redirect") {
-    return NextResponse.redirect(plan.target);
+    return applyCsp(NextResponse.redirect(plan.target), nonce);
   }
 
   const logicalPath = plan.kind === "rewrite" ? plan.logicalPath : request.nextUrl.pathname;
@@ -146,9 +216,12 @@ export async function updateSession(request: NextRequest) {
   // then short-circuit without touching Supabase.
   if (!isProtected(logicalPath)) {
     const cleanHeaders = buildIdentityHeaders(request, null);
-    return plan.kind === "rewrite"
-      ? NextResponse.rewrite(plan.target, { request: { headers: cleanHeaders } })
-      : NextResponse.next({ request: { headers: cleanHeaders } });
+    cleanHeaders.set(NONCE_HEADER, nonce);
+    const r =
+      plan.kind === "rewrite"
+        ? NextResponse.rewrite(plan.target, { request: { headers: cleanHeaders } })
+        : NextResponse.next({ request: { headers: cleanHeaders } });
+    return applyCsp(r, nonce);
   }
 
   // Protected — refresh session on a vanilla next response. Supabase
@@ -235,7 +308,7 @@ export async function updateSession(request: NextRequest) {
     }
     const r = NextResponse.redirect(loginUrl);
     copyCookies(cookieResponse, r);
-    return r;
+    return applyCsp(r, nonce);
   }
 
   // Admin role gate: a non-admin session on the admin host is illegitimate
@@ -253,18 +326,19 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Auth passed (or unauth on /admin where layout renders inline panel).
-  // Final response carries the rewrite/next + identity headers + cookies.
+  // Final response carries the rewrite/next + identity headers + cookies + nonce.
   const headersWithIdentity = buildIdentityHeaders(request, identity);
+  headersWithIdentity.set(NONCE_HEADER, nonce);
 
   if (plan.kind === "rewrite") {
     const r = NextResponse.rewrite(plan.target, {
       request: { headers: headersWithIdentity },
     });
     copyCookies(cookieResponse, r);
-    return r;
+    return applyCsp(r, nonce);
   }
 
   const r = NextResponse.next({ request: { headers: headersWithIdentity } });
   copyCookies(cookieResponse, r);
-  return r;
+  return applyCsp(r, nonce);
 }

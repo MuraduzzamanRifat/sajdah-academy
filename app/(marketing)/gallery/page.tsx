@@ -83,7 +83,9 @@ export default async function GalleryPage() {
                       fill
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       quality={75}
-                      loading={i < 3 ? "eager" : "lazy"}
+                      {...(i === 0
+                        ? { priority: true as const }
+                        : { loading: i < 3 ? ("eager" as const) : ("lazy" as const) })}
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-950/30 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />

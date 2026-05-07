@@ -59,7 +59,7 @@ export default function AdminPagesIndex() {
                   <Link
                     href={p.publicPath}
                     target="_blank"
-                    rel="noopener"
+                    rel="noopener noreferrer"
                     className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded"
                     aria-label="View live"
                     title="লাইভ পেজ"

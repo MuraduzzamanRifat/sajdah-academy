@@ -48,7 +48,7 @@ export default function RowActions({
       <a
         href={`/courses/${slug}/`}
         target="_blank"
-        rel="noopener"
+        rel="noopener noreferrer"
         className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded"
         aria-label={`Live দেখুন: ${title}`}
         title="লাইভ পেজ দেখুন"

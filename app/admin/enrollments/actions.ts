@@ -39,11 +39,41 @@ async function setStatus(id: string, status: Status): Promise<ActionResult> {
   revalidatePath("/dashboard/enrollments");
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
+  revalidatePath("/batches");
   return { ok: true };
 }
 
-export async function acceptEnrollment(id: string) {
-  return setStatus(id, "accepted");
+/* Accept goes through the dedicated Postgres function which atomically:
+     - flips status to accepted
+     - attaches the batch to existing profiles row (if any)
+     - creates the initial payment row (kind='ভর্তি ফি', due=+7 days)
+   Falls back to plain status flip if RPC doesn't exist (e.g. local dev
+   without migration 0005 applied yet). */
+export async function acceptEnrollment(id: string): Promise<ActionResult> {
+  const me = await requireAdmin();
+  if (!me) return { error: "Forbidden — admin access required." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("accept_enrollment", {
+    p_enrollment_id: id,
+    p_actor_id: me.id,
+  });
+
+  if (error) {
+    /* RPC missing (migration 0005 not applied yet) — fall back to
+       simple status flip so admins aren't blocked. */
+    if (error.code === "42883" || /function .* does not exist/i.test(error.message)) {
+      return setStatus(id, "accepted");
+    }
+    return { error: error.message };
+  }
+
+  await Actions.enrollmentAccept(id);
+  revalidatePath("/dashboard/enrollments");
+  revalidatePath("/admin/enrollments");
+  revalidatePath("/admin");
+  revalidatePath("/batches");
+  return { ok: true };
 }
 export async function rejectEnrollment(id: string) {
   return setStatus(id, "rejected");

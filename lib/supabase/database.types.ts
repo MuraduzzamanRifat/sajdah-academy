@@ -1,9 +1,23 @@
 /* Supabase types — manually transcribed from supabase/migrations/0001_initial_schema.sql.
 
-   To regenerate from the live database (recommended on schema changes):
+   THIS FILE WILL DRIFT. Regenerate from the live database whenever you
+   apply a migration:
+
+     # one-time setup (uses SUPABASE_ACCESS_TOKEN from env)
+     supabase login
+     supabase link --project-ref <your-project-ref>
+
+     # on every schema change
+     npm run db:types        # → writes lib/supabase/database.types.ts
+
+   In CI, add SUPABASE_ACCESS_TOKEN as a secret and run:
+     supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
      npm run db:types
-   That requires the supabase CLI + a linked project.  The hand-written
-   version is a stop-gap. */
+     git diff --exit-code lib/supabase/database.types.ts
+   to fail the build if the types don't match the live schema.
+
+   Until the CI job exists, treat any failed query against a column you
+   added in a recent migration as "regen the types first." */
 
 export type Json =
   | string
