@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Upload, CheckCircle2, Clock, FileText } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Assignments — অ্যাসাইনমেন্ট",
@@ -63,6 +64,7 @@ const statusConfig: Record<string, { color: string; label: string; icon: React.R
 export default function AssignmentsPage() {
   return (
     <div className="space-y-3">
+        <ComingSoon body="অ্যাসাইনমেন্ট submit/grade এখনো আসেনি।" />
         {assignments.map((a, i) => {
           const cfg = statusConfig[a.status];
           return (

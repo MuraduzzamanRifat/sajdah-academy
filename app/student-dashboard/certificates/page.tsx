@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Award, Download, Lock, CheckCircle2, Share2 } from "lucide-react";
 import MedallionMark from "../../components/MedallionMark";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Certificates — সার্টিফিকেট",
@@ -47,6 +48,7 @@ const upcoming = [
 export default function CertificatesPage() {
   return (
     <div className="space-y-5">
+        <ComingSoon body="সার্টিফিকেট ইস্যু/PDF এখনো wired হয়নি।" />
         <section>
           <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">
             Earned · অর্জিত

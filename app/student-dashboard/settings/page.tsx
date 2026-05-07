@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Globe, Bell, Eye, Trash2, Moon } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Settings — সেটিংস",
@@ -50,6 +51,7 @@ const sections = [
 export default function SettingsPage() {
   return (
     <div className="space-y-4 max-w-3xl">
+        <ComingSoon body="Toggle গুলো এখনো persist হয় না।" />
         {sections.map((s) => {
           const I = s.icon;
           return (

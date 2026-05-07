@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Camera, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
+import { getCurrentUser } from "../../../lib/auth/current-user";
+import { createClient } from "../../../lib/supabase/server";
+import { initials } from "../../../lib/initials";
+import ProfileForm from "./_components/ProfileForm";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "My Profile — আমার প্রোফাইল",
@@ -7,162 +12,111 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const inputBase =
-  "w-full px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm";
+export const dynamic = "force-dynamic";
 
-export default function ProfilePage() {
+type ProfileRow = {
+  full_name: string | null;
+  email: string;
+  phone: string | null;
+  whatsapp: string | null;
+  city: string | null;
+  date_of_birth: string | null;
+  status: string | null;
+  student_id: string | null;
+  metadata: Record<string, unknown> | null;
+  batch: { name: string; phase: string | null } | null;
+};
+
+export default async function ProfilePage() {
+  const me = await getCurrentUser();
+  if (!me) redirect("/login?next=/student-dashboard/profile/");
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select(
+      `full_name, email, phone, whatsapp, city, date_of_birth, status, student_id, metadata,
+       batch:batch_id ( name, phase )`
+    )
+    .eq("id", me.id)
+    .maybeSingle();
+
+  const profile = (data ?? null) as ProfileRow | null;
+
+  if (!profile) {
+    /* Auth user exists but profiles row is missing — shouldn't happen
+       with the handle_new_user trigger in place, but defensive UX. */
+    return (
+      <div className="bg-rose-50 border border-rose-200 rounded-xl p-5 text-sm text-rose-800">
+        আপনার প্রোফাইল রেকর্ড পাওয়া যায়নি। সাপোর্টে যোগাযোগ করুন।
+      </div>
+    );
+  }
+
+  const display = profile.full_name?.trim() || me.name || profile.email;
+  const meta = (profile.metadata ?? {}) as Record<string, unknown>;
+
   return (
     <div className="space-y-4 max-w-3xl">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5">
-          <div className="flex items-center gap-5">
-            <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
-                MI
-              </div>
-              <button
-                type="button"
-                className="absolute bottom-0 right-0 w-7 h-7 bg-amber-500 text-emerald-950 rounded-full flex items-center justify-center shadow-md"
-                aria-label="Change avatar"
-              >
-                <Camera className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-emerald-950">Muhammad Ibrahim</h2>
-              <p className="text-sm text-slate-500">Student ID: SA-2026-0418</p>
-              <div className="flex flex-wrap gap-2 mt-2">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div className="flex items-center gap-5">
+          <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold shrink-0">
+            {initials(display)}
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-emerald-950">{display}</h2>
+            {profile.student_id && (
+              <p className="text-sm text-slate-500">Student ID: {profile.student_id}</p>
+            )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {profile.batch?.phase && (
                 <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  Foundation Phase
+                  {profile.batch.phase} Phase
                 </span>
+              )}
+              {profile.batch?.name && (
                 <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  ব্যাচ-৪
+                  {profile.batch.name}
                 </span>
-                <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  Active
-                </span>
-              </div>
+              )}
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  profile.status === "active"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {profile.status ?? "pending"}
+              </span>
             </div>
           </div>
         </div>
-        <FormSection title="ব্যক্তিগত তথ্য · Personal Info">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="পূর্ণ নাম" defaultValue="Muhammad Ibrahim Hossain" />
-            <Field label="পিতার নাম" defaultValue="Abdul Karim Hossain" />
-            <Field label="বয়স" type="number" defaultValue="২৬" />
-            <Field label="জন্মতারিখ" type="date" defaultValue="2000-03-15" />
-          </div>
-        </FormSection>
-        <FormSection title="যোগাযোগ · Contact">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="ইমেইল" type="email" defaultValue="ibrahim@sajdah-alumni.org" />
-            <Field label="মোবাইল" type="tel" defaultValue="+880 17 4288 6543" />
-            <Field label="WhatsApp" type="tel" defaultValue="+880 17 4288 6543" />
-            <Field label="শহর" defaultValue="Dhaka, Bangladesh" />
-          </div>
-          <div className="mt-4">
-            <label className="block text-xs font-medium text-slate-700 mb-1.5">পূর্ণ ঠিকানা</label>
-            <textarea
-              defaultValue="Apt 4B, Lake Road, Banani, Dhaka 1213"
-              rows={2}
-              className={`${inputBase} resize-none`}
-            />
-          </div>
-        </FormSection>
-        <FormSection title="জরুরি যোগাযোগ · Emergency Contact">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="নাম" defaultValue="Abdul Karim Hossain (পিতা)" />
-            <Field label="ফোন" type="tel" defaultValue="+880 18 0010 9876" />
-          </div>
-        </FormSection>
-        <FormSection title="নিরাপত্তা · Security" icon={<Lock className="w-4 h-4" />}>
-          <div className="space-y-3">
-            <button
-              type="button"
-              className="w-full text-left px-4 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium text-emerald-950 text-sm">পাসওয়ার্ড পরিবর্তন</p>
-                <p className="text-xs text-slate-500">শেষ পরিবর্তন: ২ মাস আগে</p>
-              </div>
-              <span className="text-xs font-bold text-emerald-700">Update →</span>
-            </button>
-            <button
-              type="button"
-              className="w-full text-left px-4 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium text-emerald-950 text-sm">দুই-ধাপ যাচাইকরণ</p>
-                <p className="text-xs text-slate-500">নিষ্ক্রিয় — চালু করার পরামর্শ</p>
-              </div>
-              <span className="text-xs font-bold text-emerald-700">Enable →</span>
-            </button>
-            <button
-              type="button"
-              className="w-full text-left px-4 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center justify-between"
-            >
-              <div>
-                <p className="font-medium text-emerald-950 text-sm">সংযুক্ত ডিভাইস</p>
-                <p className="text-xs text-slate-500">২টি সক্রিয় ডিভাইস</p>
-              </div>
-              <span className="text-xs font-bold text-emerald-700">Manage →</span>
-            </button>
-          </div>
-        </FormSection>
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3">
-          <p className="text-xs text-slate-500">পরিবর্তন জমা দেওয়ার আগে সব তথ্য যাচাই করে নিন।</p>
-          <div className="flex gap-2 shrink-0">
-            <button
-              type="button"
-              className="px-5 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm rounded-lg"
-            >
-              বাতিল
-            </button>
-            <button
-              type="button"
-              disabled
-              className="px-5 py-2 bg-emerald-700 text-white font-bold text-sm rounded-lg opacity-60 cursor-not-allowed"
-            >
-              সংরক্ষণ করুন
-            </button>
-          </div>
-        </div>
-    </div>
-  );
-}
+      </div>
 
-function FormSection({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5">
-      <h3 className="font-bold text-emerald-950 mb-4 flex items-center gap-2">
-        {icon && <span className="text-amber-600">{icon}</span>}
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-}
+      <ProfileForm
+        initial={{
+          full_name: profile.full_name ?? "",
+          email: profile.email,
+          phone: profile.phone ?? "",
+          whatsapp: profile.whatsapp ?? "",
+          city: profile.city ?? "",
+          date_of_birth: profile.date_of_birth ?? "",
+          father_name: (meta.father_name as string | null) ?? "",
+          address: (meta.address as string | null) ?? "",
+          emergency_name: (meta.emergency_contact_name as string | null) ?? "",
+          emergency_phone: (meta.emergency_contact_phone as string | null) ?? "",
+        }}
+      />
 
-function Field({
-  label,
-  defaultValue,
-  type = "text",
-}: {
-  label: string;
-  defaultValue: string;
-  type?: string;
-}) {
-  return (
-    <div>
-      <label className="block text-xs font-medium text-slate-700 mb-1.5">{label}</label>
-      <input type={type} defaultValue={defaultValue} className={inputBase} />
+      <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <h3 className="font-bold text-emerald-950 flex items-center gap-2 mb-4">
+          <Lock className="w-4 h-4" /> নিরাপত্তা · Security
+        </h3>
+        <p className="text-xs text-slate-500">
+          পাসওয়ার্ড পরিবর্তন বা টু-ফ্যাক্টর সেটআপের জন্য সাপোর্টে যোগাযোগ করুন।
+          (শীঘ্রই সরাসরি এই পেজ থেকে করা যাবে।)
+        </p>
+      </div>
     </div>
   );
 }

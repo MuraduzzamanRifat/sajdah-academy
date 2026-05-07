@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Calendar as CalendarIcon, Download } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Schedule — রুটিন",
@@ -64,6 +65,7 @@ const fullToday = [
 export default function SchedulePage() {
   return (
     <div className="space-y-4">
+        <ComingSoon body="ব্যাচ-ভিত্তিক schedule wired হয়নি — sample রুটিন দেখানো হচ্ছে।" />
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-emerald-950 flex items-center gap-2">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Megaphone, Pin, Calendar, AlertCircle, Heart, Award } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Announcements — ঘোষণা",
@@ -77,6 +78,7 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="space-y-4">
+        <ComingSoon body="ঘোষণা স্ট্রিম এখনো ডিবেস ব্যাকএন্ডের সাথে wired হয়নি — নিচের কার্ডগুলো sample।" />
         {pinned.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3 flex items-center gap-1.5">

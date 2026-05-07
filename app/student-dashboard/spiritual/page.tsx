@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Heart, Moon, BookOpen, Sparkles, Flame, TrendingUp } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Spiritual Tracker — আমল ট্র্যাকার",
@@ -37,6 +38,7 @@ export default function SpiritualPage() {
   const todayPrayers = prayers.filter((p) => p.done).length;
   return (
     <div className="space-y-4">
+        <ComingSoon body="আমল ট্র্যাকার এখনো sample data।" />
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             icon={<Heart className="w-5 h-5" />}

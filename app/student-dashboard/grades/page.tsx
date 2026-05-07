@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TrendingUp, Award } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Grades — মূল্যায়ন",
@@ -32,6 +33,7 @@ const gradeColor: Record<string, string> = {
 export default function GradesPage() {
   return (
     <div className="space-y-4">
+        <ComingSoon body="গ্রেড ফিড এখনো sample data।" />
         <div className="grid sm:grid-cols-3 gap-3">
           <div className="bg-emerald-900 text-white rounded-2xl p-5">
             <Award className="w-6 h-6 text-amber-400 mb-3" />

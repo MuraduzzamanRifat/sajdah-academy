@@ -77,30 +77,51 @@ const TITLES: Record<string, string> = Object.fromEntries(
   NAV.flatMap((g) => g.items.map((i) => [i.href, `${i.label} · ${i.labelEn}`]))
 );
 
-export default function DashboardShell({ children }: { children: React.ReactNode }) {
+export type StudentMe = {
+  name: string;
+  email: string;
+  initials: string;
+  batchName: string | null;
+  studentId: string | null;
+  status: string | null;
+};
+
+export default function DashboardShell({
+  me,
+  children,
+}: {
+  me: StudentMe;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const title = TITLES[pathname ?? "/student-dashboard/"] ?? "ড্যাশবোর্ড";
 
+  /* Show a "preview" banner only when no batch is assigned yet — i.e.
+     the user is signed in but enrollment hasn't been processed. Active
+     students don't need to see this. */
+  const isPreview = !me.batchName;
+
   return (
     <main className="pt-20 pb-12 bg-slate-100 min-h-screen">
-      {/* Preview banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-        <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
-          <span className="bg-amber-500 text-emerald-950 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider shrink-0">
-            Preview
-          </span>
-          <p className="text-amber-900 leading-snug">
-            <span className="font-bold">এটি একটি পূর্বরূপ।</span> ভর্তির পর আপনার পোর্টালে এই সব ফিচার ব্যবহারযোগ্য হবে।
-          </p>
-          <Link
-            href="/enroll/"
-            className="ml-auto shrink-0 inline-flex items-center gap-1 text-amber-900 hover:text-emerald-700 font-bold whitespace-nowrap"
-          >
-            Enroll <ChevronRight className="w-4 h-4" />
-          </Link>
+      {isPreview && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
+            <span className="bg-amber-500 text-emerald-950 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider shrink-0">
+              Preview
+            </span>
+            <p className="text-amber-900 leading-snug">
+              <span className="font-bold">এখনো কোনো ব্যাচে এনরোল নেই।</span> ভর্তি অনুমোদিত হলে আপনার পোর্টাল সম্পূর্ণ ফিচার দেখাবে।
+            </p>
+            <Link
+              href="/enroll/"
+              className="ml-auto shrink-0 inline-flex items-center gap-1 text-amber-900 hover:text-emerald-700 font-bold whitespace-nowrap"
+            >
+              Apply <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg shadow-emerald-950/5 min-h-[700px] relative">
@@ -159,11 +180,14 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             </nav>
             <div className="border-t border-slate-200 p-3 flex items-center gap-2.5 shrink-0">
               <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs shrink-0">
-                MI
+                {me.initials}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-emerald-950 truncate">Muhammad Ibrahim</p>
-                <p className="text-[11px] text-slate-500">Foundation · ব্যাচ-৪</p>
+                <p className="text-sm font-medium text-emerald-950 truncate">{me.name}</p>
+                <p className="text-[11px] text-slate-500 truncate">
+                  {me.batchName ? `${me.batchName}` : "Pending enrollment"}
+                  {me.studentId ? ` · ${me.studentId}` : ""}
+                </p>
               </div>
             </div>
           </aside>
@@ -207,14 +231,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-slate-600 text-sm">
-            এই পোর্টাল পেতে চান? পরবর্তী ব্যাচে ভর্তি হোন।{" "}
-            <Link href="/enroll/" className="text-emerald-700 font-bold hover:text-emerald-900 underline">
-              Apply →
-            </Link>
-          </p>
-        </div>
+        {isPreview && (
+          <div className="mt-6 text-center">
+            <p className="text-slate-600 text-sm">
+              এই পোর্টাল পেতে চান? পরবর্তী ব্যাচে ভর্তি হোন।{" "}
+              <Link href="/enroll/" className="text-emerald-700 font-bold hover:text-emerald-900 underline">
+                Apply →
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { FileText, Play, BookOpen, Download, Headphones, Video } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Library — রিসোর্স",
@@ -94,6 +95,7 @@ const typeConfig: Record<string, { icon: React.ReactNode; color: string; label: 
 export default function LibraryPage() {
   return (
     <div className="space-y-4">
+        <ComingSoon body="Library upload/edit এখনো backend ছাড়া।" />
         <div className="grid grid-cols-4 gap-3">
           {[
             { count: "২৪", label: "ক্লাস নোট", color: "blue" },

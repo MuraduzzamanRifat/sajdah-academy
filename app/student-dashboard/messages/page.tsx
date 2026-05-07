@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Send, Search, Paperclip } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Messages — বার্তা",
@@ -77,7 +78,9 @@ const thread = [
 
 export default function MessagesPage() {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex h-[600px]">
+    <div className="space-y-4">
+      <ComingSoon body="Inbox/send এখনো wired হয়নি।" />
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex h-[600px]">
         <aside className="w-72 border-r border-slate-200 flex flex-col shrink-0 hidden md:flex">
           <div className="p-3 border-b border-slate-200">
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
@@ -174,6 +177,7 @@ export default function MessagesPage() {
             </button>
           </div>
         </div>
+      </div>
     </div>
   );
 }

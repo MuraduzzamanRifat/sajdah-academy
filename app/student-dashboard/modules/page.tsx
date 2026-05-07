@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Play, FileText, ChevronRight } from "lucide-react";
 import { modules } from "../../data/modules";
 import MedallionMark from "../../components/MedallionMark";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "My Modules — আমার মডিউল",
@@ -28,6 +29,7 @@ const enrolledProgress: Record<string, number> = {
 export default function MyModulesPage() {
   return (
     <div className="space-y-3">
+        <ComingSoon body="মডিউল প্রগ্রেস এখনো ব্যাচের মডিউল টেবিল থেকে আসছে না।" />
         {modules.map((m) => {
           const progress = enrolledProgress[m.slug] ?? 0;
           const status =

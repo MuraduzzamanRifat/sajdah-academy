@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CheckCircle2, XCircle, AlertCircle, Calendar } from "lucide-react";
+import ComingSoon from "../../admin/_components/ComingSoon";
 
 export const metadata: Metadata = {
   title: "Attendance — উপস্থিতি",
@@ -39,6 +40,7 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-4">
+        <ComingSoon body="P/L/A রেকর্ড এখনো পার্সিস্ট হয় না।" />
         <div className={`rounded-2xl p-6 ${requirementMet ? "bg-emerald-900" : "bg-amber-700"} text-white`}>
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
