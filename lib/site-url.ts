@@ -14,3 +14,12 @@ export const SITE_URL =
 
 export const ADMIN_HOST = "api.sijdahacademy.com";
 export const PUBLIC_HOST = "sijdahacademy.com";
+
+/* Single source of truth for "are we on the admin subdomain?" — used by
+   the root layout (chrome decisions), login page (theme decision), and
+   middleware (subdomain rewrite + auth-redirect target). The regex
+   matches any `api.*` host so previews like `api-staging.example.com`
+   keep working. */
+export const ADMIN_HOST_RE = /^api\./i;
+export const isAdminHost = (host: string | null | undefined): boolean =>
+  !!host && ADMIN_HOST_RE.test(host);

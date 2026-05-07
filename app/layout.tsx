@@ -197,14 +197,17 @@ const jsonLd = {
 };
 
 import { headers } from "next/headers";
+import { isAdminHost } from "../lib/site-url";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   /* The admin host (api.sijdahacademy.com) gets a clean chrome-free shell —
      no public Navbar/Footer/StickyCTA, no marketing JSON-LD, no Preloader.
-     The AdminShell component renders its own sidebar + topbar instead. */
+     The AdminShell component renders its own sidebar + topbar instead.
+     TODO: pulling host headers here forces every page (incl. public marketing)
+     to render dynamically. Follow-up: split into route groups so the
+     marketing layout stays static. */
   const h = await headers();
-  const host = h.get("host") ?? "";
-  const isAdminHost = /^api\./i.test(host);
+  const adminHost = isAdminHost(h.get("host"));
 
   return (
     <html lang="bn" className={`${hindSiliguri.variable} ${inter.variable}`}>
@@ -214,7 +217,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
       </head>
       <body className="min-h-screen bg-slate-50 font-sans selection:bg-emerald-200 selection:text-emerald-900">
-        {!isAdminHost && (
+        {!adminHost && (
           <>
             <Preloader />
             <script
@@ -226,7 +229,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </>
         )}
         {children}
-        {!isAdminHost && (
+        {!adminHost && (
           <>
             <Footer />
             <StickyMobileCTA />

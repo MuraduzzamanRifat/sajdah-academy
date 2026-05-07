@@ -14,8 +14,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminRole } from "../roles";
-
-const ADMIN_HOST_RE = /^api\./i;
+import { ADMIN_HOST_RE } from "../site-url";
 
 type Plan =
   | { kind: "pass" }

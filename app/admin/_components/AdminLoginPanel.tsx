@@ -44,7 +44,7 @@ export default function AdminLoginPanel({ next }: { next?: string }) {
         </div>
 
         <div className="bg-emerald-900/60 backdrop-blur-sm border border-emerald-800 rounded-2xl shadow-2xl shadow-black/30 p-6">
-          <LoginForm initialMode="signin" next={next} theme="dark" hideSignup />
+          <LoginForm initialMode="signin" next={next} dark hideSignup />
         </div>
 
         <div className="mt-6 space-y-2 text-center">
