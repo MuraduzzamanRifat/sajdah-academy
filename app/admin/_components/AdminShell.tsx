@@ -113,21 +113,33 @@ export default function AdminShell({
 
   return (
     <main className="pt-6 pb-12 bg-slate-100 min-h-screen">
+      {/* Skip to main content — keyboard a11y. Hidden until tab-focused. */}
+      <a
+        href="#admin-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-950 focus:text-white focus:rounded-lg focus:ring-2 focus:ring-amber-400"
+      >
+        Skip to main content
+      </a>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
-        <div className="bg-emerald-950 text-white rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
-          <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="bg-amber-500 text-emerald-950 font-bold text-xs px-2 py-1 rounded uppercase tracking-wider shrink-0">
-            Admin Preview
+        <div className="bg-emerald-950 text-white rounded-xl px-4 py-2.5 flex items-center gap-3 text-sm border border-emerald-900">
+          <span className="relative flex w-2 h-2 shrink-0" aria-hidden>
+            <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-400" />
           </span>
-          <p className="text-emerald-100 leading-snug min-w-0 truncate">
-            <span className="font-bold">এটি এডমিন প্যানেলের পূর্বরূপ।</span>{" "}
-            ওয়েবসাইটের সমস্ত কনটেন্ট এখান থেকে নিয়ন্ত্রণ করা যাবে।
+          <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="bg-amber-500 text-emerald-950 font-bold text-[10px] px-2 py-0.5 rounded uppercase tracking-wider shrink-0">
+            Live · Secure
+          </span>
+          <p className="text-emerald-200 leading-snug min-w-0 truncate text-xs hidden md:block">
+            All actions are audit-logged · RLS enforced · Session encrypted
           </p>
+          <p className="text-emerald-200 text-xs md:hidden truncate">Audit-logged</p>
           <Link
-            href="/student-dashboard/"
-            className="ml-auto shrink-0 inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-bold whitespace-nowrap"
+            href="https://sijdahacademy.com/student-dashboard/"
+            className="ml-auto shrink-0 inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-bold whitespace-nowrap text-xs focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-emerald-950 rounded px-1"
           >
-            Student view <ChevronRight className="w-4 h-4" />
+            Student view <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>
@@ -170,7 +182,7 @@ export default function AdminShell({
                         key={n.href}
                         href={n.href}
                         onClick={() => setOpen(false)}
-                        className={`mx-2 mb-0.5 px-2.5 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors ${
+                        className={`mx-2 mb-0.5 px-2.5 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-950 ${
                           active
                             ? "bg-amber-500 text-emerald-950 font-bold"
                             : "text-emerald-100 hover:bg-emerald-900"
@@ -241,14 +253,15 @@ export default function AdminShell({
                 </button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-5 bg-slate-50">{children}</div>
+            <main id="admin-main" className="flex-1 overflow-y-auto p-5 bg-slate-50">
+              {children}
+            </main>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-slate-600 text-sm">
-            এডমিন এক্সেস কেবল অনুমোদিত কর্মীদের জন্য। প্রকৃত প্যানেল ব্যাকএন্ড সংযোগের পর সক্রিয় হবে।
-          </p>
+        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+          <span>RLS-protected · Audit-logged · Signed in as <span className="font-bold text-emerald-700">{me.email}</span></span>
         </div>
       </div>
     </main>
