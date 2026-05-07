@@ -1,4 +1,6 @@
 import Hero, { type HeroTexts } from "../components/Hero";
+import HomeAbout from "../components/HomeAbout";
+import HomeTestimonials, { type Testimonial } from "../components/HomeTestimonials";
 import PremiumExperience from "../components/PremiumExperience";
 import Curriculum from "../components/Curriculum";
 import CourseOutline from "../components/CourseOutline";
@@ -41,15 +43,30 @@ export default async function Home() {
     cta_secondary_href: pick(settings, "home.hero.cta_secondary_href", DEFAULT_HERO.cta_secondary_href),
   };
 
+  const aboutEyebrow = pick(settings, "home.about.eyebrow_bn", "");
+  const aboutTitle = pick(settings, "home.about.title_bn", "");
+  const aboutBody = pick(settings, "home.about.body", "");
+  const aboutImage = pick(settings, "home.about.image", "");
+
+  const testimonialsTitle = pick(settings, "home.testimonials.title_bn", "ছাত্রদের অভিজ্ঞতা");
+  const testimonialItems = pick<Testimonial[]>(settings, "home.testimonials.items", []);
+
   return (
     <main>
       <Hero texts={heroTexts} />
       <SectionBlend from="emerald-950" to="emerald-950" />
       <PremiumExperience />
+      <HomeAbout
+        eyebrow={aboutEyebrow}
+        title={aboutTitle}
+        bodyHtml={aboutBody}
+        imageUrl={aboutImage || undefined}
+      />
       <SectionBlend from="emerald-950" to="slate-50" />
       <Curriculum />
       <SectionBlend from="slate-50" to="emerald-50" />
       <CourseOutline />
+      <HomeTestimonials title={testimonialsTitle} items={testimonialItems} />
       <SectionBlend from="emerald-50" to="emerald-900" />
       <Registration />
     </main>

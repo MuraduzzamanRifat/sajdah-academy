@@ -3,10 +3,30 @@
 import { useState } from "react";
 import { AlertCircle, CheckCircle2, Save } from "lucide-react";
 import type { FieldDef } from "../schema";
-import { saveSettings } from "../actions";
+import { saveSettings, type StorageType } from "../actions";
+import RichField from "./RichField";
+import ImageField from "./ImageField";
+import ListField from "./ListField";
 
 const inputBase =
   "w-full px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm";
+
+/* Map UI field kind → storage type understood by saveSettings. */
+function storageTypeFor(kind: FieldDef["kind"]): StorageType {
+  switch (kind) {
+    case "boolean":
+      return "boolean";
+    case "number":
+      return "number";
+    case "json":
+    case "list":
+      return "json";
+    case "rich":
+      return "rich"; // server sanitizes HTML
+    default:
+      return "string"; // string, text, image — all stored as plain string
+  }
+}
 
 export default function PageSettingsForm({
   groups,
@@ -26,15 +46,13 @@ export default function PageSettingsForm({
     setSavedCount(null);
 
     const fd = new FormData(e.currentTarget);
-    const fields: { key: string; type: "string" | "number" | "boolean" | "json"; value: string }[] = [];
+    const fields: { key: string; type: StorageType; value: string }[] = [];
 
     groups.forEach((g) => {
       g.fields.forEach((f) => {
         const raw = fd.get(f.key);
         const v = f.kind === "boolean" ? (raw === "on" ? "true" : "false") : String(raw ?? "");
-        // "text" is just a multi-line string at the storage layer
-        const storageType = f.kind === "text" ? "string" : f.kind;
-        fields.push({ key: f.key, type: storageType, value: v });
+        fields.push({ key: f.key, type: storageTypeFor(f.kind), value: v });
       });
     });
 
@@ -122,6 +140,10 @@ function Field({ field, initialValue }: { field: FieldDef; initialValue: unknown
         />
       )}
 
+      {field.kind === "rich" && (
+        <RichField name={field.key} defaultValue={stringValue} hint={field.hint} />
+      )}
+
       {field.kind === "number" && (
         <input id={id} type="number" name={field.key} defaultValue={numValue} className={inputBase} />
       )}
@@ -131,6 +153,25 @@ function Field({ field, initialValue }: { field: FieldDef; initialValue: unknown
           <input id={id} type="checkbox" name={field.key} defaultChecked={boolValue} className="rounded border-slate-300" />
           <span className="text-slate-700">সক্রিয়</span>
         </label>
+      )}
+
+      {field.kind === "image" && (
+        <ImageField
+          name={field.key}
+          defaultValue={stringValue}
+          aspect={field.aspect}
+          hint={field.hint}
+        />
+      )}
+
+      {field.kind === "list" && field.itemFields && (
+        <ListField
+          name={field.key}
+          defaultValue={initialValue}
+          itemFields={field.itemFields}
+          itemLabel={field.itemLabel}
+          hint={field.hint}
+        />
       )}
 
       {field.kind === "json" && (
@@ -144,7 +185,9 @@ function Field({ field, initialValue }: { field: FieldDef; initialValue: unknown
         />
       )}
 
-      {field.hint && <p className="text-[10px] text-slate-500 mt-1">{field.hint}</p>}
+      {field.hint && field.kind !== "rich" && field.kind !== "image" && field.kind !== "list" && (
+        <p className="text-[10px] text-slate-500 mt-1">{field.hint}</p>
+      )}
     </div>
   );
 }
