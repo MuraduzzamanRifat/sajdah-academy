@@ -27,6 +27,8 @@ type FormState = {
   paymentPlan: string;
   hearAbout: string;
   agree: boolean;
+  /* Honeypot — visually hidden, real users leave blank, bots fill it. */
+  website: string;
 };
 
 const empty: FormState = {
@@ -46,6 +48,7 @@ const empty: FormState = {
   paymentPlan: "Full payment",
   hearAbout: "",
   agree: false,
+  website: "",
 };
 
 const steps = [
@@ -167,6 +170,23 @@ export default function EnrollmentForm() {
       </div>
 
       <div className="p-6 sm:p-8">
+        {/* Honeypot — visually hidden, off-screen, autocomplete off.
+            Real humans never see or fill this. Bots auto-filling
+            every input WILL fill it; the server action then silently
+            rejects the submission. */}
+        <div aria-hidden className="absolute left-[-9999px] w-px h-px overflow-hidden" tabIndex={-1}>
+          <label htmlFor="enrollment-website-trap">Website</label>
+          <input
+            id="enrollment-website-trap"
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.website}
+            onChange={(e) => update("website", e.target.value)}
+          />
+        </div>
+
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
