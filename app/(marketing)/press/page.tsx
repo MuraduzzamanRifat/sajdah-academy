@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Mail, Download, Image as ImageIcon, FileText, Phone } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
+
+const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
+  FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
+  FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
+};
+const purify = (html: string): string =>
+  html ? String(DOMPurify.sanitize(html, RENDER_PURIFY)) : "";
 
 const title = "Press & Media — সংবাদমাধ্যম";
 const description =
@@ -76,7 +85,7 @@ export default async function PressPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="glass-light rounded-3xl p-8 md:p-10 mb-10">
             <h2 className="text-2xl font-bold text-emerald-950 mb-4">{aboutTitle}</h2>
-            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: aboutBody }} />
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: purify(aboutBody) }} />
           </div>
 
           {facts.length > 0 && (

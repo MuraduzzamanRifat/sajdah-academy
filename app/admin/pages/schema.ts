@@ -75,13 +75,6 @@ export const PAGE_DEFS: PageDef[] = [
           { key: "home.hero.title_bn", label: "প্রধান শিরোনাম", kind: "string" },
           { key: "home.hero.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 3 },
           {
-            key: "home.hero.bg_image",
-            label: "Hero ব্যাকগ্রাউন্ড ইমেজ",
-            kind: "image",
-            aspect: "16:9 — ১৯২০×১০৮০",
-            hint: "খালি রাখলে ডিফল্ট WebGL hero দেখাবে।",
-          },
-          {
             key: "home.hero.badges",
             label: "তিনটি ফিচার ব্যাজ",
             kind: "list",
@@ -114,9 +107,8 @@ export const PAGE_DEFS: PageDef[] = [
       {
         title: "Curriculum (পাঠ্যক্রম সেকশন)",
         fields: [
-          { key: "home.curriculum.eyebrow", label: "Eyebrow", kind: "string" },
           { key: "home.curriculum.title_bn", label: "শিরোনাম", kind: "string" },
-          { key: "home.curriculum.subtitle_bn", label: "সাবটাইটেল", kind: "string" },
+          { key: "home.curriculum.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
         ],
       },
       {
@@ -139,14 +131,6 @@ export const PAGE_DEFS: PageDef[] = [
               { key: "photo", label: "ছবি (অপশনাল)", kind: "image" },
             ],
           },
-        ],
-      },
-      {
-        title: "CTA (নিচের সাইন-আপ সেকশন)",
-        fields: [
-          { key: "home.cta.title_bn", label: "শিরোনাম", kind: "string" },
-          { key: "home.cta.subtitle_bn", label: "সাবটাইটেল", kind: "text", rows: 2 },
-          { key: "home.cta.button_bn", label: "বাটন লেবেল", kind: "string" },
         ],
       },
       {

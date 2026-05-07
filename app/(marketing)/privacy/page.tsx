@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
+import DOMPurify from "isomorphic-dompurify";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
+
+const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
+  FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
+  FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
+};
+const purify = (html: string): string =>
+  html ? String(DOMPurify.sanitize(html, RENDER_PURIFY)) : "";
 
 const title = "Privacy Policy & Terms — গোপনীয়তা নীতি";
 const description =
@@ -75,12 +84,12 @@ export default async function PrivacyPage() {
         <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div id="privacy">
             <h2 className="text-2xl md:text-3xl font-bold text-emerald-950 mb-3">{privacyTitle}</h2>
-            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: privacyBody }} />
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: purify(privacyBody) }} />
           </div>
 
           <div id="terms" className="pt-6 border-t border-slate-200">
             <h2 className="text-2xl md:text-3xl font-bold text-emerald-950 mb-3">{termsTitle}</h2>
-            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: termsBody }} />
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: purify(termsBody) }} />
           </div>
 
           <div className="pt-6 border-t border-slate-200 text-sm text-slate-500">

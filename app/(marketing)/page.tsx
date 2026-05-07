@@ -51,6 +51,17 @@ export default async function Home() {
   const testimonialsTitle = pick(settings, "home.testimonials.title_bn", "ছাত্রদের অভিজ্ঞতা");
   const testimonialItems = pick<Testimonial[]>(settings, "home.testimonials.items", []);
 
+  const curriculumTitle = pick(
+    settings,
+    "home.curriculum.title_bn",
+    "একাডেমিক মডেল ও কারিকুলাম"
+  );
+  const curriculumSubtitle = pick(
+    settings,
+    "home.curriculum.subtitle_bn",
+    "আমাদের ৬ মাসের কোর্সটি তিনটি ধাপে বিভক্ত, যা আপনাকে ধাপে ধাপে একজন আদর্শ মুসলিম হিসেবে গড়ে তুলতে সাহায্য করবে।"
+  );
+
   const regTitle = pick(settings, "home.registration.title_bn", "অনলাইন রেজিস্ট্রেশন");
   const regSubtitle = pick(
     settings,
@@ -70,7 +81,7 @@ export default async function Home() {
         imageUrl={aboutImage || undefined}
       />
       <SectionBlend from="emerald-950" to="slate-50" />
-      <Curriculum />
+      <Curriculum titleBn={curriculumTitle} subtitleBn={curriculumSubtitle} />
       <SectionBlend from="slate-50" to="emerald-50" />
       <CourseOutline />
       <HomeTestimonials title={testimonialsTitle} items={testimonialItems} />

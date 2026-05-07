@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, Heart, Compass, Users, Sparkles, ShieldCheck } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 import { getSettingsByPrefix, pick } from "../../../lib/settings";
+
+/* Defense in depth — settings written via the admin CMS are sanitized
+   on save, but a future migration / direct DB edit could bypass that.
+   Re-purifying at render guarantees no <script>/onerror/iframe leaks. */
+const RENDER_PURIFY: Parameters<typeof DOMPurify.sanitize>[1] = {
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[/#])/i,
+  FORBID_TAGS: ["script", "iframe", "object", "embed", "form"],
+  FORBID_ATTR: ["onerror", "onclick", "onload", "onmouseover", "onfocus"],
+};
+const purify = (html: string): string =>
+  html ? String(DOMPurify.sanitize(html, RENDER_PURIFY)) : "";
 
 const title = "About Sajdah Academy — পরিচিতি";
 const description =
@@ -186,7 +198,7 @@ function RichOrText({ html }: { html: string }) {
     return (
       <div
         className="blog-prose text-lg"
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: purify(html) }}
       />
     );
   }

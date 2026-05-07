@@ -70,19 +70,20 @@ const coreSubjects = [
   { title: "Quran & Tafsir", desc: "Quran Reading with Tajweed, Tafsir of Selected Surahs" },
 ];
 
-export default function Curriculum() {
+export default function Curriculum({
+  titleBn = "একাডেমিক মডেল ও কারিকুলাম",
+  subtitleBn = "আমাদের ৬ মাসের কোর্সটি তিনটি ধাপে বিভক্ত, যা আপনাকে ধাপে ধাপে একজন আদর্শ মুসলিম হিসেবে গড়ে তুলতে সাহায্য করবে।",
+}: {
+  titleBn?: string;
+  subtitleBn?: string;
+} = {}) {
   return (
     <section id="curriculum" className="py-20 bg-slate-50 relative overflow-hidden">
       <div aria-hidden className="ambient-orbs orbs-light" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <Reveal className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">
-            একাডেমিক মডেল ও কারিকুলাম
-          </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            আমাদের ৬ মাসের কোর্সটি তিনটি ধাপে বিভক্ত, যা আপনাকে ধাপে ধাপে একজন আদর্শ
-            মুসলিম হিসেবে গড়ে তুলতে সাহায্য করবে।
-          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-emerald-950 mb-4">{titleBn}</h2>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">{subtitleBn}</p>
         </Reveal>
 
         <div className="mb-20">
