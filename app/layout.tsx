@@ -95,13 +95,22 @@ export const metadata: Metadata = {
   referrer: "strict-origin-when-cross-origin",
 };
 
+/* CSP must allow:
+   - Supabase Storage hosts (images uploaded via the Pages CMS — testimonials,
+     gallery, hero bg, logo, blog post images). Wildcard *.supabase.co
+     covers any Supabase project.
+   - Vercel Analytics + Speed Insights (vitals.vercel-insights.com,
+     va.vercel-scripts.com).
+   - YouTube (frame-src) for embedded videos via Tiptap.
+   - Unsplash for default gallery placeholders. */
 const CSP = [
   "default-src 'self'",
-  "img-src 'self' data: blob: https://images.unsplash.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https://*.supabase.co",
+  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+  "connect-src 'self' https://*.supabase.co https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+  "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com",
   "worker-src 'self' blob:",
   "form-action 'self'",
   "base-uri 'self'",

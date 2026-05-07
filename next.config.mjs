@@ -50,6 +50,37 @@ const nextConfig = {
      Marking it external prevents Next from trying to bundle it for the
      Edge runtime + keeps static-generation happy on /404 and /blog/[slug]. */
   serverExternalPackages: ["isomorphic-dompurify", "jsdom"],
+
+  /* Browser cache strategy:
+     - /_next/static/*  →  immutable for a year (Next hashes the filename)
+     - /_next/image     →  short cache; the upstream Supabase URL is what
+                            actually changes when admins re-upload
+     - /fonts/*, /sajdah-academy/*  →  long cache for static brand assets
+     Public HTML (the route documents themselves) intentionally NOT
+     overridden — Next.js + Vercel pick the right value based on
+     revalidate/dynamic. */
+  async headers() {
+    return [
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/_next/image",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=60, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/sajdah-academy/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
