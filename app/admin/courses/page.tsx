@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Plus, Edit3, Eye, Copy, Trash2, GripVertical, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { Plus, GripVertical, AlertCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
+import RowActions from "./_components/RowActions";
 
 export const metadata: Metadata = {
   title: "Admin · Courses",
@@ -48,12 +50,12 @@ export default async function AdminCoursesPage() {
           <p className="text-xs text-slate-500 mt-0.5">৩ ফেইজ · {courses.filter((c) => c.is_published).length} প্রকাশিত · {courses.filter((c) => !c.is_published).length} খসড়া</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" className="inline-flex items-center gap-1.5 px-3 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold">
-            ফেইজ পুনর্বিন্যাস
-          </button>
-          <button type="button" className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold">
+          <Link
+            href="/admin/courses/new/"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold"
+          >
             <Plus className="w-3.5 h-3.5" /> নতুন মডিউল
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -88,9 +90,12 @@ export default async function AdminCoursesPage() {
                 </span>
                 <span className="text-xs text-slate-500">{phaseModules.length} মডিউল</span>
               </div>
-              <button type="button" className="text-xs font-bold text-emerald-700 hover:text-emerald-900">
+              <Link
+                href={`/admin/courses/new/?phase=${encodeURIComponent(phase)}`}
+                className="text-xs font-bold text-emerald-700 hover:text-emerald-900"
+              >
                 + এই ফেইজে মডিউল
-              </button>
+              </Link>
             </div>
             <div className="divide-y divide-slate-100">
               {phaseModules.map((m) => (
@@ -133,20 +138,7 @@ export default async function AdminCoursesPage() {
                     }`}>
                       {m.is_published ? "প্রকাশিত" : "খসড়া"}
                     </span>
-                    <div className="flex gap-1">
-                      <button type="button" className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded" aria-label="View">
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded" aria-label="Edit">
-                        <Edit3 className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded" aria-label="Duplicate">
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded" aria-label="Delete">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <RowActions id={m.id} slug={m.slug} title={m.title} isPublished={m.is_published} />
                   </div>
                 </div>
               ))}

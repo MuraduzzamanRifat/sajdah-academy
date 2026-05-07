@@ -17,7 +17,11 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
-import { modules as allModules } from "../data/modules";
+import { createClient } from "../../lib/supabase/server";
+
+/* ISR: cached 60s. Admin server actions call revalidatePath("/courses")
+   so edits appear immediately rather than waiting on the cache. */
+export const revalidate = 60;
 
 const moduleIconBySlug: Record<string, React.ComponentType<{ className?: string }>> = {
   "fa-firru-ilallah": Compass,
@@ -96,7 +100,25 @@ const tiers = [
 
 const phases = ["Foundation", "Understanding", "Transformation"] as const;
 
-export default function CoursesPage() {
+type CourseRow = {
+  id: string;
+  slug: string;
+  title: string;
+  title_bn: string | null;
+  phase: (typeof phases)[number];
+  module_number: number | null;
+  display_order: number;
+};
+
+export default async function CoursesPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("courses")
+    .select("id, slug, title, title_bn, phase, module_number, display_order")
+    .eq("is_published", true)
+    .order("display_order", { ascending: true });
+  const allModules = (data ?? []) as CourseRow[];
+
   return (
     <main className="pt-24 pb-24">
       {/* Page hero */}
@@ -218,10 +240,10 @@ export default function CoursesPage() {
                           <Icon className="w-6 h-6 text-emerald-700 group-hover:text-amber-700" />
                         </div>
                         <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">
-                          Module {String(m.id).padStart(2, "0")}
+                          Module {String(m.module_number ?? 0).padStart(2, "0")}
                         </span>
                         <h4 className="font-bold text-emerald-950 leading-tight mt-1">{m.title}</h4>
-                        <p className="text-sm text-slate-500 mt-1">{m.titleBn}</p>
+                        {m.title_bn && <p className="text-sm text-slate-500 mt-1">{m.title_bn}</p>}
                         <span className="text-xs text-emerald-600 mt-3 flex items-center gap-1 font-medium">
                           View details
                           <ArrowRight className="w-3 h-3" />

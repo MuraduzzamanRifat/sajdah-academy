@@ -2,39 +2,78 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen, Clock, Layers, Target, CheckCircle2 } from "lucide-react";
-import { modules, getModuleBySlug } from "../../data/modules";
+import { createClient } from "../../../lib/supabase/server";
 
-export const dynamic = "force-static";
+/* ISR with 60s revalidate. Pages render on first request and cache;
+   admin server actions call revalidatePath on edit so changes appear
+   instantly rather than waiting on the cache window.
 
-export function generateStaticParams() {
-  return modules.map((m) => ({ slug: m.slug }));
-}
+   No generateStaticParams — that runs at build time outside a request
+   scope, so the cookie-based Supabase client can't be used. ISR
+   covers the SEO/performance need without pre-generation. */
+export const revalidate = 60;
+export const dynamicParams = true;
+
+type CourseDetail = {
+  id: string;
+  slug: string;
+  title: string;
+  title_bn: string | null;
+  phase: string;
+  duration: string | null;
+  summary: string | null;
+  learning_outcomes: string[] | null;
+  topics: string[] | null;
+  module_number: number | null;
+  display_order: number;
+};
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const m = getModuleBySlug(slug);
+  const supabase = await createClient();
+  const { data: m } = await supabase
+    .from("courses")
+    .select("title, title_bn, summary")
+    .eq("slug", slug)
+    .single();
   if (!m) return { title: "Module not found" };
   return {
-    title: `${m.title} — ${m.titleBn}`,
-    description: m.summary,
-    alternates: { canonical: `/sajdah-academy/courses/${m.slug}/` },
+    title: `${m.title}${m.title_bn ? ` — ${m.title_bn}` : ""}`,
+    description: m.summary ?? undefined,
+    alternates: { canonical: `/courses/${slug}/` },
   };
 }
 
 export default async function ModulePage({ params }: Params) {
   const { slug } = await params;
-  const m = getModuleBySlug(slug);
-  if (!m) notFound();
+  const supabase = await createClient();
 
-  const idx = modules.findIndex((x) => x.slug === m.slug);
-  const prev = idx > 0 ? modules[idx - 1] : null;
-  const next = idx < modules.length - 1 ? modules[idx + 1] : null;
+  const [{ data: m }, { data: allModules }] = await Promise.all([
+    supabase
+      .from("courses")
+      .select("id, slug, title, title_bn, phase, duration, summary, learning_outcomes, topics, module_number, display_order")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .single(),
+    supabase
+      .from("courses")
+      .select("slug, title, title_bn, display_order")
+      .eq("is_published", true)
+      .order("display_order", { ascending: true }),
+  ]);
+
+  if (!m) notFound();
+  const course = m as CourseDetail;
+
+  const list = (allModules ?? []) as Pick<CourseDetail, "slug" | "title" | "title_bn" | "display_order">[];
+  const idx = list.findIndex((x) => x.slug === course.slug);
+  const prev = idx > 0 ? list[idx - 1] : null;
+  const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
 
   return (
     <main className="pt-24 pb-24">
-      {/* Hero */}
       <section className="bg-emerald-900 text-white py-16 px-4 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-4xl mx-auto relative z-10">
@@ -47,23 +86,26 @@ export default async function ModulePage({ params }: Params) {
           </Link>
           <div className="flex flex-wrap items-center gap-3 mb-5">
             <span className="bg-amber-500 text-emerald-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Module {String(m.id).padStart(2, "0")}
+              Module {String(course.module_number ?? 0).padStart(2, "0")}
             </span>
             <span className="bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded-full">
-              Phase {modules.indexOf(m) < 3 ? "1" : modules.indexOf(m) < 7 ? "2" : "3"} · {m.phase}
+              {course.phase}
             </span>
-            <span className="text-emerald-300 text-sm flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              {m.duration}
-            </span>
+            {course.duration && (
+              <span className="text-emerald-300 text-sm flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {course.duration}
+              </span>
+            )}
           </div>
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight">{m.title}</h1>
-          <p className="text-2xl text-amber-300 mb-6">{m.titleBn}</p>
-          <p className="text-lg text-emerald-100 leading-relaxed max-w-3xl">{m.summary}</p>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight">{course.title}</h1>
+          {course.title_bn && <p className="text-2xl text-amber-300 mb-6">{course.title_bn}</p>}
+          {course.summary && (
+            <p className="text-lg text-emerald-100 leading-relaxed max-w-3xl">{course.summary}</p>
+          )}
         </div>
       </section>
 
-      {/* Body */}
       <section className="py-16 bg-slate-50 relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-light" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid md:grid-cols-2 gap-6">
@@ -75,7 +117,7 @@ export default async function ModulePage({ params }: Params) {
               <h2 className="text-xl font-bold text-emerald-950">Learning Outcomes</h2>
             </div>
             <ul className="space-y-3">
-              {m.learningOutcomes.map((o, i) => (
+              {(course.learning_outcomes ?? []).map((o, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                   <span className="text-slate-700 leading-relaxed">{o}</span>
@@ -92,7 +134,7 @@ export default async function ModulePage({ params }: Params) {
               <h2 className="text-xl font-bold text-emerald-950">Topics Covered</h2>
             </div>
             <ul className="space-y-3">
-              {m.topics.map((t, i) => (
+              {(course.topics ?? []).map((t, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-700">
                   <span className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {i + 1}
@@ -105,7 +147,6 @@ export default async function ModulePage({ params }: Params) {
         </div>
       </section>
 
-      {/* Prev / Next */}
       <section className="py-12 bg-emerald-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 grid sm:grid-cols-2 gap-4">
           {prev ? (
@@ -118,7 +159,7 @@ export default async function ModulePage({ params }: Params) {
                 Previous Module
               </span>
               <p className="font-bold text-emerald-950 mt-2 group-hover:text-emerald-700">{prev.title}</p>
-              <p className="text-sm text-slate-500">{prev.titleBn}</p>
+              {prev.title_bn && <p className="text-sm text-slate-500">{prev.title_bn}</p>}
             </Link>
           ) : (
             <div />
@@ -133,7 +174,7 @@ export default async function ModulePage({ params }: Params) {
                 <ArrowRight className="w-3 h-3" />
               </span>
               <p className="font-bold text-emerald-950 mt-2 group-hover:text-emerald-700">{next.title}</p>
-              <p className="text-sm text-slate-500">{next.titleBn}</p>
+              {next.title_bn && <p className="text-sm text-slate-500">{next.title_bn}</p>}
             </Link>
           ) : (
             <div />
@@ -141,7 +182,6 @@ export default async function ModulePage({ params }: Params) {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-16 bg-emerald-900 text-white relative overflow-hidden">
         <div aria-hidden className="ambient-orbs orbs-dark" />
         <div className="max-w-3xl mx-auto px-4 text-center relative z-10">

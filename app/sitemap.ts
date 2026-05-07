@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
-import { modules } from "./data/modules";
-import { posts } from "./data/posts";
+import { createClient } from "../lib/supabase/server";
 import { SITE_URL } from "../lib/site-url";
 
-export const dynamic = "force-static";
+/* Sitemap revalidates on the same window as the public pages
+   themselves so it never lags behind the content it references. */
+export const revalidate = 60;
 
 const SITE = SITE_URL;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const make = (
     path: string,
@@ -20,8 +21,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: pri,
   });
 
+  const supabase = await createClient();
+  const [coursesRes, postsRes] = await Promise.all([
+    supabase.from("courses").select("slug, updated_at").eq("is_published", true),
+    supabase.from("posts").select("slug, updated_at").eq("is_published", true),
+  ]);
+
   return [
-    // Top-level
     make("/", 1.0, "weekly"),
     make("/courses/", 0.9, "monthly"),
     make("/enroll/", 0.9, "monthly"),
@@ -37,10 +43,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     make("/press/", 0.4, "monthly"),
     make("/privacy/", 0.3, "yearly"),
 
-    // Per-course detail pages
-    ...modules.map((m) => make(`/courses/${m.slug}/`, 0.7, "monthly")),
-
-    // Blog posts
-    ...posts.map((p) => make(`/blog/${p.slug}/`, 0.6, "monthly")),
+    ...(coursesRes.data ?? []).map((c) => ({
+      url: `${SITE}/courses/${c.slug}/`,
+      lastModified: c.updated_at ? new Date(c.updated_at as string) : now,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+    ...(postsRes.data ?? []).map((p) => ({
+      url: `${SITE}/blog/${p.slug}/`,
+      lastModified: p.updated_at ? new Date(p.updated_at as string) : now,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }
