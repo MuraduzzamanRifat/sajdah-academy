@@ -6,15 +6,25 @@
       The main domain redirects /admin/* to api so /admin can never
       be reached on the public host.
 
-   2. AUTH GATE — refresh the Supabase session, then enforce role-
-      based access on the LOGICAL path (post-rewrite). Cookies set by
-      the auth refresh are carried onto whatever final response we
-      return (rewrite, redirect, or pass-through). */
+   2. AUTH GATE + IDENTITY PROPAGATION — refresh the Supabase session,
+      fetch the profile (role + name + email) ONCE, and set x-user-*
+      headers on the request that downstream Server Components read
+      via next/headers. Layouts and pages no longer need to re-call
+      auth.getUser()/profile-select; they just read headers. */
 
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminRole } from "../roles";
 import { ADMIN_HOST_RE } from "../site-url";
+
+/* Header names — single source of truth for both writer (this file)
+   and readers (lib/auth/current-user.ts). Imported elsewhere so a
+   typo can't silently desync. */
+export const USER_ID_HEADER = "x-sajdah-user-id";
+export const USER_EMAIL_HEADER = "x-sajdah-user-email";
+export const USER_NAME_HEADER = "x-sajdah-user-name";
+export const USER_ROLE_HEADER = "x-sajdah-user-role";
+const ALL_USER_HEADERS = [USER_ID_HEADER, USER_EMAIL_HEADER, USER_NAME_HEADER, USER_ROLE_HEADER];
 
 type Plan =
   | { kind: "pass" }
@@ -27,10 +37,7 @@ function planRouting(request: NextRequest): Plan {
   const host = request.headers.get("host") ?? "";
   const isAdminHost = ADMIN_HOST_RE.test(host);
 
-  // api.*  →  rewrite "/foo" to internal "/admin/foo"
   if (isAdminHost) {
-    // /student-dashboard/* on the admin host → bounce to the main domain
-    // (admin host is for admins; student dashboard belongs on sijdahacademy.com)
     if (path.startsWith("/student-dashboard")) {
       const target = new URL(url.toString());
       target.host = host.replace(/^api\./i, "");
@@ -48,7 +55,6 @@ function planRouting(request: NextRequest): Plan {
     return { kind: "rewrite", target, logicalPath: target.pathname };
   }
 
-  // main domain  →  /admin/* should not be reachable; redirect to api host
   if (path.startsWith("/admin")) {
     const target = new URL(url.toString());
     target.host = host.replace(/^(www\.)?/, "api.");
@@ -68,36 +74,52 @@ function isProtected(path: string) {
   );
 }
 
-/* Carry every cookie set on `from` onto `to`. Used so that cookies the
-   auth refresh wrote onto a NextResponse.next() survive when we replace
-   that response with a rewrite or redirect. */
 function copyCookies(from: NextResponse, to: NextResponse) {
   from.cookies.getAll().forEach((c) => {
     to.cookies.set({ ...c });
   });
 }
 
+/* Build the request-header bag that gets handed to downstream code.
+   Always sanitise — we MUST overwrite any client-supplied x-sajdah-*
+   header so a malicious request can't impersonate by sending
+   "x-sajdah-user-role: super_admin" from the browser. */
+function buildIdentityHeaders(
+  request: NextRequest,
+  identity: { id: string; email: string; name: string; role: string } | null
+): Headers {
+  const out = new Headers(request.headers);
+  ALL_USER_HEADERS.forEach((h) => out.delete(h));
+  if (identity) {
+    out.set(USER_ID_HEADER, identity.id);
+    out.set(USER_EMAIL_HEADER, identity.email);
+    out.set(USER_NAME_HEADER, identity.name);
+    out.set(USER_ROLE_HEADER, identity.role);
+  }
+  return out;
+}
+
 export async function updateSession(request: NextRequest) {
   const plan = planRouting(request);
 
-  // Redirects need no auth — short-circuit
   if (plan.kind === "redirect") {
     return NextResponse.redirect(plan.target);
   }
 
   const logicalPath = plan.kind === "rewrite" ? plan.logicalPath : request.nextUrl.pathname;
 
-  // Public paths: skip Supabase round-trip entirely
+  // Public paths: sanitise identity headers (in case client sent any),
+  // then short-circuit without touching Supabase.
   if (!isProtected(logicalPath)) {
+    const cleanHeaders = buildIdentityHeaders(request, null);
     return plan.kind === "rewrite"
-      ? NextResponse.rewrite(plan.target)
-      : NextResponse.next({ request });
+      ? NextResponse.rewrite(plan.target, { request: { headers: cleanHeaders } })
+      : NextResponse.next({ request: { headers: cleanHeaders } });
   }
 
-  // Refresh session on a vanilla `next` response (the cookie callback
-  // pattern requires this — it overwrites `response` with a fresh
-  // NextResponse.next() each time cookies change). We'll transplant
-  // the cookies onto a rewrite/redirect at the end if needed.
+  // Protected — refresh session on a vanilla next response. Supabase
+  // setAll callback overwrites this response when cookies change;
+  // we'll transplant cookies + identity headers onto the final response.
   let cookieResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -126,12 +148,26 @@ export async function updateSession(request: NextRequest) {
   const isAdmin = logicalPath.startsWith("/admin");
   const isStudent = logicalPath.startsWith("/student-dashboard");
 
-  /* Unauthenticated access to a protected route:
-     - /admin/* → don't redirect; let the layout render the inline
-       AdminLoginPanel at the same URL (so the URL stays /admin... and
-       feels like the admin's home rather than a separate /login page).
-     - /student-dashboard/* → redirect to the public /login with `next`
-       so the student returns to the page they wanted. */
+  /* Single profile fetch — covers both the role gate AND the identity
+     headers downstream code needs. Save 1 round-trip vs the previous
+     "middleware fetches role, layout fetches name+email+role again"
+     pattern. */
+  let identity: { id: string; email: string; name: string; role: string } | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email, role")
+      .eq("id", user.id)
+      .single();
+    identity = {
+      id: user.id,
+      email: profile?.email ?? user.email ?? "",
+      name: profile?.full_name ?? user.email ?? "User",
+      role: profile?.role ?? "student",
+    };
+  }
+
+  // Student-dashboard auth gate: redirect to /login if not signed in.
   if (isStudent && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
@@ -141,27 +177,28 @@ export async function updateSession(request: NextRequest) {
     return r;
   }
 
-  if (isAdmin && user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    if (!isAdminRole(profile?.role)) {
-      const u = request.nextUrl.clone();
-      u.pathname = "/student-dashboard";
-      const r = NextResponse.redirect(u);
-      copyCookies(cookieResponse, r);
-      return r;
-    }
-  }
-
-  // Auth passed — finalize. Apply the rewrite if we had one; otherwise
-  // return the cookie response.
-  if (plan.kind === "rewrite") {
-    const r = NextResponse.rewrite(plan.target);
+  // Admin role gate: signed-in non-admins on /admin/* go to student dashboard.
+  if (isAdmin && user && !isAdminRole(identity?.role)) {
+    const u = request.nextUrl.clone();
+    u.pathname = "/student-dashboard";
+    const r = NextResponse.redirect(u);
     copyCookies(cookieResponse, r);
     return r;
   }
-  return cookieResponse;
+
+  // Auth passed (or unauth on /admin where layout renders inline panel).
+  // Final response carries the rewrite/next + identity headers + cookies.
+  const headersWithIdentity = buildIdentityHeaders(request, identity);
+
+  if (plan.kind === "rewrite") {
+    const r = NextResponse.rewrite(plan.target, {
+      request: { headers: headersWithIdentity },
+    });
+    copyCookies(cookieResponse, r);
+    return r;
+  }
+
+  const r = NextResponse.next({ request: { headers: headersWithIdentity } });
+  copyCookies(cookieResponse, r);
+  return r;
 }

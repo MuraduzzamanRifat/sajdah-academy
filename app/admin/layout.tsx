@@ -1,42 +1,24 @@
 import AdminShell from "./_components/AdminShell";
 import AdminLoginPanel from "./_components/AdminLoginPanel";
-import { createClient } from "../../lib/supabase/server";
+import { getCurrentUser } from "../../lib/auth/current-user";
 import { isAdminRole } from "../../lib/roles";
 
-/* Admin URL is now also the admin login URL. When there's no session,
-   render the dark "Restricted Access" login panel inline; when signed
-   in as an admin role, wrap children in the AdminShell. Non-admin users
-   who somehow get here (RLS rejected) see the login again — the prior
-   middleware redirect to /student-dashboard handles the typical case. */
+/* Admin layout reads identity from x-sajdah-* request headers populated
+   by middleware. Zero Supabase round-trips here — middleware already
+   did the getUser + profile fetch once per request. */
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const me = await getCurrentUser();
 
-  if (!user) {
-    return <AdminLoginPanel />;
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, email, role")
-    .eq("id", user.id)
-    .single();
-
-  if (!isAdminRole(profile?.role)) {
-    // Logged-in but not admin — show the login panel; they can sign out
-    // and back in with admin creds, or click the "ছাত্র লগইন" link.
+  if (!me || !isAdminRole(me.role)) {
+    // No session, or signed-in but non-admin role. Either way render
+    // the inline restricted-access panel; AdminShell never appears
+    // unless role is verified admin.
     return <AdminLoginPanel />;
   }
 
   return (
-    <AdminShell
-      me={{
-        name: profile?.full_name ?? user.email ?? "Admin",
-        email: profile?.email ?? user.email ?? "",
-        role: profile?.role ?? "—",
-      }}
-    >
+    <AdminShell me={{ name: me.name, email: me.email, role: me.role }}>
       {children}
     </AdminShell>
   );
