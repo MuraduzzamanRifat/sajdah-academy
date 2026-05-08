@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/privacy/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const DEFAULT_PRIVACY_HTML = `
 <h3>কোন তথ্য আমরা সংগ্রহ করি</h3>

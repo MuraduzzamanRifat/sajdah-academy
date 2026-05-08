@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const values = [
   {

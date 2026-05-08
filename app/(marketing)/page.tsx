@@ -8,10 +8,11 @@ import Registration from "../components/Registration";
 import SectionBlend from "../components/SectionBlend";
 import { getSettingsByPrefix, pick } from "../../lib/settings";
 
-/* Homepage is now driven by site_settings rows. ISR window is short
-   so admin edits show up within ~minute even if revalidatePath misses
-   a path. Public visitors still get a cached static-feeling response. */
-export const revalidate = 60;
+/* Homepage is settings-driven. The 5-min revalidate is a cold-cache
+   safety net; in practice admin edits fire revalidateTag() instantly
+   so visitors see fresh copy on next request without waiting for
+   the ISR window to lapse. */
+export const revalidate = 300;
 
 const DEFAULT_HERO: HeroTexts = {
   eyebrow_bn: "100% PHYSICAL SESSIONS AT PREMIUM RESORTS",

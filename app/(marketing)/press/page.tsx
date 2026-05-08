@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/press/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 type Fact = { label?: string; value?: string };
 type Release = { date?: string; title?: string; summary?: string };

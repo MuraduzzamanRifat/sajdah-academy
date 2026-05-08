@@ -7,6 +7,7 @@ import { createClient } from "../../lib/supabase/server";
 import { safeNext } from "../../lib/safe-redirect";
 import { isAdminRole } from "../../lib/roles";
 import { isAdminHost } from "../../lib/site-url";
+import { rateLimit } from "../../lib/rate-limit";
 
 /* Server actions return AuthState only on FAILURE — success paths
    throw NEXT_REDIRECT via redirect(). useActionState handles the
@@ -19,6 +20,14 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const next = String(formData.get("next") ?? "");
 
   if (!email || !password) return { error: "ইমেইল ও পাসওয়ার্ড দুটোই দিন।" };
+
+  /* Brute-force throttle — 10 attempts/minute/IP. Supabase enforces
+     account-level throttling too, but this stops a botnet from burning
+     attempts before reaching their auth layer. */
+  const rl = await rateLimit("login", { limit: 10, windowSeconds: 60 });
+  if (!rl.ok) {
+    return { error: `অনেক বার চেষ্টা করা হয়েছে। ${rl.resetIn} সেকেন্ড পরে আবার চেষ্টা করুন।` };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -71,6 +80,14 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   if (!email || !password) return { error: "ইমেইল ও পাসওয়ার্ড দিন।" };
   if (password.length < 8) return { error: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে।" };
   if (fullName && fullName.length < 2) return { error: "নাম খুব ছোট।" };
+
+  /* Tighter cap on signup than login — registration spam is more
+     expensive (creates auth.users rows) and there's no legitimate
+     reason for one IP to register more than a few accounts/hour. */
+  const rl = await rateLimit("signup", { limit: 5, windowSeconds: 60 * 10 });
+  if (!rl.ok) {
+    return { error: "অনেক বার চেষ্টা করা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।" };
+  }
 
   /* The admin host (api.sijdahacademy.com) is for admin sign-IN only.
      Self-registration on the api host is denied — admins are minted

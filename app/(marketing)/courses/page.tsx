@@ -30,9 +30,10 @@ type Tier = {
   highlight?: boolean;
 };
 
-/* ISR: cached 60s. Admin server actions call revalidatePath("/courses")
-   so edits appear immediately rather than waiting on the cache. */
-export const revalidate = 60;
+/* ISR: 5-min cold-cache safety net. Admin saves call revalidateTag()
+   on the settings tag, so edits appear immediately on next request
+   without waiting on the ISR window. */
+export const revalidate = 300;
 
 const moduleIconBySlug: Record<string, React.ComponentType<{ className?: string }>> = {
   "fa-firru-ilallah": Compass,

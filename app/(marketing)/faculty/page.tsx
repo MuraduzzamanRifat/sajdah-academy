@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faculty/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 type InstructorRow = {
   id: string;

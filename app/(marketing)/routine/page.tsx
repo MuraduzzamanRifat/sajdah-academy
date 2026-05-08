@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/routine/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 export default async function RoutinePage() {
   const s = await getSettingsByPrefix("routine.");

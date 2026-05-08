@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/gallery/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 type Photo = { image?: string; alt?: string; caption?: string };
 

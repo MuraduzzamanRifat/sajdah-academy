@@ -14,6 +14,7 @@
 import { headers } from "next/headers";
 import { createClient } from "../../../lib/supabase/server";
 import { audit } from "../../../lib/audit";
+import { rateLimit } from "../../../lib/rate-limit";
 
 export type ContactResult = { ok: true } | { error: string };
 
@@ -38,6 +39,14 @@ export async function submitContactMessage(formData: FormData): Promise<ContactR
   if (!message) return { error: "বার্তা আবশ্যক।" };
   if (!EMAIL_RE.test(email)) return { error: "সঠিক ইমেইল দিন।" };
   if (message.length < 5) return { error: "বার্তা খুব ছোট।" };
+
+  /* Fast-fail in-memory pre-check — saves the audit_log count query
+     when an IP is hammering the form. Falls through to the canonical
+     DB-backed limit below for cross-instance / persistent enforcement. */
+  const burst = await rateLimit("contact", { limit: 3, windowSeconds: 60 });
+  if (!burst.ok) {
+    return { error: "অনেক দ্রুত বার্তা পাঠানো হচ্ছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।" };
+  }
 
   const h = await headers();
   const ip =

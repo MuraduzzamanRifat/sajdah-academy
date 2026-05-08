@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faq/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 type FaqItem = { q_bn: string; a_bn: string };
 

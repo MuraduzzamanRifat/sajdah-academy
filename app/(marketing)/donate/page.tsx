@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/donate/" },
 };
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 type Tier = { amount?: string; label?: string; desc?: string; icon?: string };
 type Channel = {

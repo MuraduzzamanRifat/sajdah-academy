@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
+import { rateLimit } from "../../../lib/rate-limit";
 
 export type EnrollResult = { ok: true; reference: string } | { error: string };
 
@@ -99,6 +100,15 @@ export async function submitEnrollment(payload: EnrollPayload): Promise<EnrollRe
   const phone = payload.phone.trim();
 
   if (!EMAIL_RE.test(email)) return { error: "সঠিক ইমেইল দিন।" };
+
+  /* In-memory IP rate limit FIRST — saves the 3 DB count queries when
+     a single IP is hammering the form. The DB-backed per-email/phone/IP
+     check below is the canonical limit (multi-instance, persistent),
+     this is just a fast-fail layer for spam bursts. */
+  const burst = await rateLimit("enroll", { limit: 5, windowSeconds: 60 });
+  if (!burst.ok) {
+    return { error: "অনেক দ্রুত আবেদন পাঠানো হচ্ছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।" };
+  }
 
   const supabase = await createClient();
 

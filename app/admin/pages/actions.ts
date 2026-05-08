@@ -6,11 +6,12 @@
    figures out which public paths to revalidate based on which keys
    changed (no hardcoded list to drift when new pages are added). */
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "../../../lib/supabase/server";
 import { Actions } from "../../../lib/audit";
 import { requireAdmin } from "../../../lib/auth/current-user";
+import { SETTINGS_GLOBAL_TAG } from "../../../lib/settings";
 import { PAGE_DEFS } from "./schema";
 
 export type StorageType = "string" | "number" | "boolean" | "json" | "rich";
@@ -132,6 +133,14 @@ export async function saveSettings(
   /* Auto cache clean — derive paths from the actual keys changed. */
   const { paths, chromeChanged } = pathsToRevalidate(rows.map((r) => r.key));
 
+  /* Tag-based invalidation flushes the unstable_cache() ring around
+     site_settings reads. Without this, ISR re-renders would still
+     read stale settings until the 5-min TTL expires. One global tag
+     keeps it simple — fan-out cost is one bag refetch on next read,
+     which is cheap compared to the alternative (per-prefix tags
+     would require knowing every reader's prefix at edit time). */
+  revalidateTag(SETTINGS_GLOBAL_TAG);
+
   if (chromeChanged) {
     /* Layout-level invalidation cascades to every public route that
        inherits the marketing layout (Navbar/Footer/JSON-LD). Cheaper
@@ -156,6 +165,7 @@ export async function refreshAllCaches(): Promise<{ ok: true } | { error: string
   const me = await requireAdmin();
   if (!me) return { error: "Forbidden — admin access required." };
 
+  revalidateTag(SETTINGS_GLOBAL_TAG);
   revalidatePath("/", "layout");
   revalidatePath("/dashboard/pages");
   revalidatePath("/admin/pages");

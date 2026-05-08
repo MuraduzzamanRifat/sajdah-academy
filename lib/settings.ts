@@ -8,12 +8,21 @@
    "Pages" CMS calls getSettings(prefix) to load all keys at once
    and updateSettings() (server action) to upsert them.
 
-   Both readers are wrapped in React `cache()` so multiple callers in
-   the same request (e.g. NavbarServer + Footer + the page itself, all
-   asking for site.* / footer.* / contact.*) share a single Supabase
-   round-trip per unique key/prefix. */
+   ── Two-layer caching ──────────────────────────────────────
+   1. React cache() — per-request dedup so NavbarServer + Footer +
+      the page itself, all asking for site.* / footer.* / contact.*,
+      share a single Supabase round-trip per unique key/prefix.
+   2. unstable_cache() — cross-request, ISR-aware persistent cache
+      with tag-based invalidation. Without this, every cold ISR
+      render in every Vercel region re-hits Supabase. With ~16
+      pages × ~18 regions × 60s revalidate that's ≈ 17K cold
+      Supabase queries per hour at peak. The tagged cache flips
+      that to "once per content edit" — admins call revalidateTag()
+      from the save action and consumers see fresh data on next
+      hit. */
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { createClient } from "./supabase/server";
 
 export type SettingValue =
@@ -24,45 +33,71 @@ export type SettingValue =
   | SettingValue[]
   | { [k: string]: SettingValue };
 
-/* Both readers swallow ALL exceptions and return the fallback / empty
-   bag on failure. Public layouts call these in render — a Supabase
-   timeout, a DNS hiccup, or a missing env var would otherwise throw
-   inside (marketing)/layout.tsx and 500 every public page. CMS values
-   are non-load-bearing (every site page has hard-coded defaults via
-   pick()), so a missing settings bag degrades to "default copy"
-   instead of "site-wide outage". */
+/* Stable tag namespace. Public pages don't reference these directly;
+   the admin save action calls invalidateSettingsTags() with the
+   prefixes that actually changed. */
+export const settingsTag = (prefix: string) => `settings:${prefix}`;
+export const SETTINGS_GLOBAL_TAG = "settings:all";
+
+const FETCH_TTL_SECONDS = 300; // 5 min hard ceiling — tags fire faster
+
+/* Persistent (cross-request) prefix fetch. Keyed by prefix; tagged
+   with both the per-prefix tag and a global tag so admins can blow
+   the whole bag in one call. Throws are swallowed inside; the wrapper
+   returns {} on failure so a Supabase outage degrades to defaults
+   instead of 500'ing every public page. */
+const fetchPrefix = unstable_cache(
+  async (prefix: string): Promise<Record<string, SettingValue>> => {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .like("key", `${prefix}%`);
+      const out: Record<string, SettingValue> = {};
+      (data ?? []).forEach((row) => {
+        out[row.key as string] = row.value as SettingValue;
+      });
+      return out;
+    } catch {
+      return {};
+    }
+  },
+  ["site-settings:by-prefix"],
+  { revalidate: FETCH_TTL_SECONDS, tags: [SETTINGS_GLOBAL_TAG] }
+);
+
+const fetchSingle = unstable_cache(
+  async (key: string): Promise<SettingValue | null> => {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", key)
+        .maybeSingle();
+      if (data?.value === undefined || data?.value === null) return null;
+      return data.value as SettingValue;
+    } catch {
+      return null;
+    }
+  },
+  ["site-settings:single"],
+  { revalidate: FETCH_TTL_SECONDS, tags: [SETTINGS_GLOBAL_TAG] }
+);
+
 export const getSetting = cache(async <T extends SettingValue>(
   key: string,
   fallback: T
 ): Promise<T> => {
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase.from("site_settings").select("value").eq("key", key).maybeSingle();
-    if (data?.value === undefined || data?.value === null) return fallback;
-    return data.value as T;
-  } catch {
-    return fallback;
-  }
+  const v = await fetchSingle(key);
+  return (v === null ? fallback : v) as T;
 });
 
-/* Batch-fetch every setting whose key starts with a prefix.
-   Returns a flat object keyed by full key (so caller can do
-   `s["home.hero.title_bn"]`). Memoized per-prefix per-request. */
-export const getSettingsByPrefix = cache(async (prefix: string): Promise<Record<string, SettingValue>> => {
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("site_settings")
-      .select("key, value")
-      .like("key", `${prefix}%`);
-    const out: Record<string, SettingValue> = {};
-    (data ?? []).forEach((row) => {
-      out[row.key as string] = row.value as SettingValue;
-    });
-    return out;
-  } catch {
-    return {};
-  }
+export const getSettingsByPrefix = cache(async (
+  prefix: string
+): Promise<Record<string, SettingValue>> => {
+  return fetchPrefix(prefix);
 });
 
 /* Convenience: read a value from a pre-fetched bag with a fallback.
