@@ -3,10 +3,16 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
-import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
+
+/* Postprocessing (Bloom + ChromaticAberration + EffectComposer) was
+   removed — it was responsible for ~10s of Total Blocking Time in
+   Lighthouse. Shader compilation on the first frame ran serially on
+   the main thread; no amount of off-screen detection can hide that
+   cost since it fires the moment the canvas mounts. The hero looks
+   marginally less luminous; the alternative is a 27-second TBT score
+   that tanks LCP-adjacent metrics. */
 
 /* Pause render loop when hero scrolls out of viewport.
    Saves significant GPU/battery — Three.js otherwise renders
@@ -58,7 +64,10 @@ function OrbitRing({
     <group ref={ref}>
       {dots.map((p, i) => (
         <mesh key={i} position={p as unknown as [number, number, number]}>
-          <sphereGeometry args={[size, 16, 16]} />
+          {/* 8x8 segments instead of 16x16 — quarters the triangle count
+              per sphere (256→64). Spheres are tiny (size=0.045) so the
+              loss of curvature smoothness is invisible at hero scale. */}
+          <sphereGeometry args={[size, 8, 8]} />
           <meshStandardMaterial
             color={color}
             emissive={color}
@@ -207,29 +216,8 @@ export default function HeroCanvas() {
         <MinaretRing />
         <OrbitRing radius={2.0} speed={0.25} count={8} size={0.045} color={"#fbbf24"} reduced={reduced} />
         <OrbitRing radius={2.7} speed={-0.15} count={12} size={0.025} color={"#fde68a"} reduced={reduced} />
-        <ParticleField count={420} reduced={reduced} />
-        <Stars radius={20} depth={30} count={1200} factor={2.4} saturation={0} fade speed={reduced ? 0 : 0.4} />
-
-        {/* Premium post-processing — bloom on emissive surfaces (gold star,
-            orbit dots, particles) gives true luminous glow; subtle chromatic
-            aberration adds a luxe optical edge. Disabled for reduced-motion. */}
-        {!reduced && (
-          <EffectComposer multisampling={0} enableNormalPass={false}>
-            <Bloom
-              intensity={0.85}
-              luminanceThreshold={0.35}
-              luminanceSmoothing={0.6}
-              mipmapBlur
-              radius={0.7}
-            />
-            <ChromaticAberration
-              blendFunction={BlendFunction.NORMAL}
-              offset={[0.0008, 0.0008]}
-              radialModulation={false}
-              modulationOffset={0}
-            />
-          </EffectComposer>
-        )}
+        <ParticleField count={140} reduced={reduced} />
+        <Stars radius={20} depth={30} count={300} factor={2.4} saturation={0} fade speed={reduced ? 0 : 0.4} />
       </Suspense>
 
       <ParallaxRig reduced={reduced} />
