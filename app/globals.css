@@ -43,8 +43,18 @@ html, body {
     "Helvetica Neue", Arial, "Noto Sans Bengali", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Prevent horizontal scroll from any rogue scale/translate transform on
-     scroll-tied elements (e.g. hero canvas scale, parallax cards). */
+}
+
+/* Horizontal-overflow guard belongs on ONE element — applying it to
+   both html AND body (the previous behavior) made them BOTH scroll
+   containers. Browsers split wheel events between the two contexts
+   and the document failed to scroll on any non-WebGL page. The
+   homepage worked only because Three.js captured wheel events first
+   and forwarded them through its own scroll handling — text-heavy
+   pages hit the bug head-on.
+
+   Now: html is the sole scroll root, body defaults to overflow:visible. */
+html {
   overflow-x: hidden;
 }
 
