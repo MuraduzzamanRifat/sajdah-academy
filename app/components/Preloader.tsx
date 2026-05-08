@@ -25,16 +25,21 @@ const PRELOADER_CSS = `
   opacity: 1;
   transition: opacity 350ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity;
-  /* CSS-only safety net. If the inline JS is blocked (CSP mismatch
-     on a subsequent navigation, sessionStorage cleared, etc.), the
-     preloader still fades after 2.5s via this animation so it can
-     never get permanently stuck on any page. JS hide via .__loaded
-     still triggers earlier when it works. */
-  animation: __preloader_autohide 600ms 2500ms forwards;
+  /* pointer-events: none from the FIRST moment so the overlay can NEVER
+     block scroll/clicks even if the JS hide path is blocked (CSP edge
+     case, navigation timing). The page content is server-rendered
+     behind it — there's no interaction we need to intercept. The
+     animation handles the visual fade-out; events were never our job. */
+  pointer-events: none;
+  /* CSS-only safety net. If the inline JS doesn't run, the preloader
+     still fades via this animation. Without forwards-fill, opacity
+     would snap back to 1 after the animation; with forwards, the
+     final transparent state persists. */
+  animation: __preloader_autohide 600ms 1200ms forwards;
 }
-#__preloader.__loaded { opacity: 0; pointer-events: none; }
+#__preloader.__loaded { opacity: 0; }
 @keyframes __preloader_autohide {
-  to { opacity: 0; pointer-events: none; visibility: hidden; }
+  to { opacity: 0; visibility: hidden; }
 }
 #__preloader__inner {
   position: relative;
@@ -98,7 +103,7 @@ const PRELOADER_JS = `
   } else {
     onReady();
   }
-  setTimeout(hide, 1500);
+  setTimeout(hide, 800);
 })();
 `;
 
