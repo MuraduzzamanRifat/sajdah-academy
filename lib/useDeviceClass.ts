@@ -3,9 +3,9 @@
 /* Single source of truth for "what kind of device is this?".
 
    Replaces ad-hoc copies of the same matchMedia checks that were
-   previously hand-rolled in Hero, ScrollProgress, HeroBackdrop, and
-   LenisProvider. Each consumer was duplicating the literal media-query
-   string and the SSR-safe-default + resize-listener pattern.
+   previously hand-rolled in Hero, ScrollProgress, and HeroBackdrop.
+   Each consumer was duplicating the literal media-query string and
+   the SSR-safe-default + resize-listener pattern.
 
    `lowMotion` matches when ANY of:
      - viewport < 768px (mobile)

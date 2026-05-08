@@ -4,7 +4,6 @@ import Footer from "../components/Footer";
 import ScrollProgress from "../components/ScrollProgress";
 import StickyMobileCTA from "../components/StickyMobileCTA";
 import Preloader from "../components/Preloader";
-import LenisProvider from "../components/LenisProvider";
 import { SITE_URL } from "../../lib/site-url";
 import { getSettingsByPrefix, pick } from "../../lib/settings";
 
@@ -93,7 +92,6 @@ export default async function MarketingLayout({ children }: { children: React.Re
   return (
     <>
       <Preloader nonce={nonce} />
-      <LenisProvider />
       <script
         type="application/ld+json"
         nonce={nonce}

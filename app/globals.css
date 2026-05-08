@@ -264,11 +264,10 @@ html, body {
   contain-intrinsic-size: auto 800px;
 }
 
-/* Smooth wheel scroll is now handled by Lenis (app/components/
-   LenisProvider.tsx). Lenis has its own anchor-jump handling, so
-   `scroll-behavior: smooth` on html would fight the Lenis animation
-   loop and cause double-eased motion. We rely on Lenis on the marketing
-   surface; the rest of the site uses native browser scroll. */
+/* Native browser scroll on every route. Lenis was removed because the
+   per-route gating leaked subtly broken scroll state when navigating
+   from the homepage (smooth) to other pages (native), and the perceived
+   benefit didn't justify the wheel-event hijack on text-heavy pages. */
 
 /* Prevent modal/overlay scrolls from bleeding into the document. */
 body {
